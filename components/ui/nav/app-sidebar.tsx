@@ -8,9 +8,28 @@ import { NavUserExperience } from "@/components/ui/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/ui/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/ui/nav/nav-web-config"
 
-import { Button } from "@/components/ui/button"
-
 import { ModeToggle } from "@/components/toggle-theme"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 import {
   Sidebar,
@@ -32,15 +51,50 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="cursor-pointer">
-              <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <img src="/puskesmasLogo.png" alt="Logo Puskesmas" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Admin</span>
-                <span className="truncate text-xs">Puskesmas Bogor Barat</span>
-              </div>
-            </SidebarMenuButton>
+            <Sheet>
+              <Tooltip>
+                <SheetTrigger asChild>
+                  <TooltipTrigger asChild>
+                    <SidebarMenuButton size="lg" className="cursor-pointer">
+                      <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                        <img src="/puskesmasLogo.png" className="w-full h-full object-contain" alt="Logo Puskesmas" />
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">Admin</span>
+                        <span className="truncate text-xs">Puskesmas Bogor Barat</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </TooltipTrigger>
+                </SheetTrigger>
+                <TooltipContent side="right">
+                  <p>Edit Profil</p>
+                </TooltipContent>
+              </Tooltip>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Edit Profil</SheetTitle>
+                  <SheetDescription>
+                    Edit profil anda disini. Klik simpan ketika selesai.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                  <div className="grid gap-3">
+                    <Label htmlFor="sheet-demo-name">Foto Profil</Label>
+                    <Input id="sheet-demo-name" type="file" />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="sheet-demo-name">Nama</Label>
+                    <Input id="sheet-demo-name" defaultValue="Pedro Duarte" />
+                  </div>
+                </div>
+                <SheetFooter>
+                  <Button type="submit">Simpan Perubahan</Button>
+                  <SheetClose asChild>
+                    <Button variant="outline">Tutup</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

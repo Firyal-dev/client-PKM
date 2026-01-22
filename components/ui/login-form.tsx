@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,16 +10,40 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
+
+import { User } from "@/app/types/userInterface"
+
+import { register as loginService } from "@/app/admin/services/login/login"
+
+import Cookies from 'js-cookie';
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { register, handleSubmit, formState: { errors } } = useForm<User>();
+  const router = useRouter();
+
+  const onSubmit = async (user: User) => {
+    try {
+      const response = await loginService(user);
+      console.log(response);
+      if (response?.access_token) {
+        Cookies.set("token", response.access_token, { expires: 1/3 }); // expires dalam 8 jam
+        router.push("/admin/pages/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <img src="/puskesmasLogo.png" alt="Logo Puskesmas" className="w-22 h-23 cursor-pointer" />
@@ -27,28 +53,38 @@ export function LoginForm({
                 </p>
               </div>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="name">Username</FieldLabel>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="email@example.com"
+                  id="name"
+                  type="text"
+                  placeholder="username"
                   required
-                  aria-invalid
+                  {...register("name", { required: true })}
                 />
-                <FieldError>
-                  Email is required
-                </FieldError>
+                {errors.name && (
+                  <FieldError>
+                    {errors.name.message}
+                  </FieldError>
+                )}
               </Field>
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                 </div>
-                <Input id="password" type="password" placeholder="********" required aria-invalid />
-                <FieldError>
-                  Password is required
-                </FieldError>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  required
+                  {...register("password", { required: true })}
+                />
+                {errors.password && (
+                  <FieldError>
+                    {errors.password.message}
+                  </FieldError>
+                )}
               </Field>
-              <Field>
+              {/* <Field>
                 <FieldLabel htmlFor="captcha">Captcha</FieldLabel>
                 <Input
                   id="captcha"
@@ -60,7 +96,7 @@ export function LoginForm({
                 <FieldError>
                   Captcha is required
                 </FieldError>
-              </Field>
+              </Field> */}
               <Field>
                 <Button type="submit">Login</Button>
               </Field>

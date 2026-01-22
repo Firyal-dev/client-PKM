@@ -17,6 +17,13 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+export const metadata: Metadata = {
+    title: "Puskesmas",
+    description: "Sistem Informasi Manajemen Puskesmas",
+};
+
+import type { Metadata } from "next"
+
 export default function AdminLayout({
     children,
 }: {
