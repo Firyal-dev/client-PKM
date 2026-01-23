@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     description: "Sistem Informasi Manajemen Puskesmas",
 };
 
-export default function AuthLayout({
+export default function Layout({
     children,
 }: {
     children: React.ReactNode;

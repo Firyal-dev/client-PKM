@@ -1,25 +1,20 @@
 "use client"
 
 import * as React from "react"
-
 import { NavMain } from "@/components/ui/nav/nav-main"
 import { NavMedia } from "@/components/ui/nav/nav-media"
 import { NavUserExperience } from "@/components/ui/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/ui/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/ui/nav/nav-web-config"
-
 import { ModeToggle } from "@/components/toggle-theme"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
 import {
   Sheet,
   SheetClose,
@@ -30,7 +25,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-
 import {
   Sidebar,
   SidebarContent,
@@ -40,12 +34,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-
 import { Separator } from "@/components/ui/separator"
+import { sidebarData } from "@/constants/sidebar-data"
+import Image from 'next/image'
 
-import { sidebarData } from "@/app/admin/constants/sidebar-data"
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile?: any }) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -57,10 +50,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <TooltipTrigger asChild>
                     <SidebarMenuButton size="lg" className="cursor-pointer">
                       <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                        <img src="/puskesmasLogo.png" className="w-full h-full object-contain" alt="Logo Puskesmas" />
+                        <Image src="/puskesmasLogo.png" width={100} height={100} className="w-full h-full object-contain" alt="Logo Puskesmas" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">Admin</span>
+                        <span className="truncate font-medium">{profile.name}</span>
                         <span className="truncate text-xs">Puskesmas Bogor Barat</span>
                       </div>
                     </SidebarMenuButton>
@@ -84,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                   <div className="grid gap-3">
                     <Label htmlFor="sheet-demo-name">Nama</Label>
-                    <Input id="sheet-demo-name" defaultValue="Pedro Duarte" />
+                    <Input id="sheet-demo-name" defaultValue={profile.name} />
                   </div>
                 </div>
                 <SheetFooter>

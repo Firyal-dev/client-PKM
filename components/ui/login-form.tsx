@@ -10,43 +10,31 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
+import { loginService } from "@/services/auth/loginService"
+import Image from 'next/image'
+import { useActionState } from 'react'
 
-import { User } from "@/app/types/userInterface"
-
-import { register as loginService } from "@/app/admin/services/login/login"
-
-import Cookies from 'js-cookie';
+const initialState = {
+  loading: false,
+  error: null,
+}
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { register, handleSubmit, formState: { errors } } = useForm<User>();
-  const router = useRouter();
-
-  const onSubmit = async (user: User) => {
-    try {
-      const response = await loginService(user);
-      console.log(response);
-      if (response?.access_token) {
-        Cookies.set("token", response.access_token, { expires: 1/3 }); // expires dalam 8 jam
-        router.push("/admin/pages/dashboard");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const [state, action, pending] = useActionState(loginService, initialState);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
+
+          {/* form login */}
+          <form action={action} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <img src="/puskesmasLogo.png" alt="Logo Puskesmas" className="w-22 h-23 cursor-pointer" />
+                <Image src="/puskesmasLogo.png" alt="Logo Puskesmas" width={100} height={100} className="cursor-pointer" />
                 <h1 className="text-2xl font-bold">Selamat datang Admin!</h1>
                 <p className="text-muted-foreground text-balance">
                   Masukkan email dan password untuk masuk ke akun admin
@@ -56,15 +44,13 @@ export function LoginForm({
                 <FieldLabel htmlFor="name">Username</FieldLabel>
                 <Input
                   id="name"
+                  name="name"
                   type="text"
                   placeholder="username"
                   required
-                  {...register("name", { required: true })}
                 />
-                {errors.name && (
-                  <FieldError>
-                    {errors.name.message}
-                  </FieldError>
+                {state?.error && (
+                  <FieldError>{state.error}</FieldError>
                 )}
               </Field>
               <Field>
@@ -73,39 +59,29 @@ export function LoginForm({
                 </div>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="********"
+                  minLength={8}
                   required
-                  {...register("password", { required: true })}
                 />
-                {errors.password && (
-                  <FieldError>
-                    {errors.password.message}
-                  </FieldError>
+                {state?.error && (
+                  <FieldError>{state.error}</FieldError>
                 )}
               </Field>
-              {/* <Field>
-                <FieldLabel htmlFor="captcha">Captcha</FieldLabel>
-                <Input
-                  id="captcha"
-                  type="number"
-                  placeholder="captcha"
-                  required
-                  aria-invalid
-                />
-                <FieldError>
-                  Captcha is required
-                </FieldError>
-              </Field> */}
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={pending}>
+                  {pending ? "Memuat..." : "Masuk"}
+                </Button>
               </Field>
             </FieldGroup>
           </form>
           <div className="bg-muted relative hidden md:block">
-            <img
+            <Image
+              width={1920}
+              height={1080}
               src="/authBg.jpg"
-              alt="Image"
+              alt="Foto Profil"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4]"
             />
           </div>
