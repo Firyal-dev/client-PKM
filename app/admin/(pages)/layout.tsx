@@ -28,7 +28,7 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const token = (await cookies()).get("token")?.value;
-    const res = await fetch("http://localhost:3030/admin/profile", {
+    const res = await fetch("http://localhost:3030/api/v1/admin/profile", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
     });

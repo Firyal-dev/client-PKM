@@ -21,7 +21,7 @@ export async function loginService(_prevState: any, formData: FormData) {
             secure: false,
             sameSite: 'lax',
             maxAge: 60 * 60 * 8,
-            path: '/admin'
+            path: '/'
         });
 
     } catch (error: any) {

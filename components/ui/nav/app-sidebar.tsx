@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation" 
 import { NavMain } from "@/components/ui/nav/nav-main"
 import { NavMedia } from "@/components/ui/nav/nav-media"
 import { NavUserExperience } from "@/components/ui/nav/nav-user-experience"
@@ -36,9 +37,21 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
+import { logoutAction } from "@/services/auth/logoutService" 
 import Image from 'next/image'
 
 export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile?: any }) {
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleLogout = async () => {
+    setIsLoading(true)
+    try {
+      await logoutAction() 
+    } catch (error) {
+      console.error("Gagal logout", error)
+      setIsLoading(false)
+    }
+  }
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -53,7 +66,8 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                         <Image src="/puskesmasLogo.png" width={100} height={100} className="w-full h-full object-contain" alt="Logo Puskesmas" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">{profile.name}</span>
+                        {/* Pakai tanda tanya (?) biar aman kalau profile belum load */}
+                        <span className="truncate font-medium">{profile?.name || 'Admin'}</span>
                         <span className="truncate text-xs">Puskesmas Bogor Barat</span>
                       </div>
                     </SidebarMenuButton>
@@ -77,7 +91,7 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                   </div>
                   <div className="grid gap-3">
                     <Label htmlFor="sheet-demo-name">Nama</Label>
-                    <Input id="sheet-demo-name" defaultValue={profile.name} />
+                    <Input id="sheet-demo-name" defaultValue={profile?.name} />
                   </div>
                 </div>
                 <SheetFooter>
@@ -101,8 +115,13 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">
-          <Button variant="destructive" className="flex-1">
-            Logout
+          <Button 
+            variant="destructive" 
+            className="flex-1"
+            onClick={handleLogout} 
+            disabled={isLoading}   
+          >
+            {isLoading ? "Keluar..." : "Logout"}
           </Button>
           <ModeToggle />
         </div>
