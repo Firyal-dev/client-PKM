@@ -10,7 +10,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { loginService } from "@/services/auth/loginService"
+import { loginService } from "@/services/auth/login-service"
 import Image from 'next/image'
 import { useActionState } from 'react'
 

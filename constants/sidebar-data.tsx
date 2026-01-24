@@ -7,7 +7,6 @@ import {
     Video,
     PanelRightDashed,
     UserStar,
-    User,
     Headset,
     Users,
     ClipboardClock,
@@ -18,80 +17,79 @@ export const sidebarData = {
     navMain: [
         {
             title: "Dashboard",
-            url: "/admin/main/dashboard",
+            url: "/admin/dashboard",
             icon: LayoutDashboard,
         },
         {
             title: "Dinamis",
-            url: "#",
             icon: Settings2,
             items: [
                 {
                     title: "Menu Dinamis",
-                    url: "#",
+                    url: "/admin/dynamic-menu",
                 },
                 {
                     title: "Konten Dinamis",
-                    url: "#",
+                    url: "/admin/dynamic-content",
                 },
             ],
         },
         {
             title: "Konten Statis",
-            url: "#",
+            url: "/admin/static-content",
             icon: GitCommitHorizontal,
         },
     ],
     navMedia: [
         {
             name: "Galeri",
-            url: "#",
+            url: "/admin/gallery",
             icon: BookImage,
         },
         {
             name: "Album",
-            url: "#",
+            url: "/admin/albums",
             icon: Album,
         },
         {
             name: "Video",
-            url: "#",
+            url: "/admin/videos",
             icon: Video,
         },
         {
             name: "Banner",
-            url: "#",
+            url: "/admin/banners",
             icon: PanelRightDashed,
         },
     ],
     navUserExperience: [
         {
             name: "Kritik & Saran",
-            url: "#",
+            url: "/admin/critic-suggestion",
             icon: UserStar,
         },
         {
             name: "Konsultasi",
-            url: "#",
+            url: "/admin/consultation",
             icon: Headset,
         }
     ],
     navAdminManage: [
         {
             name: "Data Admin",
-            url: "#",
+            url: "/admin/admin-data",
             icon: Users,
         },
         {
             name: "Log Aktivitas",
-            url: "#",
+            url: "/admin/activities-log",
             icon: ClipboardClock,
         }
     ],
     navWebConfig: [
         {
             name: "Informasi Puskesmas",
-            url: "#",
+            url: "/admin/puskesmas-info",
             icon: Hospital,
         },
     ]

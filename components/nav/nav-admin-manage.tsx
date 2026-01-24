@@ -3,6 +3,7 @@
 import {
     type LucideIcon,
 } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 import {
     SidebarGroup,
@@ -21,6 +22,7 @@ export function NavAdminManage({
         icon: LucideIcon
     }[]
 }) {
+    const pathname = usePathname()
 
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -28,7 +30,7 @@ export function NavAdminManage({
             <SidebarMenu>
                 {navAdminManage.map((item) => (
                     <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton asChild>
+                        <SidebarMenuButton asChild isActive={item.url === pathname}>
                             <a href={item.url}>
                                 <item.icon />
                                 <span>{item.name}</span>
@@ -40,3 +42,4 @@ export function NavAdminManage({
         </SidebarGroup>
     )
 }
+

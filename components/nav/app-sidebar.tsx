@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { NavMain } from "@/components/ui/nav/nav-main"
-import { NavMedia } from "@/components/ui/nav/nav-media"
-import { NavUserExperience } from "@/components/ui/nav/nav-user-experience"
-import { NavAdminManage } from "@/components/ui/nav/nav-admin-manage"
-import { NavWebConfig } from "@/components/ui/nav/nav-web-config"
+import { NavMain } from "@/components/nav/nav-main"
+import { NavMedia } from "@/components/nav/nav-media"
+import { NavUserExperience } from "@/components/nav/nav-user-experience"
+import { NavAdminManage } from "@/components/nav/nav-admin-manage"
+import { NavWebConfig } from "@/components/nav/nav-web-config"
 import { ModeToggle } from "@/components/toggle-theme"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,8 +37,9 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
 import Image from 'next/image'
+import { AdminProfileProp } from "@/types/admin-profile-prop"
 
-export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile?: any }) {
+export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile: AdminProfileProp }) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
