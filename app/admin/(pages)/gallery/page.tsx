@@ -12,7 +12,7 @@ const sampleData = [
     { id: "4", title: "Premium Bundle", image: "/authBg.jpg" },
 ]
 
-export default function Page() {
+export default function GalleryPage() {
     const [selected, setSelected] = useState<string[]>([])
 
     const handleSelect = (id: string) => {
