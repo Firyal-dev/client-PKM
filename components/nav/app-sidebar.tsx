@@ -41,9 +41,13 @@ import { logoutAction } from "@/services/auth/logout-service"
 import Image from 'next/image'
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 import { useActionState } from "react"
+import { updateProfileAction } from "@/services/admin/update-profile-action"
+import { useImagePreview } from '@/hooks/use-photo-preview'
 
 export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile: AdminProfileProp }) {
-  const [state, action, isLoading] = useActionState(logoutAction, null)
+  const [logoutState, formLogoutAction, logoutIsLoading] = useActionState(logoutAction, null)
+  const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
+  const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -56,10 +60,13 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                   <TooltipTrigger asChild>
                     <SidebarMenuButton size="lg" className="cursor-pointer">
                       <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                        <Image src="/puskesmasLogo.png" width={100} height={100} className="w-full h-full object-contain" alt="Logo Puskesmas" />
+                        <Image src={profile.photo
+                          ? `http://localhost:3002/${profile.photo}`
+                          : "/puskesmasLogo.png"
+                        } width={100} height={100} unoptimized className="w-full h-full object-contain rounded-full" alt="Profil" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">{profile?.name || 'Admin'}</span>
+                        <span className="truncate font-medium">{profile.name}</span>
                         <span className="truncate text-xs">Puskesmas Bogor Barat</span>
                       </div>
                     </SidebarMenuButton>
@@ -76,19 +83,40 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                     Edit profil anda disini. Klik simpan ketika selesai.
                   </SheetDescription>
                 </SheetHeader>
-                <form action="">
+                {previewUrl && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-4">
+                    <div className="relative group">
+                      <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-lg">
+                        <Image
+                          src={previewUrl}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                      Preview Foto Baru
+                    </p>
+                  </div>
+                )}
+                <form action={formUpdateAction}>
                   <div className="grid flex-1 auto-rows-min gap-6 px-4">
                     <div className="grid gap-3">
                       <Label htmlFor="sheet-demo-name">Foto Profil</Label>
-                      <Input id="sheet-demo-name" type="file" />
+                      <Input id="sheet-demo-name" onChange={handleFileChange} type="file" name="photo" accept="image/*" />
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="sheet-demo-name">Nama</Label>
-                      <Input id="sheet-demo-name" defaultValue={profile?.name} />
+                      <Input id="sheet-demo-name" defaultValue={profile.name} name="name" required />
                     </div>
                   </div>
+                  {updateState?.error && (
+                    <div className="text-red-500 text-sm">{updateState.error}</div>
+                  )}
                   <SheetFooter className="pt-10">
-                    <Button type="submit">Simpan Perubahan</Button>
+                    <Button type="submit" disabled={updateIsLoading}>{updateIsLoading ? "Memuat..." : "Simpan Perubahan"}</Button>
                   </SheetFooter>
                 </form>
               </SheetContent>
@@ -106,13 +134,13 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">
-          <form action={action} className="flex-1">
+          <form action={formLogoutAction} className="flex-1">
             <Button
               variant="destructive"
               className="cursor-pointer w-full"
-              disabled={isLoading}
+              disabled={logoutIsLoading}
             >
-              {isLoading ? "Memuat..." : "Logout"}
+              {logoutIsLoading ? "Memuat..." : "Logout"}
             </Button>
           </form>
           <ModeToggle />

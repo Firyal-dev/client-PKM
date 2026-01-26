@@ -36,7 +36,7 @@ export default function Page() {
                                 </Field>
                                 <Field>
                                     <FieldLabel htmlFor="image">Pilih Foto</FieldLabel>
-                                    <Input id="image" onChange={handleFileChange} name="image" type="file" required className="cursor-pointer" />
+                                    <Input id="image" onChange={handleFileChange} name="image" type="file" accept="image/*" required className="cursor-pointer" />
                                     <FieldDescription>
                                         Format: JPG, PNG atau JPEG (Maks. 2MB)
                                     </FieldDescription>
