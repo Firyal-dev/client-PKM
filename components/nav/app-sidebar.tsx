@@ -49,6 +49,12 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
   const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
   const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
 
+
+  const photoSrc =
+    profile.photo
+      ? `http://localhost:3002/profiles/${profile.photo}`
+      : "/puskesmasLogo.png";
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -60,10 +66,7 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                   <TooltipTrigger asChild>
                     <SidebarMenuButton size="lg" className="cursor-pointer">
                       <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                        <Image src={profile.photo
-                          ? `http://localhost:3002/${profile.photo}`
-                          : "/puskesmasLogo.png"
-                        } width={100} height={100} unoptimized className="w-full h-full object-contain rounded-full" alt="Profil" />
+                        <Image src={photoSrc} width={100} height={100} unoptimized className="w-full h-full object-contain rounded-full" alt="Profil" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">{profile.name}</span>

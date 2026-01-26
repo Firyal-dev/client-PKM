@@ -10,18 +10,25 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
 
     if (!token) return { error: "Sesi habis, silakan login lagi" };
 
+    const photo = formData.get("photo") as File;
+
+    if (!photo || photo.size === 0) {
+        formData.delete("photo");
+    }
+
     try {
         const response = await api.put("/v1/admin/update-profile", formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
         });
+
         revalidatePath('/', 'layout');
 
         return { success: true, message: "Profil berhasil diupdate!" };
     } catch (error: any) {
-        return {
-            error: error?.response?.data?.message || "Gagal update profile ke server"
+        return { 
+            error: error?.response?.data?.message || "Gagal update profile ke server" 
         };
     }
 }
