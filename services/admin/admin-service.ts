@@ -1,22 +1,24 @@
+import api from "@/services/api"
 import { cookies } from "next/headers"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 
 export async function getAdminProfile(): Promise<AdminProfileProp> {
-    const token = (await cookies()).get("token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("token")?.value
 
     if (!token) {
         throw new Error("Unauthorized")
     }
 
-    const res = await fetch("http://localhost:3002/api/v1/admin/profile", {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    })
+    try {
+        const response = await api.get("/v1/admin/profile", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
 
-    if (!res.ok) {
-        throw new Error("Failed to fetch admin profile")
+        return response.data
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Gagal mengambil data admin")
     }
-
-    return res.json()
 }
