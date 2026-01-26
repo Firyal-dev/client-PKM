@@ -4,6 +4,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
+import Link from 'next/link'
 
 import {
   SidebarGroup,
@@ -31,10 +32,10 @@ export function NavMedia({
         {navMedia.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild isActive={item.url === pathname}>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

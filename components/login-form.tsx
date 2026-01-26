@@ -14,16 +14,13 @@ import { loginService } from "@/services/auth/login-service"
 import Image from 'next/image'
 import { useActionState } from 'react'
 
-const initialState = {
-  loading: false,
-  error: null,
-}
+
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, action, pending] = useActionState(loginService, initialState);
+  const [state, action, pending] = useActionState(loginService, null);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -49,9 +46,6 @@ export function LoginForm({
                   placeholder="username"
                   required
                 />
-                {state?.error && (
-                  <FieldError>{state.error}</FieldError>
-                )}
               </Field>
               <Field>
                 <div className="flex items-center">
@@ -65,12 +59,12 @@ export function LoginForm({
                   minLength={8}
                   required
                 />
-                {state?.error && (
-                  <FieldError>{state.error}</FieldError>
-                )}
               </Field>
               <Field>
-                <Button type="submit" disabled={pending}>
+                {state?.error && (
+                  <p className="text-sm font-medium text-destructive text-center mb-2">{state.error}</p>
+                )}
+                <Button type="submit" disabled={pending} className="cursor-pointer">
                   {pending ? "Memuat..." : "Masuk"}
                 </Button>
               </Field>
@@ -80,9 +74,10 @@ export function LoginForm({
             <Image
               width={1920}
               height={1080}
+              loading="eager"
               src="/authBg.jpg"
               alt="Foto Profil"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4]"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4] w-auto h-auto"
             />
           </div>
         </CardContent>

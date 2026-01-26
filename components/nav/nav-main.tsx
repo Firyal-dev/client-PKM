@@ -2,6 +2,7 @@
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
+import Link from 'next/link'
 
 import {
   Collapsible,
@@ -64,9 +65,9 @@ export function NavMain({
                         {item.items?.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild isActive={subItem.url === pathname}>
-                              <a href={subItem.url}>
+                              <Link href={subItem.url}>
                                 <span>{subItem.title}</span>
-                              </a>
+                              </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -75,10 +76,10 @@ export function NavMain({
                   </>
                 ) : (
                   <SidebarMenuButton asChild tooltip={item.title} isActive={item.url === pathname}>
-                    <a href={item.url}>
+                    <Link href={item.url ?? '#'}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 )}
               </SidebarMenuItem>

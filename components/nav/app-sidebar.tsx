@@ -6,6 +6,7 @@ import { NavMedia } from "@/components/nav/nav-media"
 import { NavUserExperience } from "@/components/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/nav/nav-web-config"
+
 import { ModeToggle } from "@/components/toggle-theme"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,10 +37,14 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
+import { logoutAction } from "@/services/auth/logout-service"
 import Image from 'next/image'
 import { AdminProfileProp } from "@/types/admin-profile-prop"
+import { useActionState } from "react"
 
 export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Sidebar> & { profile: AdminProfileProp }) {
+  const [state, action, isLoading] = useActionState(logoutAction, null)
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -54,7 +59,7 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                         <Image src="/puskesmasLogo.png" width={100} height={100} className="w-full h-full object-contain" alt="Logo Puskesmas" />
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">{profile.name}</span>
+                        <span className="truncate font-medium">{profile?.name || 'Admin'}</span>
                         <span className="truncate text-xs">Puskesmas Bogor Barat</span>
                       </div>
                     </SidebarMenuButton>
@@ -71,22 +76,21 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
                     Edit profil anda disini. Klik simpan ketika selesai.
                   </SheetDescription>
                 </SheetHeader>
-                <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                  <div className="grid gap-3">
-                    <Label htmlFor="sheet-demo-name">Foto Profil</Label>
-                    <Input id="sheet-demo-name" type="file" />
+                <form action="">
+                  <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                    <div className="grid gap-3">
+                      <Label htmlFor="sheet-demo-name">Foto Profil</Label>
+                      <Input id="sheet-demo-name" type="file" />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="sheet-demo-name">Nama</Label>
+                      <Input id="sheet-demo-name" defaultValue={profile?.name} />
+                    </div>
                   </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="sheet-demo-name">Nama</Label>
-                    <Input id="sheet-demo-name" defaultValue={profile.name} />
-                  </div>
-                </div>
-                <SheetFooter>
-                  <Button type="submit">Simpan Perubahan</Button>
-                  <SheetClose asChild>
-                    <Button variant="outline">Tutup</Button>
-                  </SheetClose>
-                </SheetFooter>
+                  <SheetFooter className="pt-10">
+                    <Button type="submit">Simpan Perubahan</Button>
+                  </SheetFooter>
+                </form>
               </SheetContent>
             </Sheet>
           </SidebarMenuItem>
@@ -102,9 +106,15 @@ export function AppSidebar({ profile, ...props }: React.ComponentProps<typeof Si
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">
-          <Button variant="destructive" className="flex-1">
-            Logout
-          </Button>
+          <form action={action} className="flex-1">
+            <Button
+              variant="destructive"
+              className="cursor-pointer w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Memuat..." : "Logout"}
+            </Button>
+          </form>
           <ModeToggle />
         </div>
       </SidebarFooter>

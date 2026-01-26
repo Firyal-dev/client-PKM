@@ -13,15 +13,14 @@ export async function loginService(_prevState: any, formData: FormData) {
     }
 
     try {
-        const res = await api.post("/auth/login", { name, password })
-
+        const res = await api.post("/v1/auth/login", { name, password })
         const cookieStore = await cookies();
         cookieStore.set("token", res.data.access_token, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             sameSite: 'lax',
-            maxAge: 60 * 60 * 8,
-            path: '/admin'
+            maxAge: 60 * 60 * 8, // 8 jam
+            path: '/'
         });
 
     } catch (error: any) {

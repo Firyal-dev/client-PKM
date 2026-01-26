@@ -8,7 +8,7 @@ export async function getAdminProfile(): Promise<AdminProfileProp> {
         throw new Error("Unauthorized")
     }
 
-    const res = await fetch("http://localhost:3030/admin/profile", {
+    const res = await fetch("http://localhost:3030/api/v1/admin/profile", {
         headers: {
             Authorization: `Bearer ${token}`,
         },
