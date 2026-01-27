@@ -1,6 +1,6 @@
 export interface Gallery {
     _id: string;
-    title: string;
+    image_title: string;
     image: string;
     created_at: Date;
 }
