@@ -1,7 +1,7 @@
 import { getGallery } from "@/services/gallery/gallery-service"
 import { GalleryList } from "./gallery-list"
-import { CustomLink } from "@/components/ui/link"
 import { PaginationControl } from "@/components/pagination-control"
+import { PageHeader } from "@/components/page-header"
 
 export default async function GalleryPage({
     searchParams,
@@ -16,17 +16,12 @@ export default async function GalleryPage({
 
     return (
         <div className="px-5 pb-10">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Galeri</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Kelola daftar foto dan dokumentasi
-                    </p>
-                </div>
-                <CustomLink href="/admin/gallery/upload-photo">
-                    Tambah Foto
-                </CustomLink>
-            </div>
+            <PageHeader
+                title="Galeri"
+                description="Kelola daftar foto dan dokumentasi"
+                linkHref="/admin/gallery/upload-photo"
+                linkLabel="Tambah Foto"
+            />
 
             <div className="rounded-xl bg-muted/30 border border-border mt-5 p-5 min-h-[500px]">
                 <GalleryList initialGallery={response.data} />

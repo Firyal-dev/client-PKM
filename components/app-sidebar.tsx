@@ -58,7 +58,6 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">
-          {/* Bungkus tombol logout pake AlertDialog */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button

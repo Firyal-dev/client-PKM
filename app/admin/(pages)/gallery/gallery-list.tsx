@@ -121,7 +121,7 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
                             </EmptyMedia>
                             <EmptyTitle className="text-xl font-semibold">Galeri kosong</EmptyTitle>
                             <EmptyDescription className="max-w-[300px] mx-auto">
-                                Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi lu.
+                                Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi.
                             </EmptyDescription>
                         </EmptyHeader>
                         <EmptyContent className="mt-6">
