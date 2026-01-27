@@ -15,8 +15,9 @@ import { ImagePlus, X } from "lucide-react"
 import { useActionState } from 'react'
 import { uploadPhoto } from '@/services/gallery/gallery-service'
 import { useImagePreview } from '@/hooks/use-photo-preview'
+import { CustomLink } from '@/components/ui/link'
 
-export default function Page() {
+export default function UploadPhotoPage() {
     const [state, formAction, isPending] = useActionState(uploadPhoto, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview();
 
@@ -48,9 +49,14 @@ export default function Page() {
                                 {state?.error && (
                                     <p className="text-sm font-medium text-destructive text-center mb-2">{state.error}</p>
                                 )}
-                                <Button type="submit" disabled={isPending} className="w-full lg:w-max">
-                                    {isPending ? "Memuat..." : "Unggah Sekarang"}
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <CustomLink href="/admin/gallery" variant="outline">
+                                        Kembali
+                                    </CustomLink>
+                                    <Button type="submit" disabled={isPending} className="w-full lg:w-max">
+                                        {isPending ? "Memuat..." : "Unggah Sekarang"}
+                                    </Button>
+                                </div>
                             </FieldGroup>
                         </form>
                     </CardContent>

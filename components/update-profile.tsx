@@ -26,13 +26,16 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+    const BASE_URL = API_URL.replace('/api', '');
+
     const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false);
 
     const photoSrc = profile.photo
-        ? `http://localhost:3002/profiles/${profile.photo}`
+        ? `${BASE_URL}/profiles/${profile.photo}`
         : "/puskesmasLogo.png";
 
     const displayPreview = previewUrl || photoSrc;
@@ -64,9 +67,9 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
                                     src={photoSrc || "/userPlaceholder.png"}
                                     width={100}
                                     height={100}
-                                    unoptimized
                                     className="w-full h-full object-cover rounded-full"
                                     alt="Profil"
+                                    unoptimized
                                 />
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">

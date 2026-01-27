@@ -1,6 +1,6 @@
 import { getGallery } from "@/services/gallery/gallery-service"
 import { GalleryList } from "./gallery-list"
-import Link from "next/link"
+import { CustomLink } from "@/components/ui/link"
 
 export default async function GalleryPage() {
     const galleryData = await getGallery()
@@ -8,12 +8,9 @@ export default async function GalleryPage() {
     return (
         <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 p-6">
             <div className="flex items-center mb-6 gap-2">
-                <Link
-                    href="/admin/gallery/upload-photo"
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-all text-sm font-medium"
-                >
+                <CustomLink href="/admin/gallery/upload-photo">
                     Tambah Foto
-                </Link>
+                </CustomLink>
             </div>
 
             <GalleryList initialGallery={galleryData} />
