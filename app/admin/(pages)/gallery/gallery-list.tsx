@@ -11,6 +11,15 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+    Empty,
+    EmptyContent,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from "@/components/ui/empty"
+import { ImageOff } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { useState, useTransition } from "react"
 import { GalleryCard } from "@/components/gallery-card"
@@ -18,6 +27,7 @@ import { Gallery } from "@/types/gallery-card-prop"
 import { deleteGalleryBatch } from "@/services/gallery/gallery-service"
 import { Loader2, Trash2, X, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
+import { CustomLink } from "@/components/ui/link"
 
 export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
     const [selected, setSelected] = useState<string[]>([])
@@ -103,8 +113,23 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
             )}
 
             {initialGallery.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] border-2 border-dashed rounded-xl">
-                    <p className="text-muted-foreground font-medium">Galeri masih kosong nih...</p>
+                <div className="flex flex-col items-center justify-center min-h-[400px] py-20 w-full">
+                    <Empty className="flex flex-col items-center text-center">
+                        <EmptyHeader className="flex flex-col items-center">
+                            <EmptyMedia variant="icon" className="mb-4 bg-muted/50 p-4 rounded-full">
+                                <ImageOff className="w-10 h-10 text-muted-foreground" />
+                            </EmptyMedia>
+                            <EmptyTitle className="text-xl font-semibold">Galeri kosong</EmptyTitle>
+                            <EmptyDescription className="max-w-[300px] mx-auto">
+                                Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi lu.
+                            </EmptyDescription>
+                        </EmptyHeader>
+                        <EmptyContent className="mt-6">
+                            <CustomLink href="/admin/gallery/upload-photo">
+                                Tambah foto
+                            </CustomLink>
+                        </EmptyContent>
+                    </Empty>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

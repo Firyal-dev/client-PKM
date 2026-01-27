@@ -36,7 +36,7 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
 
     const photoSrc = profile.photo
         ? `${BASE_URL}/profiles/${profile.photo}`
-        : "/puskesmasLogo.png";
+        : "/userPlaceholder.jpg";
 
     const displayPreview = previewUrl || photoSrc;
 
@@ -59,8 +59,8 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <Tooltip>
-                <SheetTrigger asChild>
-                    <TooltipTrigger asChild>
+                <TooltipTrigger asChild>
+                    <SheetTrigger asChild>
                         <SidebarMenuButton size="lg" className="cursor-pointer">
                             <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                                 <Image
@@ -77,8 +77,8 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
                                 <span className="truncate text-xs">Puskesmas Bogor Barat</span>
                             </div>
                         </SidebarMenuButton>
-                    </TooltipTrigger>
-                </SheetTrigger>
+                    </SheetTrigger>
+                </TooltipTrigger>
                 <TooltipContent side="right">
                     <p>Edit Profil</p>
                 </TooltipContent>

@@ -18,9 +18,9 @@ export default async function GalleryPage({
         <div className="px-5 pb-10">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">GALERI</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Galeri</h1>
                     <p className="text-muted-foreground text-sm">
-                        Kelola daftar foto puskesmas
+                        Kelola daftar foto dan dokumentasi
                     </p>
                 </div>
                 <CustomLink href="/admin/gallery/upload-photo">
