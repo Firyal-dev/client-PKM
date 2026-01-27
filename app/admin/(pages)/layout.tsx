@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/nav/app-sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 import { DynamicBreadcrumb } from "@/components/dynamic-breadcumb"
 import { Separator } from "@/components/ui/separator"
 import {

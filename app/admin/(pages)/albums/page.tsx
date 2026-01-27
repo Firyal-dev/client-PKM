@@ -2,7 +2,7 @@ import { CustomLink } from "@/components/ui/link"
 
 export default function AlbumsPage() {
     return (
-        <div>
+        <div className="px-5">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">Albums</h1>
