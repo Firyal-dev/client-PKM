@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/[id]/page.tsx
 import { PageHeader } from "@/components/page-header"
 import { GalleryList } from "../../gallery/gallery-list"
 

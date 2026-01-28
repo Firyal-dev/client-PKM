@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/page.tsx
 import { PageHeader } from "@/components/page-header"
 import { Empty } from "@/components/ui/empty"
 import { Folder } from "lucide-react"

@@ -4,81 +4,56 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import api from "@/services/api"
-import { Album } from "@/types/album-prop"
+import { Album, CreateAlbum } from "@/types/album-prop"
 
-// --- Helper: Get Token ---
-const getToken = async () => {
-    const cookieStore = await cookies()
-    return cookieStore.get("token")?.value
-}
+const getToken = async () => (await cookies()).get("token")?.value
 
-// --- 1. Get All Albums (Pagination) ---
-export const getAlbums = async (page: number, limit: number) => {
+export const getAlbums = async (page: number, limit: number): Promise<{ data: Album[], totalPages: number, currentPage: number }> => {
     try {
-        const response = await api.get("/v1/admin/album", {
-            params: { page, limit } // Gunakan params axios biar lebih rapi
-        })
+        const response = await api.get(`/v1/admin/album?page=${page}&limit=${limit}`)
 
-        // Handle non-paginated response (array)
-        if (Array.isArray(response.data)) {
-            return {
-                data: response.data as Album[],
-                totalPages: 1,
-                currentPage: 1
-            }
-        }
-
-        // Handle paginated response
         return {
-            data: response.data.docs as Album[],
+            data: response.data.docs,
             totalPages: response.data.totalPages,
             currentPage: response.data.page
         }
     } catch (error: any) {
-        console.error("Error fetching albums:", error)
-        return { data: [], totalPages: 1, currentPage: 1 } // Return safe default
+        throw new Error(error?.response?.data?.message || "Gagal mengambil data album")
     }
 }
 
-// --- 2. Create Album (Dengan Foto & Deskripsi) ---
-interface CreateAlbumPayload {
-    title: string
-    description?: string
-    photoIds: string[]
-}
+export const createAlbum = async (prevState: any, data: FormData) => {
+    const token = await getToken();
 
-export const createAlbum = async (payload: CreateAlbumPayload) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+    const payload = {
+        album_title: data.get('album_title'),
+        description: data.get('description'),
+        album_cover: null,
+        photo_ids: []
+    };
 
     try {
-        // Endpoint sesuai controller NestJS: @Post('create')
-        const response = await api.post("/admin/album/create", {
-            album_title: payload.title,      // ✅ Sesuaikan field backend
-            description: payload.description,
-            photo_ids: payload.photoIds      // ✅ Kirim array ID foto
-        }, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        const response = await api.post('/v1/admin/album/create-album', payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            }
+        });
 
-        revalidatePath('/admin/albums')
-        return { success: true, data: response.data }
-
+        revalidatePath('/admin/albums');
     } catch (error: any) {
-        return {
-            success: false,
-            error: error?.response?.data?.message || "Gagal membuat album baru"
-        }
+        throw new Error(error?.response?.data?.message || "Gagal membuat album baru")
     }
+
+    redirect('/admin/albums')
 }
 
-// --- 3. Update Album Name ---
 export const updateAlbumName = async (id: string, newTitle: string) => {
     const token = await getToken()
     if (!token) redirect("/admin/login")
 
     try {
-        await api.put(`/admin/album/${id}`, {
+        await api.put(`/v1/admin/album/${id}`, {
             album_title: newTitle
         }, {
             headers: { Authorization: `Bearer ${token}` }
@@ -91,13 +66,12 @@ export const updateAlbumName = async (id: string, newTitle: string) => {
     }
 }
 
-// --- 4. Delete Album ---
 export const deleteAlbum = async (id: string) => {
     const token = await getToken()
     if (!token) redirect("/admin/login")
 
     try {
-        await api.delete(`/admin/album/${id}`, {
+        await api.delete(`/v1/admin/album/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
 
