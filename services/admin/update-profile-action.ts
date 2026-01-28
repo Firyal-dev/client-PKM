@@ -4,10 +4,10 @@ import api from "@/services/api";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-export async function updateProfileAction(prevState: any, formData: FormData) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+const getToken = async () => (await cookies()).get("token")?.value
 
+export async function updateProfileAction(prevState: any, formData: FormData) {
+    const token = await getToken()
     if (!token) return { error: "Sesi habis, silakan login lagi" };
 
     const photo = formData.get("photo") as File;
@@ -27,8 +27,8 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
 
         return { success: true, message: "Profil berhasil diupdate!" };
     } catch (error: any) {
-        return { 
-            error: error?.response?.data?.message || "Gagal update profile ke server" 
+        return {
+            error: error?.response?.data?.message || "Gagal update profile ke server"
         };
     }
 }

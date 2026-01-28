@@ -2,7 +2,7 @@ import api from "@/services/api"
 import { cookies } from "next/headers"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 
-export async function getAdminProfile(): Promise<AdminProfileProp> {
+export async function getAdminProfile(): Promise<AdminProfileProp | null> {
     const cookieStore = await cookies()
     const token = cookieStore.get("token")?.value
 
@@ -19,6 +19,7 @@ export async function getAdminProfile(): Promise<AdminProfileProp> {
 
         return response.data
     } catch (error: any) {
-        throw new Error(error?.response?.data?.message || "Gagal mengambil data admin")
+        console.error("Gagal mengambil data admin:", error?.response?.data || error.message);
+        return null;
     }
 }

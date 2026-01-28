@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sidebar"
 import { getAdminProfile } from "@/services/admin/admin-service"
 import { Toaster } from "@/components/ui/sonner"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
     title: "Puskesmas",
@@ -22,6 +23,10 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const profile = await getAdminProfile();
+
+    if (!profile) {
+        redirect("/admin/login"); 
+    }
 
     return (
         <SidebarProvider>

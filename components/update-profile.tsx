@@ -28,12 +28,14 @@ import { toast } from "sonner"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 
 export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
+    if (!profile) return null;
+
     const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const photoSrc = getMediaUrl(profile.photo, '/profiles') || "/userPlaceholder.jpg";
+    const photoSrc = getMediaUrl(profile?.photo, '/profiles') || "/userPlaceholder.jpg";
 
     const displayPreview = previewUrl || photoSrc;
 
@@ -61,7 +63,7 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
                         <SidebarMenuButton size="lg" className="cursor-pointer">
                             <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                                 <Image
-                                    src={photoSrc || "/userPlaceholder.png"}
+                                    src={photoSrc}
                                     width={100}
                                     height={100}
                                     className="w-full h-full object-cover rounded-full"
