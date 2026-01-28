@@ -8,13 +8,15 @@ import { Gallery } from "@/types/gallery-prop"
 
 const getToken = async () => (await cookies()).get("token")?.value
 
-export const uploadPhoto = async (data: FormData) => {
+export const uploadPhoto = async (prevState: any, data: FormData) => {
     const token = await getToken()
     if (!token) redirect("/admin/login")
 
     try {
         await api.post('/v1/admin/gallery/upload-photo', data, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
         })
         revalidatePath('/admin/gallery')
     } catch (error: any) {

@@ -2,16 +2,12 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import Image from "next/image"
 import { GalleryCardProp } from "@/types/gallery-prop"
 
 export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCardProp) {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-    const BASE_URL = API_URL.replace('/api', '');
-
-    const imageUrl = gallery.image.startsWith('http')
-        ? gallery.image
-        : `${BASE_URL}${gallery.image}`;
+    const imageUrl = getMediaUrl(gallery.image) || "/placeholder.jpg";
 
     return (
         <Card
@@ -31,6 +27,9 @@ export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCardProp) 
                 <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <p className="text-white font-bold text-lg leading-tight truncate">
                         {gallery.image_title}
+                    </p>
+                    <p className="text-white text-sm leading-tight truncate">
+                        {gallery.description}
                     </p>
                 </div>
 

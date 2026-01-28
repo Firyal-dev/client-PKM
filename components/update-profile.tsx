@@ -25,18 +25,15 @@ import { AdminProfileProp } from "@/types/admin-profile-prop"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
-export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-    const BASE_URL = API_URL.replace('/api', '');
+import { getMediaUrl } from "@/lib/getMediaUrl"
 
+export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
     const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const photoSrc = profile.photo
-        ? `${BASE_URL}/profiles/${profile.photo}`
-        : "/userPlaceholder.jpg";
+    const photoSrc = getMediaUrl(profile.photo, '/profiles') || "/userPlaceholder.jpg";
 
     const displayPreview = previewUrl || photoSrc;
 
