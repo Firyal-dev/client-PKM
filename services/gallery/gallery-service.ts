@@ -25,9 +25,13 @@ export const uploadPhoto = async (prevState: any, data: FormData) => {
     redirect('/admin/gallery')
 }
 
-export const getGallery = async (page: number, limit: number): Promise<{ data: Gallery[], totalPages: number, currentPage: number }> => {
+export const getGallery = async (page: number, limit: number, albumId?: string, noAlbum?: boolean): Promise<{ data: Gallery[], totalPages: number, currentPage: number }> => {
     try {
-        const response = await api.get(`/v1/admin/gallery?page=${page}&limit=${limit}`)
+        let url = `/v1/admin/gallery?page=${page}&limit=${limit}`
+        if (albumId) url += `&album_id=${albumId}`
+        if (noAlbum) url += `&no_album=true`
+
+        const response = await api.get(url)
         return {
             data: response.data.docs,
             totalPages: response.data.totalPages,

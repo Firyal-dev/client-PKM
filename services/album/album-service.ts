@@ -22,6 +22,15 @@ export const getAlbums = async (page: number, limit: number): Promise<{ data: Al
     }
 }
 
+export const getAlbumDetail = async (id: string): Promise<Album> => {
+    try {
+        const response = await api.get(`/v1/admin/album/${id}`)
+        return response.data
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Gagal mengambil detail album")
+    }
+}
+
 export const createAlbum = async (prevState: any, data: FormData) => {
     const token = await getToken();
 
@@ -77,5 +86,24 @@ export const deleteAlbum = async (id: string) => {
         revalidatePath('/admin/albums')
     } catch (error: any) {
         throw new Error(error?.response?.data?.message || "Gagal menghapus album")
+    }
+}
+
+export const addPhotosToAlbum = async (albumId: string, photoIds: string[]) => {
+    const token = await getToken()
+    if (!token) redirect("/admin/login")
+
+    try {
+        await api.post('/v1/admin/gallery/update-album', {
+            photo_ids: photoIds,
+            album_id: albumId
+        }, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+
+        revalidatePath(`/admin/albums/${albumId}`)
+        return { success: true }
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Gagal menambahkan foto ke album")
     }
 }

@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/page.tsx
 import { PageHeader } from "@/components/page-header"
 import { Folder } from "lucide-react"
 import { AlbumCard } from "./album-card"
