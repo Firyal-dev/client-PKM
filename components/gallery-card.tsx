@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import Image from "next/image"
-import { GalleryCardProp } from "@/types/gallery-card-prop"
+import { GalleryCardProp } from "@/types/gallery-prop"
 
 export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCardProp) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL!;

@@ -3,11 +3,7 @@ import { GalleryList } from "./gallery-list"
 import { PaginationControl } from "@/components/pagination-control"
 import { PageHeader } from "@/components/page-header"
 
-export default async function GalleryPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ page?: string }>
-}) {
+export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const limit = 12
@@ -23,7 +19,7 @@ export default async function GalleryPage({
                 linkLabel="Tambah Foto"
             />
 
-            <div className="rounded-xl bg-muted/30 border border-border mt-5 p-5 min-h-[500px]">
+            <div className="rounded-xl bg-muted/50 border border-border mt-5 p-5 min-h-[500px]">
                 <GalleryList initialGallery={response.data} />
 
                 {response.totalPages > 1 && (

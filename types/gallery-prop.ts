@@ -10,8 +10,3 @@ export interface GalleryCardProp {
     isSelected: boolean
     onSelect: (id: string) => void
 }
-
-export interface GalleryResponse {
-    data?: Gallery[];
-    error?: string;
-}

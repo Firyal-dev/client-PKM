@@ -7,6 +7,8 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { getAdminProfile } from "@/services/admin/admin-service"
+import { Toaster } from "@/components/ui/sonner"
+
 export const metadata: Metadata = {
     title: "Puskesmas",
     description: "Sistem Informasi Manajemen Puskesmas",
@@ -38,6 +40,7 @@ export default async function AdminLayout({
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     {children}
                 </div>
+                <Toaster />
             </SidebarInset>
         </SidebarProvider>
     );

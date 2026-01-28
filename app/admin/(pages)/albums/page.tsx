@@ -2,18 +2,14 @@ import { PageHeader } from "@/components/page-header"
 import { Empty } from "@/components/ui/empty"
 import { Folder } from "lucide-react"
 import { AlbumList } from "./album-list"
+import { getAlbums } from "@/services/album/album-service"
 
-const DUMMY_ALBUMS = [
-    { id: "1", title: "Kegiatan Puskesmas 2025", count: 24, updatedAt: "2 hari lalu" },
-    { id: "2", title: "Vaksinasi Door to Door", count: 12, updatedAt: "5 hari lalu" },
-    { id: "3", title: "Rapat Koordinasi Dinkes", count: 8, updatedAt: "1 minggu lalu" },
-    { id: "4", title: "Layanan Lansia Terpadu", count: 45, updatedAt: "2 minggu lalu" },
-    { id: "5", title: "Sosialisasi Stunting", count: 15, updatedAt: "3 minggu lalu" },
-    { id: "6", title: "Cek Kesehatan Gratis", count: 30, updatedAt: "1 bulan lalu" },
-]
+export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+    const params = await searchParams
+    const currentPage = Number(params.page) || 1
+    const limit = 9
 
-export default function AlbumsPage() {
-    const albums = DUMMY_ALBUMS
+    const response = await getAlbums(currentPage, limit)
 
     return (
         <div className="px-5 pb-10">
@@ -23,8 +19,8 @@ export default function AlbumsPage() {
                 linkHref="/admin/albums/create-album"
                 linkLabel="Buat Album"
             />
-            <div className="rounded-xl bg-muted/50 mt-5 p-5">
-                {albums.length === 0 ? (
+            <div className="rounded-xl bg-muted/50 border border-border mt-5 p-5 min-h-[500px]">
+                {response.data.length === 0 ? (
                     <div className="flex items-center justify-center min-h-[400px]">
                         <Empty>
                             <Folder className="w-12 h-12 text-muted-foreground mb-4" />
@@ -33,12 +29,12 @@ export default function AlbumsPage() {
                         </Empty>
                     </div>
                 ) : (
-                    /* Grid Album: 1 kolom di HP, 2 di tablet, 3 di desktop */
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {albums.map((album) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {response.data.map((album) => (
                             <AlbumList
-                                key={album.id}
-                                title={album.title}
+                                key={album._id}
+                                id={album._id}
+                                title={album.album_name}
                                 count={album.count}
                             />
                         ))}
