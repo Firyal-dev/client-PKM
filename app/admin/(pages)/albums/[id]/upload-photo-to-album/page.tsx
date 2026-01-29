@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/[id]/upload-photo-to-album/page.tsx
 import { PageHeader } from "@/components/page-header"
 import { getAlbumDetail } from "@/services/album/album-service"
 import { getGallery } from "@/services/gallery/gallery-service"

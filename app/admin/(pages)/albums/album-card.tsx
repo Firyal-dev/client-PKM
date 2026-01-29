@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/album-card.tsx
 'use client'
 
 import { useState, useRef, useEffect } from "react"
@@ -13,14 +14,16 @@ import Link from "next/link"
 import { updateAlbumName, deleteAlbum } from "@/services/album/album-service"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import Image from "next/image" // 👈 1. Import Image
 
 interface AlbumCardProps {
     id: string
     title: string
     count: number
+    coverUrl?: string | null // 👈 2. Tambah props coverUrl
 }
 
-export function AlbumCard({ id, title, count }: AlbumCardProps) {
+export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [albumTitle, setAlbumTitle] = useState(title)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -51,7 +54,9 @@ export function AlbumCard({ id, title, count }: AlbumCardProps) {
 
     return (
         <div className="group relative flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1">
-            <AlbumCover id={id} count={count} disabled={isEditing} />
+            {/* 👈 3. Kirim coverUrl ke sub-component */}
+            <AlbumCover id={id} count={count} disabled={isEditing} coverUrl={coverUrl} />
+
             <div className="flex items-start justify-between px-1 gap-2">
                 <div className="flex-1 min-w-0">
                     {isEditing ? (
@@ -88,7 +93,15 @@ export function AlbumCard({ id, title, count }: AlbumCardProps) {
     )
 }
 
-function AlbumCover({ id, count, disabled }: { id: string, count: number, disabled: boolean }) {
+// 👈 4. Terima props di sini
+function AlbumCover({ id, count, disabled, coverUrl }: { id: string, count: number, disabled: boolean, coverUrl?: string | null }) {
+
+    // Sesuaikan Base URL Server Backend kamu (hapus /api jika gambar di root public)
+    const API_URL = process.env.NEXT_PUBLIC_API_URL
+    const BASE_URL = API_URL?.replace(/\/api$/, '')
+
+    const fullImageUrl = coverUrl ? `${BASE_URL}${coverUrl}` : null
+
     return (
         <Link
             href={`/admin/albums/${id}`}
@@ -97,17 +110,32 @@ function AlbumCover({ id, count, disabled }: { id: string, count: number, disabl
                 disabled ? "pointer-events-none opacity-50" : "group-hover:ring-2 group-hover:ring-primary/20"
             )}
         >
-            <div className="flex h-full flex-col items-center justify-center gap-3">
-                <div className="relative">
-                    <Folder className="h-12 w-12 text-primary/20 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
-                    <ImageIcon className="absolute inset-0 h-6 w-6 m-auto text-primary/40" />
+            {/* 👈 5. LOGIKA UTAMA: Tampilkan Gambar jika ada, Icon jika tidak */}
+            {fullImageUrl ? (
+                <div className="relative h-full w-full">
+                    <Image
+                        src={fullImageUrl}
+                        alt="Cover"
+                        fill
+                        unoptimized
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                 </div>
-            </div>
+            ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-3">
+                    <div className="relative">
+                        <Folder className="h-12 w-12 text-primary/20 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
+                        <ImageIcon className="absolute inset-0 h-6 w-6 m-auto text-primary/40" />
+                    </div>
+                </div>
+            )}
 
-            <div className="absolute bottom-3 right-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[10px] text-white backdrop-blur-md font-bold shadow-lg border border-white/10">
+            <div className="absolute bottom-3 right-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[10px] text-white backdrop-blur-md font-bold shadow-lg border border-white/10 z-10">
                 {count} FOTO
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </Link>
     )
 }
