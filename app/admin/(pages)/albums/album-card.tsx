@@ -14,6 +14,17 @@ import { updateAlbumName, deleteAlbum } from "@/services/album/album-service"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 interface AlbumCardProps {
     id: string
     title: string
@@ -113,36 +124,58 @@ function AlbumCover({ id, count, disabled }: { id: string, count: number, disabl
 }
 
 function AlbumActions({ id, onRename }: { id: string, onRename: () => void }) {
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full transition-colors hover:bg-primary/10 hover:text-primary"
-                >
-                    <MoreVertical className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-50 rounded-xl shadow-xl border-border/50">
-                <DropdownMenuItem onClick={onRename} className="cursor-pointer gap-2">
-                    <Pencil className="h-4 w-4" />
-                    <span>Ubah Nama</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    variant="destructive"
-                    className="cursor-pointer gap-2"
-                    onSelect={(e) => {
-                        e.preventDefault()
-                        if (confirm("Yakin mau hapus album ini? Semua referensi foto bakal dilepas.")) {
-                            deleteAlbum(id)
-                        }
-                    }}
-                >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Hapus Album</span>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full transition-colors hover:bg-primary/10 hover:text-primary"
+                    >
+                        <MoreVertical className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-50 rounded-xl shadow-xl border-border/50">
+                    <DropdownMenuItem onClick={onRename} className="cursor-pointer gap-2">
+                        <Pencil className="h-4 w-4" />
+                        <span>Ubah Nama</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        variant="destructive"
+                        className="cursor-pointer gap-2"
+                        onSelect={(e) => {
+                            e.preventDefault()
+                            setShowDeleteDialog(true)
+                        }}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Hapus Album</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Album?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tindakan ini tidak bisa dibatalkan. Menghapus album ini berarti semua referensi foto di dalamnya akan dilepas.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => deleteAlbum(id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }

@@ -1,7 +1,7 @@
 import { getGallery } from "@/services/gallery/gallery-service"
 import { GalleryList } from "./gallery-list"
-import { PaginationControl } from "@/components/pagination-control"
-import { PageHeader } from "@/components/page-header"
+import { PaginationControl } from "@/components/admin/pagination-control"
+import { PageHeader } from "@/components/admin/page-header"
 
 export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams

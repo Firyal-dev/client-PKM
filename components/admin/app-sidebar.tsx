@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { NavMain } from "@/components/nav/nav-main"
-import { NavMedia } from "@/components/nav/nav-media"
-import { NavUserExperience } from "@/components/nav/nav-user-experience"
-import { NavAdminManage } from "@/components/nav/nav-admin-manage"
-import { NavWebConfig } from "@/components/nav/nav-web-config"
+import { NavMain } from "@/components/admin/nav/nav-main"
+import { NavMedia } from "@/components/admin/nav/nav-media"
+import { NavUserExperience } from "@/components/admin/nav/nav-user-experience"
+import { NavAdminManage } from "@/components/admin/nav/nav-admin-manage"
+import { NavWebConfig } from "@/components/admin/nav/nav-web-config"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { ModeToggle } from "@/components/toggle-theme"
+import { ModeToggle } from "@/components/admin/toggle-theme"
 import { Button } from "@/components/ui/button"
 import {
   Sidebar,
@@ -31,7 +31,7 @@ import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
 import { logoutAction } from "@/services/auth/logout-service"
 import { useActionState } from "react"
-import { UpdateProfile } from "@/components/update-profile"
+import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 
 

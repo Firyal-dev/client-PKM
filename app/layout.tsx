@@ -1,5 +1,5 @@
 import '@/app/globals.css'
-import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider } from '@/components/admin/theme-provider'
 
 import type { Metadata } from "next";
 
@@ -18,7 +18,7 @@ export default function Layout({
             <body>
                 <ThemeProvider
                     attribute="class"
-                    defaultTheme="system"
+                    defaultTheme="light"
                     enableSystem
                     disableTransitionOnChange
                 >

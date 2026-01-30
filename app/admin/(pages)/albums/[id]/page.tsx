@@ -1,8 +1,8 @@
-import { PageHeader } from "@/components/page-header"
+import { PageHeader } from "@/components/admin/page-header"
 import { GalleryList } from "../../gallery/gallery-list"
 import { getAlbumDetail } from "@/services/album/album-service"
 import { getGallery } from "@/services/gallery/gallery-service"
-import { PaginationControl } from "@/components/pagination-control"
+import { PaginationControl } from "@/components/admin/pagination-control"
 import { notFound } from "next/navigation"
 
 export default async function AlbumDetailPage({

@@ -22,7 +22,7 @@ import {
 import { ImageOff } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { useState, useTransition } from "react"
-import { GalleryCard } from "@/components/gallery-card"
+import { GalleryCard } from "@/components/admin/gallery-card"
 import { Gallery } from "@/types/gallery-prop"
 import { deleteGalleryBatch } from "@/services/gallery/gallery-service"
 import { Loader2, Trash2, X, AlertTriangle } from "lucide-react"

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { Gallery } from "@/types/gallery-prop"
-import { GalleryCard } from "@/components/gallery-card"
+import { GalleryCard } from "@/components/admin/gallery-card"
 import { Button } from "@/components/ui/button"
 import { addPhotosToAlbum } from "@/services/album/album-service"
 import { toast } from "sonner"

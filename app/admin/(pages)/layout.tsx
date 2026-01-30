@@ -1,5 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { DynamicBreadcrumb } from "@/components/dynamic-breadcumb"
+import { AppSidebar } from "@/components/admin/app-sidebar"
+import { DynamicBreadcrumb } from "@/components/admin/dynamic-breadcumb"
 import { Separator } from "@/components/ui/separator"
 import {
     SidebarInset,
@@ -25,7 +25,7 @@ export default async function AdminLayout({
     const profile = await getAdminProfile();
 
     if (!profile) {
-        redirect("/admin/login"); 
+        redirect("/admin/login");
     }
 
     return (

@@ -1,9 +1,8 @@
-// app/admin/(pages)/albums/page.tsx
-import { PageHeader } from "@/components/page-header"
+import { PageHeader } from "@/components/admin/page-header"
 import { Folder } from "lucide-react"
 import { AlbumCard } from "./album-card"
 import { getAlbums } from "@/services/album/album-service"
-import { PaginationControl } from "@/components/pagination-control"
+import { PaginationControl } from "@/components/admin/pagination-control"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { CustomLink } from "@/components/ui/link"
 
