@@ -32,7 +32,6 @@ export default async function UploadPhotoToAlbum({
                 <PageHeader
                     title="Pilih Foto Untuk Album"
                     description={`Memasukkan foto ke dalam album: ${album.album_title}`}
-                    showButton={false}
                 />
 
                 <div className="mt-8 rounded-xl bg-muted/30 border border-border p-5 min-h-[500px]">

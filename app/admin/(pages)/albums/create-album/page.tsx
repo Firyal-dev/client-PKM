@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/create-album/page.tsx
 'use client'
 
 import {

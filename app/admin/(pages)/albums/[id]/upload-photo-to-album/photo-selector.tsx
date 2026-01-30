@@ -1,3 +1,4 @@
+// app/admin/(pages)/albums/[id]/upload-photo-to-album/photo-selector.tsx
 'use client'
 
 import { useState, useTransition } from "react"
