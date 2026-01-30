@@ -4,6 +4,8 @@ import { socialList, informasi, layanan } from "@/constants/footer-data"
 import { Map, MapControls, MapMarker, MarkerContent, MarkerLabel, MarkerPopup } from "@/components/ui/map"
 import { Card } from "@/components/ui/card"
 import { lokasi } from "@/constants/footer-data"
+import { CustomLink } from "@/components/ui/link"
+import { Navigation, Clock } from "lucide-react"
 
 export default function Footer() {
     return (
@@ -37,7 +39,7 @@ export default function Footer() {
                                 <Link
                                     key={i}
                                     href={social.href}
-                                    className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-90"
+                                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground bg-background hover:bg-primary hover:text-white hover:border-primary hover:scale-110 transition-all duration-300 shadow-sm hover:shadow-md"
                                 >
                                     <social.icon size={18} />
                                 </Link>
@@ -54,9 +56,8 @@ export default function Footer() {
                                 <li key={index}>
                                     <Link
                                         href={item.href}
-                                        className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
+                                        className="text-muted-foreground hover:text-primary transition-all hover:translate-x-1 flex items-center"
                                     >
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary/20 group-hover:bg-primary transition-all" />
                                         {item.label}
                                     </Link>
                                 </li>
@@ -73,9 +74,8 @@ export default function Footer() {
                                 <li key={index}>
                                     <Link
                                         href={item.href}
-                                        className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
+                                        className="text-muted-foreground hover:text-primary transition-all hover:translate-x-1 flex items-center"
                                     >
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary/20 group-hover:bg-primary transition-all" />
                                         {item.label}
                                     </Link>
                                 </li>
@@ -101,12 +101,17 @@ export default function Footer() {
                                             />
                                         </div>
                                         <div className="p-3 bg-background rounded-b-xl border border-t-0">
-                                            <h4 className="font-bold text-sm text-foreground leading-tight mb-1">
+                                            <h4 className="font-bold text-xs text-foreground leading-tight mb-1">
                                                 {lokasi.nama}
                                             </h4>
-                                            <p className="text-[10px] text-muted-foreground leading-none italic">
+                                            <p className="flex items-center text-[12px] text-muted-foreground leading-none">
+                                                <Clock className="size-3.5 mr-1.5" />
                                                 {lokasi.jam}
                                             </p>
+                                            <CustomLink href={lokasi.lokasi} className="mt-3 w-full">
+                                                <Navigation className="size-3.5 mr-1.5" />
+                                                Buka Maps
+                                            </CustomLink>
                                         </div>
                                     </MarkerPopup>
                                     <MapControls />
