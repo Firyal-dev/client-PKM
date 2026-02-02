@@ -1,4 +1,3 @@
-// services/album/album-service.ts
 'use server'
 
 import { cookies } from "next/headers"
@@ -43,7 +42,7 @@ export const createAlbum = async (prevState: any, data: FormData) => {
     };
 
     try {
-        const response = await api.post('/v1/admin/album/create-album', payload, {
+        const response = await api.post('/v1/admin/album', payload, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -75,6 +74,27 @@ export const updateAlbumName = async (id: string, newTitle: string) => {
     }
 }
 
+export const updateAlbum = async (id: string, data: FormData) => {
+    const token = await getToken()
+    if (!token) redirect("/admin/login")
+
+    const payload = {
+        album_title: data.get('album_title'),
+        description: data.get('description')
+    };
+
+    try {
+        await api.put(`/v1/admin/album/${id}`, payload, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        revalidatePath('/admin/albums');
+        return { success: true };
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Gagal update album");
+    }
+}
+
 export const deleteAlbum = async (id: string) => {
     const token = await getToken()
     if (!token) redirect("/admin/login")
@@ -95,7 +115,7 @@ export const addPhotosToAlbum = async (albumId: string, photoIds: string[]) => {
     if (!token) redirect("/admin/login")
 
     try {
-        await api.post('/v1/admin/gallery/update-album', {
+        await api.put('/v1/admin/gallery/album', {
             photo_ids: photoIds,
             album_id: albumId
         }, {

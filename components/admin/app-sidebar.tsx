@@ -6,6 +6,7 @@ import { NavMedia } from "@/components/admin/nav/nav-media"
 import { NavUserExperience } from "@/components/admin/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/admin/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/admin/nav/nav-web-config"
+import { NavMainTable } from "@/components/admin/nav/nav-main-table"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +54,9 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
         <NavMedia navMedia={sidebarData.navMedia} />
         <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
         <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+        <NavMainTable navMainTable={sidebarData.navMainTable} />
         <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
+
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">

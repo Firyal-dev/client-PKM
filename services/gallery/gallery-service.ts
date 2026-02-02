@@ -13,14 +13,18 @@ export const uploadPhoto = async (prevState: any, data: FormData) => {
     if (!token) redirect("/admin/login")
 
     try {
-        await api.post('/v1/admin/gallery/upload-photo', data, {
+        // ✅ API CREATE: /v1/admin/gallery (POST) - Hapus 'upload-photo'
+        await api.post('/v1/admin/gallery', data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
         })
         revalidatePath('/admin/gallery')
     } catch (error: any) {
-        throw new Error(error?.response?.data?.message || "Gagal mengunggah foto")
+        // Return error state instead of throwing, so useActionState can catch it
+        return { 
+            error: error?.response?.data?.message || "Gagal mengunggah foto" 
+        }
     }
     redirect('/admin/gallery')
 }
@@ -57,6 +61,6 @@ export const deleteGalleryBatch = async (ids: string[]) => {
         revalidatePath('/admin/gallery')
         return { success: true }
     } catch (error: any) {
-        throw new Error(error?.response?.data?.message || "Gagal menghapus beberapa foto")
+        return { error: error?.response?.data?.message || "Gagal menghapus beberapa foto" }
     }
 }
