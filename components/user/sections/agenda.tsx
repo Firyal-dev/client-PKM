@@ -75,22 +75,16 @@ const agendas = [
 ]
 
 export default function Agenda() {
-    // Initialize with undefined to prevent hydration mismatch (server date vs client date)
     const [date, setDate] = React.useState<Date | undefined>(undefined)
     const [currentPage, setCurrentPage] = React.useState(1)
     const itemsPerPage = 3
-
-    // Set default date on client side mount
     React.useEffect(() => {
         setDate(new Date())
     }, [])
 
-    // Reset pagination when date changes
     React.useEffect(() => {
         setCurrentPage(1)
     }, [date])
-
-    // Filter agendas based on selected date
     const filteredAgendas = agendas.filter(item =>
         date ? isSameDay(item.date, date) : false
     )
@@ -124,7 +118,6 @@ export default function Agenda() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-                    {/* Left Column: Calendar */}
                     <div className="lg:col-span-5 xl:col-span-4">
                         <Card className="border-none shadow-lg overflow-hidden rounded-3xl sticky top-24">
                             <CardContent className="p-6 flex flex-col items-center">
@@ -155,7 +148,6 @@ export default function Agenda() {
                         </Card>
                     </div>
 
-                    {/* Right Column: Activity List */}
                     <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-xl font-bold text-slate-900">
