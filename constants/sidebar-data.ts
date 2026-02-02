@@ -10,7 +10,8 @@ import {
     Headset,
     Users,
     ClipboardClock,
-    Hospital
+    Hospital,
+    ClipboardList
 } from "lucide-react"
 
 export const sidebarData = {
@@ -72,6 +73,13 @@ export const sidebarData = {
             name: "Konsultasi",
             url: "/admin/consultation",
             icon: Headset,
+        }
+    ],
+    navMainTable: [
+        {
+            name: "Agenda",
+            url: "/admin/agenda",
+            icon: ClipboardList,
         }
     ],
     navAdminManage: [

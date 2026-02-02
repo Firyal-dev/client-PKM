@@ -17,7 +17,8 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
     }
 
     try {
-        const response = await api.put("/v1/admin/update-profile", formData, {
+        // ✅ API UPDATE: /v1/admin/profile (PUT)
+        const response = await api.put("/v1/admin/profile", formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }
