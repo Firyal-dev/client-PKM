@@ -1,5 +1,6 @@
 import '@/app/globals.css'
 import { ThemeProvider } from '@/components/admin/theme-provider'
+import { Toaster } from "@/components/ui/sonner"
 
 import type { Metadata } from "next";
 
@@ -23,6 +24,7 @@ export default function Layout({
                     disableTransitionOnChange
                 >
                     {children}
+                    <Toaster />
                 </ThemeProvider>
             </body>
         </html>
