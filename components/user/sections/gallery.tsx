@@ -3,6 +3,13 @@
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { CustomLink } from "@/components/ui/link"
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
 
 const galleryData = [
     {
@@ -63,7 +70,8 @@ export default function Gallery() {
                     </p>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-3 h-[420px] w-full max-w-6xl mx-auto">
+                {/* Desktop View (Flex) */}
+                <div className="hidden md:flex flex-row gap-3 h-[420px] w-full max-w-6xl mx-auto">
                     {galleryData.map((item, index) => (
                         <div
                             key={item.id}
@@ -98,6 +106,51 @@ export default function Gallery() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div className="relative md:hidden w-full max-w-sm px-4">
+
+                    <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+                    <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+
+                    <Carousel
+                        opts={{
+                            align: "center",
+                            loop: true,
+                        }}
+                        className="w-full"
+                    >
+                        <CarouselContent className="-ml-2">
+                            {galleryData.map((item, index) => (
+                                <CarouselItem key={item.id} className="pl-2 basis-[85%]">
+                                    <div className="relative h-[400px] w-full bg-slate-200 rounded-2xl overflow-hidden group">
+                                        <Image
+                                            src={item.image}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500"
+                                            sizes="(max-width: 768px) 85vw, 33vw"
+                                            priority={index === 0}
+                                        />
+
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                        <div className="absolute inset-x-0 bottom-0 p-5">
+                                            <span className="inline-block px-2 py-0.5 mb-2 text-[10px] font-semibold text-white bg-blue-600/90 rounded-full">
+                                                {item.category}
+                                            </span>
+                                            <h3 className="text-xl font-bold text-white leading-snug">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-slate-200 text-sm mt-1 line-clamp-2">
+                                                {item.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                    </Carousel>
                 </div>
 
                 <CustomLink href="/" variant="outline" className="mt-8 mx-auto">
