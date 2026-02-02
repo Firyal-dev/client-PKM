@@ -128,3 +128,10 @@
     @apply hidden!;
   }
 }
+
+/* Custom Container with Consistent Padding */
+@layer components {
+  .container {
+    @apply mx-auto px-6 md:px-12 max-w-7xl;
+  }
+}

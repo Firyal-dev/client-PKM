@@ -1,7 +1,7 @@
 "use client"
 
 import { menuList } from "@/constants/navbar-data"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"

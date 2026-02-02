@@ -9,8 +9,8 @@ import { Navigation, Clock } from "lucide-react"
 
 export default function Footer() {
     return (
-        <footer className="w-full bg-muted/30 border-t border-border py-16 px-6">
-            <div className="max-w-7xl mx-auto">
+        <footer className="w-full bg-background/80 backdrop-blur-md py-16">
+            <div className="container">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
 
                     <div className="md:col-span-4 flex flex-col gap-6">

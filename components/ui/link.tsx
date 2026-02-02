@@ -34,7 +34,6 @@ interface CustomLinkProps
 export function CustomLink({ className, variant, size, href, ...props }: CustomLinkProps) {
     return (
         <Link
-            target="_blank"
             href={href}
             className={cn(customLinkVariants({ variant, size, className }))}
             {...props}
