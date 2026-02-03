@@ -197,13 +197,13 @@ function AlbumActions({ id, onRename }: { id: string, onRename: () => void }) {
                         <AlertDialogCancel>Batal</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => deleteAlbum(id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 cursor-pointer"
                         >
                             Hapus
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+        </AlertDialog >
         </>
     )
 }

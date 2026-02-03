@@ -3,17 +3,21 @@ import Layanan from "@/components/user/sections/layanan";
 import Agenda from "@/components/user/sections/agenda";
 import Berita from "@/components/user/sections/berita";
 import Gallery from "@/components/user/sections/gallery";
-import { Suspense } from "react";
 
-export default function HomePage() {
+// services
+import { getGallery } from "@/services/gallery/gallery-service";
+import { getAgendas } from "@/services/agenda/agenda-service";
+
+export default async function HomePage() {
+    const galleryData = await getGallery(1, 5);
+    const agendaData = await getAgendas(1, 100);
+
     return (
         <main>
             <Banner />
             <Layanan />
-            <Suspense fallback={null}>
-                <Gallery />
-            </Suspense>
-            <Agenda />
+            <Agenda data={agendaData.data} />
+            <Gallery data={galleryData.data} />
             <Berita />
         </main>
     )

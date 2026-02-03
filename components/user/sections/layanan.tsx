@@ -18,33 +18,31 @@ export default function Layanan() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {layananList.map((item, index) => (
                         <Card
                             key={index}
                             className="
                                 h-full bg-white
-                                border border-slate-200
-                                rounded-t-2xl rounded-b-3xl
+                                border border-slate-100
+                                rounded-xl
                                 shadow-sm
-                                transition
-                                hover:shadow-lg
+                                transition-all
+                                hover:shadow-md hover:border-blue-100
                             "
                         >
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                                        <item.icon className="w-6 h-6" />
-                                    </div>
-
-                                    <CardTitle className="text-lg font-semibold text-slate-900 leading-snug">
-                                        {item.label}
-                                    </CardTitle>
+                            <CardHeader className="pb-2">
+                                <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mb-3">
+                                    <item.icon className="w-5 h-5" />
                                 </div>
+
+                                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                                    {item.label}
+                                </CardTitle>
                             </CardHeader>
 
-                            <CardContent className="pt-0">
-                                <CardDescription className="text-base text-slate-600 leading-relaxed">
+                            <CardContent>
+                                <CardDescription className="text-sm text-slate-500 leading-relaxed">
                                     {item.desc}
                                 </CardDescription>
                             </CardContent>

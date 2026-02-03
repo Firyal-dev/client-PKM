@@ -10,8 +10,10 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        const message = error.response?.data?.message || "Terjadi kesalahan, silakan coba lagi nanti.";
-        toast.error(message);
+        if (typeof window !== 'undefined') {
+            const message = error.response?.data?.message || "Terjadi kesalahan, silakan coba lagi nanti.";
+            toast.error(message);
+        }
         return Promise.reject(error);
     }
 );

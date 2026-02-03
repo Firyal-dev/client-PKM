@@ -2,61 +2,23 @@
 
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { ImageOff } from "lucide-react"
 import { CustomLink } from "@/components/ui/link"
+import { EmptyState } from "@/components/ui/empty-user"
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
 } from "@/components/ui/carousel"
 
-const galleryData = [
-    {
-        id: 1,
-        title: "Pemeriksaan Lansia",
-        category: "Layanan Medis",
-        image: "/authBg.jpg",
-        description:
-            "Pemeriksaan kesehatan rutin untuk lansia guna memantau kondisi fisik dan mental.",
-    },
-    {
-        id: 2,
-        title: "Senam Prolanis",
-        category: "Kegiatan",
-        image: "/authBg.jpg",
-        description:
-            "Kegiatan senam bersama untuk menjaga kebugaran peserta program pengelolaan penyakit kronis.",
-    },
-    {
-        id: 3,
-        title: "Penyuluhan Gizi",
-        category: "Edukasi",
-        image: "/authBg.jpg",
-        description:
-            "Edukasi pentingnya gizi seimbang untuk mencegah stunting pada balita.",
-    },
-    {
-        id: 4,
-        title: "Vaksinasi COVID-19",
-        category: "Imunisasi",
-        image: "/authBg.jpg",
-        description:
-            "Pelayanan vaksinasi dosis lengkap dan booster untuk masyarakat umum.",
-    },
-    {
-        id: 5,
-        title: "Kunjungan Rumah",
-        category: "Home Care",
-        image: "/authBg.jpg",
-        description:
-            "Petugas kesehatan mengunjungi pasien yang memiliki keterbatasan mobilitas.",
-    },
-]
+// type
+import type { Gallery } from "@/types/gallery-prop"
 
-export default function Gallery() {
+export default function Gallery({ data }: { data: Gallery[] }) {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "");
+
     return (
-        <section className="py-16 bg-white overflow-hidden">
+        <section className="py-16 overflow-hidden">
             <div className="container flex flex-col items-center mx-auto">
                 <div className="flex flex-col items-center text-center mb-10 space-y-3">
                     <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-semibold uppercase tracking-wide">
@@ -70,92 +32,101 @@ export default function Gallery() {
                     </p>
                 </div>
 
-                {/* Desktop View (Flex) */}
-                <div className="hidden md:flex flex-row gap-3 h-[420px] w-full max-w-6xl mx-auto">
-                    {galleryData.map((item, index) => (
-                        <div
-                            key={item.id}
-                            className={cn(
-                                "group relative flex-1 min-h-[80px] md:min-h-full",
-                                "bg-slate-200 rounded-2xl overflow-hidden cursor-pointer",
-                                "transition-all duration-500 ease-out",
-                                "hover:flex-[2.5] hover:shadow-xl hover:shadow-blue-900/20"
-                            )}
-                        >
-                            <Image
-                                src={item.image}
-                                alt={item.title}
-                                fill
-                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                priority={index === 0}
-                            />
 
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                {(!data || data.length === 0) ? (
+                    <EmptyState
+                        title="Belum ada dokumentasi"
+                        description="Saat ini belum ada foto kegiatan yang tersedia untuk ditampilkan."
+                        icon={ImageOff}
+                        className="max-w-4xl mx-auto"
+                    />
+                ) : (
+                    <>
+                        <div className="hidden md:flex flex-row gap-3 h-[420px] w-full max-w-6xl mx-auto">
+                            {data.map((item, index) => (
+                                <div
+                                    key={item._id}
+                                    className={cn(
+                                        "group relative flex-1 min-h-[80px] md:min-h-full",
+                                        "bg-slate-200 rounded-2xl overflow-hidden cursor-pointer",
+                                        "transition-all duration-500 ease-out",
+                                        "hover:flex-[2.5] hover:shadow-xl hover:shadow-blue-900/20"
+                                    )}
+                                >
+                                    <Image
+                                        src={`${baseUrl}${item.image}`}
+                                        alt={item.image_title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                        priority={index === 0}
+                                        unoptimized
+                                    />
 
-                            <div className="absolute inset-x-0 bottom-0 p-5 translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                <span className="inline-block px-2 py-0.5 mb-2 text-[10px] font-semibold text-white bg-blue-600/90 rounded-full">
-                                    {item.category}
-                                </span>
-                                <h3 className="text-lg md:text-xl font-bold text-white leading-snug">
-                                    {item.title}
-                                </h3>
-                                <p className="text-slate-200 text-xs md:text-sm line-clamp-2">
-                                    {item.description}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                <div className="relative md:hidden w-full max-w-sm px-4">
-
-                    <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-                    <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-
-                    <Carousel
-                        opts={{
-                            align: "center",
-                            loop: true,
-                        }}
-                        className="w-full"
-                    >
-                        <CarouselContent className="-ml-2">
-                            {galleryData.map((item, index) => (
-                                <CarouselItem key={item.id} className="pl-2 basis-[85%]">
-                                    <div className="relative h-[400px] w-full bg-slate-200 rounded-2xl overflow-hidden group">
-                                        <Image
-                                            src={item.image}
-                                            alt={item.title}
-                                            fill
-                                            className="object-cover transition-transform duration-500"
-                                            sizes="(max-width: 768px) 85vw, 33vw"
-                                            priority={index === 0}
-                                        />
-
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                                        <div className="absolute inset-x-0 bottom-0 p-5">
-                                            <span className="inline-block px-2 py-0.5 mb-2 text-[10px] font-semibold text-white bg-blue-600/90 rounded-full">
-                                                {item.category}
-                                            </span>
-                                            <h3 className="text-xl font-bold text-white leading-snug">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-slate-200 text-sm mt-1 line-clamp-2">
-                                                {item.description}
-                                            </p>
-                                        </div>
+                                    <div className="absolute inset-x-0 bottom-0 p-5 translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                        <h3 className="text-lg md:text-xl font-bold text-white leading-snug">
+                                            {item.image_title}
+                                        </h3>
+                                        <p className="text-slate-200 text-xs md:text-sm line-clamp-2">
+                                            {item.description}
+                                        </p>
                                     </div>
-                                </CarouselItem>
+                                </div>
                             ))}
-                        </CarouselContent>
-                    </Carousel>
-                </div>
+                        </div>
 
-                <CustomLink href="/" variant="outline" className="mt-8 mx-auto">
-                    Lihat Semua
-                </CustomLink>
+                        <div className="relative md:hidden w-full max-w-sm px-4">
+
+                            <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+                            <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+
+                            <Carousel
+                                opts={{
+                                    align: "center",
+                                    loop: true,
+                                }}
+                                className="w-full"
+                            >
+                                <CarouselContent className="-ml-2">
+                                    {data.map((item, index) => (
+                                        <CarouselItem key={item._id} className="pl-2 basis-[85%]">
+                                            <div className="relative h-[400px] w-full bg-slate-200 rounded-2xl overflow-hidden group">
+                                                <Image
+                                                    src={`${baseUrl}${item.image}`}
+                                                    alt={item.image_title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-500"
+                                                    sizes="(max-width: 768px) 85vw, 33vw"
+                                                    priority={index === 0}
+                                                    unoptimized
+                                                />
+
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                                <div className="absolute inset-x-0 bottom-0 p-5">
+                                                    <h3 className="text-xl font-bold text-white leading-snug">
+                                                        {item.image_title}
+                                                    </h3>
+                                                    <p className="text-slate-200 text-sm mt-1 line-clamp-2">
+                                                        {item.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                            </Carousel>
+                        </div>
+                    </>
+                )}
+
+                {data.length > 5 && (
+                    <CustomLink href="/" variant="outline" className="mt-8 mx-auto">
+                        Lihat Semua
+                    </CustomLink>
+                )}
             </div>
         </section>
     )
