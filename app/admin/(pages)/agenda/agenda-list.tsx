@@ -68,12 +68,11 @@ export function AgendaList({ initialAgendas }: { initialAgendas: Agenda[] }) {
                 <TableBody>
                     {initialAgendas.map((agenda) => {
                         // --- LOGIC PENGECEKAN TANGGAL YANG AMAN ---
-
+                        
                         // 1. Parsing Start Date
                         const startDateObj = new Date(agenda.date);
                         const isStartDateValid = isValid(startDateObj);
 
-                        // 2. Parsing Effective Date (Tanggal Selesai)
                         let effectiveDateObj: Date | null = null;
                         if (agenda.effective_date) {
                             const d = new Date(agenda.effective_date);
@@ -82,7 +81,6 @@ export function AgendaList({ initialAgendas }: { initialAgendas: Agenda[] }) {
                             }
                         }
 
-                        // 3. Cek apakah Multi Day
                         const isMultiDay = isStartDateValid &&
                             effectiveDateObj &&
                             format(startDateObj, 'yyyy-MM-dd') !== format(effectiveDateObj, 'yyyy-MM-dd');
