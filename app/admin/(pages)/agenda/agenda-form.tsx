@@ -20,28 +20,47 @@ const initialState: { success: boolean; error: string | undefined } = {
     error: undefined,
 }
 
-function DatePicker({ name, required, defaultValue }: { name: string; required?: boolean; defaultValue?: string }) {
-    const [date, setDate] = useState<Date | undefined>(defaultValue ? new Date(defaultValue) : undefined)
-
+function DatePicker({
+    name,
+    value,
+    onChange,
+    required,
+    minDate,
+}: {
+    name: string
+    value?: Date
+    onChange?: (date?: Date) => void
+    required?: boolean
+    minDate?: Date
+}) {
     return (
         <Popover>
-            <input type="hidden" name={name} value={date ? format(date, "yyyy-MM-dd") : ""} required={required} />
+            <input
+                type="hidden"
+                name={name}
+                value={value ? format(value, "yyyy-MM-dd") : ""}
+                required={required}
+            />
+
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
-                    data-empty={!date}
+                    data-empty={!value}
                     className="data-[empty=true]:text-muted-foreground w-full justify-between text-left font-normal h-10 px-3 rounded-lg border-input bg-background hover:bg-accent hover:text-accent-foreground"
                 >
-                    {date ? format(date, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
+                    {value ? format(value, "PPP", { locale: id }) : "Pilih tanggal"}
                     <ChevronDownIcon className="h-4 w-4 opacity-50" />
                 </Button>
             </PopoverTrigger>
+
             <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                     mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    defaultMonth={date}
+                    selected={value}
+                    onSelect={onChange}
+                    disabled={(date) =>
+                        minDate ? date <= minDate : false
+                    }
                     locale={id}
                     initialFocus
                 />
@@ -59,10 +78,28 @@ export function AgendaForm({ initialData, action }: AgendaFormProps) {
     const [state, formAction, isPending] = useActionState(action, initialState)
     const router = useRouter()
 
+    // 1. PARSING LOGIC: Pecah string "09:00 - 12:00" jadi dua variable
+    const initialTimes = initialData?.time ? initialData.time.split(' - ') : ["", ""];
+
+    const [startTime, setStartTime] = useState(initialTimes[0] || "")
+    const [endTime, setEndTime] = useState(initialTimes[1] || "")
+
+    // 2. DATE LOGIC
+    const [agendaDate, setAgendaDate] = useState<Date | undefined>(
+        initialData?.date ? new Date(initialData.date) : undefined
+    )
+
+    // Cek apakah tanggal akhir beda sama tanggal mulai
+    const initialEffectiveDate = initialData?.effective_date ? new Date(initialData.effective_date) : undefined;
+
+    const isSameDateInitial = !initialData?.effective_date ||
+        (initialData?.date && format(new Date(initialData.date), 'yyyy-MM-dd') === initialData.effective_date);
+
+    const [endDateMode, setEndDateMode] = useState<'same' | 'custom'>(isSameDateInitial ? 'same' : 'custom')
+    const [effectiveDate, setEffectiveDate] = useState<Date | undefined>(initialEffectiveDate)
+
     useEffect(() => {
-        if (state?.error) {
-            toast.error(state.error)
-        }
+        if (state?.error) toast.error(state.error)
         if (state?.success) {
             toast.success(initialData ? "Agenda berhasil diperbarui" : "Agenda berhasil dibuat")
             router.push('/admin/agenda')
@@ -74,6 +111,13 @@ export function AgendaForm({ initialData, action }: AgendaFormProps) {
         <Card className="w-full border-border/50 shadow-sm overflow-hidden rounded-2xl">
             <CardContent className="p-6 md:p-8">
                 <form action={formAction}>
+                    {/* INPUT HIDDEN GABUNGAN WAKTU */}
+                    <input
+                        type="hidden"
+                        name="time"
+                        value={startTime && endTime ? `${startTime} - ${endTime}` : startTime}
+                    />
+
                     <FieldGroup className="space-y-6">
                         <Field className="space-y-2">
                             <FieldLabel htmlFor="activity_name" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
@@ -96,39 +140,102 @@ export function AgendaForm({ initialData, action }: AgendaFormProps) {
                                 </FieldLabel>
                                 <DatePicker
                                     name="date"
-                                    defaultValue={initialData?.date}
+                                    value={agendaDate}
+                                    onChange={(date) => {
+                                        setAgendaDate(date)
+                                        if (endDateMode === 'same') {
+                                            setEffectiveDate(date)
+                                        }
+                                    }}
                                     required
                                 />
                             </Field>
 
                             <Field className="space-y-2">
-                                <FieldLabel htmlFor="time" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                <FieldLabel htmlFor="start_time" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
                                     Dari jam:
                                 </FieldLabel>
                                 <Input
-                                    id="time"
-                                    name="time"
+                                    id="start_time"
                                     type="time"
-                                    defaultValue={initialData?.time}
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
                                     required
                                     className="h-11 rounded-lg bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden focus-visible:ring-primary"
                                 />
                             </Field>
 
                             <Field className="space-y-2">
-                                <FieldLabel htmlFor="effective_date" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                <FieldLabel htmlFor="end_time" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
                                     Sampai jam:
                                 </FieldLabel>
                                 <Input
-                                    id="effective_date"
-                                    name="effective_date"
+                                    id="end_time"
                                     type="time"
-                                    defaultValue={initialData?.effective_date}
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
                                     required
                                     className="h-11 rounded-lg bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden focus-visible:ring-primary"
                                 />
                             </Field>
                         </div>
+
+                        <Field className="space-y-2">
+                            <FieldLabel className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                Rentang Tanggal
+                            </FieldLabel>
+                            <div className="flex gap-6 text-sm">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="endDateMode"
+                                        checked={endDateMode === 'same'}
+                                        onChange={() => {
+                                            setEndDateMode('same')
+                                            setEffectiveDate(agendaDate)
+                                        }}
+                                        className="w-4 h-4 text-primary focus:ring-primary"
+                                    />
+                                    Hari yang sama
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="endDateMode"
+                                        checked={endDateMode === 'custom'}
+                                        onChange={() => {
+                                            setEndDateMode('custom')
+                                        }}
+                                        className="w-4 h-4 text-primary focus:ring-primary"
+                                    />
+                                    Tanggal lain
+                                </label>
+                            </div>
+                        </Field>
+
+                        {endDateMode === 'custom' && (
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor="effective_date" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                    Pilih Tanggal Akhir
+                                </FieldLabel>
+                                <DatePicker
+                                    name="effective_date"
+                                    value={effectiveDate}
+                                    onChange={setEffectiveDate}
+                                    minDate={agendaDate}
+                                    required
+                                />
+                            </Field>
+                        )}
+
+                        {endDateMode === 'same' && (
+                            <input
+                                type="hidden"
+                                name="effective_date"
+                                value={agendaDate ? format(agendaDate, "yyyy-MM-dd") : ""}
+                            />
+                        )}
 
                         <Field className="space-y-2">
                             <FieldLabel htmlFor="location" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
