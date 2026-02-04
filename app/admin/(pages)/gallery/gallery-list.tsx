@@ -29,7 +29,17 @@ import { Loader2, Trash2, X, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { CustomLink } from "@/components/ui/link"
 
-export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
+export function GalleryList({
+    initialGallery,
+    emptyTitle,
+    emptyDescription,
+    emptyAction
+}: {
+    initialGallery: Gallery[],
+    emptyTitle?: string,
+    emptyDescription?: string,
+    emptyAction?: React.ReactNode
+}) {
     const [selected, setSelected] = useState<string[]>([])
     const [isPending, startTransition] = useTransition()
 
@@ -119,15 +129,19 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
                             <EmptyMedia variant="icon" className="mb-4 bg-muted/50 p-4 rounded-full">
                                 <ImageOff className="w-10 h-10 text-muted-foreground" />
                             </EmptyMedia>
-                            <EmptyTitle className="text-xl font-semibold">Galeri kosong</EmptyTitle>
+                            <EmptyTitle className="text-xl font-semibold">
+                                {emptyTitle || "Galeri kosong"}
+                            </EmptyTitle>
                             <EmptyDescription className="max-w-[300px] mx-auto">
-                                Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi.
+                                {emptyDescription || "Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi."}
                             </EmptyDescription>
                         </EmptyHeader>
                         <EmptyContent className="mt-6">
-                            <CustomLink href="/admin/gallery/upload-photo">
-                                Tambah foto
-                            </CustomLink>
+                            {emptyAction || (
+                                <CustomLink href="/admin/gallery/upload-photo">
+                                    Tambah foto
+                                </CustomLink>
+                            )}
                         </EmptyContent>
                     </Empty>
                 </div>

@@ -91,7 +91,7 @@ export function AgendaList({ initialAgendas }: { initialAgendas: Agenda[] }) {
                             </TableCell>
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">
-                                    <Link href={`/admin/agenda/edit-agenda/${agenda._id}`}>
+                                    <Link href={`/admin/agenda/${agenda._id}`}>
                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                                             <Edit className="h-4 w-4" />
                                         </Button>

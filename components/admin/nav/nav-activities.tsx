@@ -20,10 +20,10 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-export function NavMainTable({
-  navMainTable,
+export function NavActivities({
+  navActivities,
 }: {
-  navMainTable: {
+  navActivities: {
     name: string
     url?: string
     icon: LucideIcon
@@ -38,9 +38,9 @@ export function NavMainTable({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Utama</SidebarGroupLabel>
+      <SidebarGroupLabel>Kegiatan</SidebarGroupLabel>
       <SidebarMenu>
-        {navMainTable.map((item) => {
+        {navActivities.map((item) => {
           const isItemActive = item.url === pathname || item.items?.some(subItem => subItem.url === pathname)
 
           return (

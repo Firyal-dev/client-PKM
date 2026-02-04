@@ -3,8 +3,9 @@ import { Folder } from "lucide-react"
 import { AlbumCard } from "./album-card"
 import { getAlbums } from "@/services/album/album-service"
 import { PaginationControl } from "@/components/admin/pagination-control"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { CustomLink } from "@/components/ui/link"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { CreateAlbumDialog } from "./create-album-dialog"
+import { Album } from "@/types/album-prop"
 
 export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
@@ -13,7 +14,9 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
 
     return (
         <div className="px-5 pb-10">
-            <PageHeader title="Albums" linkHref="/admin/albums/create-album" linkLabel="Buat Album" />
+            <PageHeader title="Albums">
+                <CreateAlbumDialog />
+            </PageHeader>
 
             <div className="rounded-xl bg-muted/50 border border-border mt-5 p-5 min-h-[500px]">
                 {!data?.length ? (
@@ -25,13 +28,10 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
                     </Empty>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {data.map((item: any) => (
+                        {data.map((item: Album) => (
                             <AlbumCard
                                 key={item._id}
-                                id={item._id}
-                                title={item.album_title}
-                                count={item.count}
-                                coverUrl={item.album_cover} // ✅ INI WAJIB ADA
+                                {...item}
                             />
                         ))}
                     </div>

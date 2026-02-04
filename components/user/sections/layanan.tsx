@@ -3,16 +3,16 @@ import { layananList } from "@/constants/layanan"
 
 export default function Layanan() {
     return (
-        <section className="py-24">
+        <section className="pt-15">
             <div className="container mx-auto">
-                <div className="flex flex-col items-center text-center mb-20 space-y-4">
+                <div className="flex flex-col items-center text-center mb-12 space-y-3">
                     <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold uppercase tracking-wide">
                         Layanan Kami
                     </span>
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+                    <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">
                         Layanan Kesehatan
                     </h2>
-                    <p className="max-w-2xl text-lg text-slate-600 leading-relaxed">
+                    <p className="max-w-2xl text-sm md:text-base text-slate-600 leading-relaxed">
                         Puskesmas Bogor Tengah memberikan pelayanan kesehatan yang aman,
                         profesional, dan mudah diakses masyarakat.
                     </p>
@@ -25,9 +25,9 @@ export default function Layanan() {
                             className="
                                 h-full bg-white
                                 border border-slate-100
-                                rounded-xl
+                                rounded-2xl
                                 shadow-sm
-                                transition-all
+                                transition-all duration-300
                                 hover:shadow-md hover:border-blue-100
                             "
                         >

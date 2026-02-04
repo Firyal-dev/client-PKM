@@ -1,5 +1,9 @@
-import { CreateAgendaForm } from "./create-agenda-form"
+import { AgendaForm } from "../agenda-form"
 import { PageHeader } from "@/components/admin/page-header"
+import { createAgenda } from "@/services/agenda/agenda-service"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
 
 export default function CreateAgendaPage() {
     return (
@@ -7,11 +11,15 @@ export default function CreateAgendaPage() {
             <PageHeader
                 title="Tambah Agenda Baru"
                 description="Tambahkan agenda baru ke dalam sistem"
-                linkHref="/admin/agenda"
-                linkLabel="Kembali"
-            />
-            <div className="mt-6">
-                <CreateAgendaForm />
+            >
+                <Link href="/admin/agenda">
+                    <Button variant="outline" className="gap-2 rounded-xl">
+                        <ChevronLeft className="w-4 h-4" /> Kembali
+                    </Button>
+                </Link>
+            </PageHeader>
+            <div className="mt-8 max-w-4xl">
+                <AgendaForm action={createAgenda} />
             </div>
         </div>
     )

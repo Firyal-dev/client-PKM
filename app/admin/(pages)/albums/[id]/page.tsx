@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { GalleryList } from "../../gallery/gallery-list"
+import { CustomLink } from "@/components/ui/link"
 import { getAlbumDetail } from "@/services/album/album-service"
 import { getGallery } from "@/services/gallery/gallery-service"
 import { PaginationControl } from "@/components/admin/pagination-control"
@@ -29,13 +30,22 @@ export default async function AlbumDetailPage({
             <div className="px-5 pb-10">
                 <PageHeader
                     title={album.album_title}
-                    description={album.description || "Daftar foto dalam album ini"}
+                    description="Daftar foto dalam album ini"
                     linkHref={`/admin/albums/${id}/upload-photo-to-album`}
                     linkLabel="Atur Foto Album"
                 />
 
                 <div className="mt-8 rounded-xl bg-muted/30 border border-border p-5">
-                    <GalleryList initialGallery={galleryResponse.data} />
+                    <GalleryList
+                        initialGallery={galleryResponse.data}
+                        emptyTitle="Album ini masih kosong"
+                        emptyDescription="Belum ada foto yang ditambahkan ke album ini."
+                        emptyAction={
+                            <CustomLink href={`/admin/albums/${id}/upload-photo-to-album`}>
+                                Pilih foto dari Galeri
+                            </CustomLink>
+                        }
+                    />
                 </div>
 
                 {galleryResponse.totalPages > 1 && (

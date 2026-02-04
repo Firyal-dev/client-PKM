@@ -36,24 +36,26 @@ export const createAlbum = async (prevState: any, data: FormData) => {
 
     const payload = {
         album_title: data.get('album_title'),
-        description: data.get('description'),
+        description: data.get('description') || "",
         album_cover: null,
         photo_ids: []
     };
 
     try {
-        const response = await api.post('/v1/admin/album', payload, {
+        await api.post('/v1/admin/album', payload, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
 
         revalidatePath('/admin/albums');
+        return { success: true };
     } catch (error: any) {
-        throw new Error(error?.response?.data?.message || "Gagal membuat album baru")
+        return {
+            error: error?.response?.data?.message || "Gagal membuat album baru",
+            success: false
+        };
     }
-
-    redirect('/admin/albums')
 }
 
 export const updateAlbumName = async (id: string, newTitle: string) => {

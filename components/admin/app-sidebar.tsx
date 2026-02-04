@@ -6,7 +6,7 @@ import { NavMedia } from "@/components/admin/nav/nav-media"
 import { NavUserExperience } from "@/components/admin/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/admin/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/admin/nav/nav-web-config"
-import { NavMainTable } from "@/components/admin/nav/nav-main-table"
+import { NavActivities } from "@/components/admin/nav/nav-activities"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,10 +52,10 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
       <SidebarContent>
         <NavMain items={sidebarData.navMain} />
         <NavMedia navMedia={sidebarData.navMedia} />
+        <NavActivities navActivities={sidebarData.navActivities} />
         <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
-        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-        <NavMainTable navMainTable={sidebarData.navMainTable} />
         <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
+        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
 
       </SidebarContent>
       <SidebarFooter>

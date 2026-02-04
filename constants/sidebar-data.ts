@@ -11,7 +11,8 @@ import {
     Users,
     ClipboardClock,
     Hospital,
-    ClipboardList
+    ClipboardList,
+    Newspaper
 } from "lucide-react"
 
 export const sidebarData = {
@@ -75,11 +76,16 @@ export const sidebarData = {
             icon: Headset,
         }
     ],
-    navMainTable: [
+    navActivities: [
         {
             name: "Agenda",
             url: "/admin/agenda",
             icon: ClipboardList,
+        },
+        {
+            name: "Berita",
+            url: "/admin/news",
+            icon: Newspaper,
         }
     ],
     navAdminManage: [

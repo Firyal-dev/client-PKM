@@ -18,16 +18,16 @@ export default function Gallery({ data }: { data: Gallery[] }) {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "");
 
     return (
-        <section className="py-16 overflow-hidden">
+        <section className="py-15 overflow-hidden">
             <div className="container flex flex-col items-center mx-auto">
-                <div className="flex flex-col items-center text-center mb-10 space-y-3">
-                    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-semibold uppercase tracking-wide">
+                <div className="flex flex-col items-center text-center mb-12 space-y-3">
+                    <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold uppercase tracking-wide">
                         Dokumentasi
                     </span>
                     <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">
                         Galeri Kegiatan
                     </h2>
-                    <p className="max-w-xl text-slate-600 text-sm md:text-base">
+                    <p className="max-w-xl text-sm md:text-base text-slate-600 leading-relaxed">
                         Momen berharga pelayanan kesehatan kami.
                     </p>
                 </div>

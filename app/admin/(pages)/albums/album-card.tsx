@@ -14,6 +14,8 @@ import Link from "next/link"
 import { updateAlbumName, deleteAlbum } from "@/services/album/album-service"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { formatDistanceToNow } from "date-fns"
+import { id } from "date-fns/locale"
 import Image from "next/image" // 👈 1. Import Image
 
 import {
@@ -26,32 +28,33 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Album } from "@/types/album-prop"
 
-interface AlbumCardProps {
-    id: string
-    title: string
-    count: number
-    coverUrl?: string | null // 👈 2. Tambah props coverUrl
-}
-
-export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
+export function AlbumCard({ _id, album_title, count, album_cover, created_at }: Album) {
+    const actualId = _id
+    const actualTitle = album_title
     const [isEditing, setIsEditing] = useState(false)
-    const [albumTitle, setAlbumTitle] = useState(title)
+    const [albumTitle, setAlbumTitle] = useState(actualTitle)
     const inputRef = useRef<HTMLInputElement>(null)
 
+    // Sync state if props change
+    useEffect(() => {
+        setAlbumTitle(actualTitle)
+    }, [actualTitle])
+
     const handleRename = async () => {
-        if (albumTitle.trim() === "" || albumTitle === title) {
-            setAlbumTitle(title)
+        if (!albumTitle || albumTitle.trim() === "" || albumTitle === actualTitle) {
+            setAlbumTitle(actualTitle)
             setIsEditing(false)
             return
         }
         try {
-            await updateAlbumName(id, albumTitle)
+            await updateAlbumName(actualId, albumTitle)
             toast.success("Nama album berhasil diperbarui")
             setIsEditing(false)
         } catch (error) {
             toast.error("Gagal ganti nama")
-            setAlbumTitle(title)
+            setAlbumTitle(actualTitle)
             setIsEditing(false)
         }
     }
@@ -64,9 +67,9 @@ export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
     }, [isEditing])
 
     return (
-        <div className="group relative flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1">
+        <div className="group relative flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             {/* 👈 3. Kirim coverUrl ke sub-component */}
-            <AlbumCover id={id} count={count} disabled={isEditing} coverUrl={coverUrl} />
+            <AlbumCover id={actualId} count={count} disabled={isEditing} album_cover={album_cover} />
 
             <div className="flex items-start justify-between px-1 gap-2">
                 <div className="flex-1 min-w-0">
@@ -78,7 +81,7 @@ export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
                             onBlur={handleRename}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') handleRename()
-                                if (e.key === 'Escape') { setAlbumTitle(title); setIsEditing(false); }
+                                if (e.key === 'Escape') { setAlbumTitle(actualTitle); setIsEditing(false); }
                             }}
                             className="w-full bg-background border-b-2 border-primary outline-none text-sm font-bold py-1"
                         />
@@ -91,12 +94,12 @@ export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
                         </h3>
                     )}
                     <p className="text-[11px] text-muted-foreground mt-1 font-medium uppercase tracking-wider">
-                        Update 2 hari lalu
+                        {created_at ? `Dibuat ${formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: id })}` : "Waktu tidak diketahui"}
                     </p>
                 </div>
 
                 <AlbumActions
-                    id={id}
+                    id={actualId}
                     onRename={() => setIsEditing(true)}
                 />
             </div>
@@ -105,13 +108,13 @@ export function AlbumCard({ id, title, count, coverUrl }: AlbumCardProps) {
 }
 
 // 👈 4. Terima props di sini
-function AlbumCover({ id, count, disabled, coverUrl }: { id: string, count: number, disabled: boolean, coverUrl?: string | null }) {
+function AlbumCover({ id, count, disabled, album_cover }: { id: string, count: number, disabled: boolean, album_cover?: string | null }) {
 
     // Sesuaikan Base URL Server Backend kamu (hapus /api jika gambar di root public)
     const API_URL = process.env.NEXT_PUBLIC_API_URL
     const BASE_URL = API_URL?.replace(/\/api$/, '')
 
-    const fullImageUrl = coverUrl ? `${BASE_URL}${coverUrl}` : null
+    const fullImageUrl = album_cover ? `${BASE_URL}${album_cover}` : null
 
     return (
         <Link
@@ -203,7 +206,7 @@ function AlbumActions({ id, onRename }: { id: string, onRename: () => void }) {
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-        </AlertDialog >
+            </AlertDialog >
         </>
     )
 }
