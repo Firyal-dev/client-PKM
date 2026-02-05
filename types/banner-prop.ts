@@ -3,6 +3,4 @@ export interface Banner {
     image_path: string;
     description?: string;
     is_publish: boolean;
-    createdAt: string;
-    updatedAt: string;
 }

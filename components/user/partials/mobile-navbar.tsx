@@ -6,6 +6,7 @@ import { Menu } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import SearchBar from "./search-bar"
 
 export default function MobileNavbar() {
     const [open, setOpen] = useState(false)

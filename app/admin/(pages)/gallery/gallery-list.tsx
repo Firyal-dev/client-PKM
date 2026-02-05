@@ -1,45 +1,17 @@
 'use client'
 
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import {
-    Empty,
-    EmptyContent,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty"
-import { ImageOff } from 'lucide-react';
-import { Button } from "@/components/ui/button"
 import { useState, useTransition } from "react"
+import { Loader2, Trash2, X, AlertTriangle, CheckSquare } from "lucide-react"
+import { toast } from "sonner"
+
+import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+
+import { Button } from "@/components/ui/button"
 import { GalleryCard } from "@/components/admin/gallery-card"
 import { Gallery } from "@/types/gallery-prop"
 import { deleteGalleryBatch } from "@/services/gallery/gallery-service"
-import { Loader2, Trash2, X, AlertTriangle } from "lucide-react"
-import { toast } from "sonner"
-import { CustomLink } from "@/components/ui/link"
 
-export function GalleryList({
-    initialGallery,
-    emptyTitle,
-    emptyDescription,
-    emptyAction
-}: {
-    initialGallery: Gallery[],
-    emptyTitle?: string,
-    emptyDescription?: string,
-    emptyAction?: React.ReactNode
-}) {
+export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
     const [selected, setSelected] = useState<string[]>([])
     const [isPending, startTransition] = useTransition()
 
@@ -52,111 +24,81 @@ export function GalleryList({
     const handleDelete = () => {
         startTransition(async () => {
             const result = await deleteGalleryBatch(selected);
-
             if (result?.success) {
                 toast.success(`${selected.length} foto berhasil dihapus`);
                 setSelected([]);
             } else {
-                toast.error(result?.error || "Terjadi kesalahan");
+                toast.error(result?.error || "Gagal menghapus foto");
             }
         });
     }
 
     return (
-        <div className="relative">
+        <div className="relative pb-24">
+            {/* Floating Action Bar */}
             {selected.length > 0 && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-primary text-primary-foreground px-4 py-3 rounded-full shadow-2xl animate-in fade-in zoom-in slide-in-from-bottom-4">
-                    <span className="text-sm font-bold border-r border-primary-foreground/20 pr-4">
-                        {selected.length} Terpilih
-                    </span>
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-6 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-in fade-in zoom-in slide-in-from-bottom-10 border border-white/10 backdrop-blur-xl">
+                    <div className="flex items-center gap-3 border-r border-white/20 pr-6">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20 text-red-500">
+                            <CheckSquare className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] opacity-50 uppercase font-black tracking-tighter">Terpilih</span>
+                            <span className="text-lg font-bold tabular-nums leading-none">
+                                {selected.length} <span className="text-sm font-medium opacity-70">Item</span>
+                            </span>
+                        </div>
+                    </div>
 
                     <div className="flex items-center gap-2">
                         <Button
-                            size="sm"
                             variant="ghost"
-                            className="text-primary-foreground hover:bg-primary-foreground/10 h-8 rounded-full cursor-pointer"
+                            size="sm"
+                            className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl font-semibold h-10"
                             onClick={() => setSelected([])}
                             disabled={isPending}
                         >
-                            <X className="w-4 h-4 mr-1" /> Batal
+                            <X className="w-4 h-4 mr-2" /> Batal
                         </Button>
 
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                        <ConfirmDialog
+                            trigger={
                                 <Button
                                     size="sm"
                                     variant="destructive"
-                                    className="bg-red-500 hover:bg-red-600 h-8 rounded-full shadow-lg cursor-pointer"
+                                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold px-6 h-10 shadow-lg shadow-red-900/20 active:scale-95 transition-all cursor-pointer"
                                     disabled={isPending}
                                 >
                                     {isPending ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
                                     ) : (
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-4 h-4 mr-2" />
                                     )}
-                                    <span className="ml-1">Hapus</span>
+                                    Hapus
                                 </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <div className="flex items-center gap-2 text-destructive mb-2">
-                                        <AlertTriangle className="w-5 h-5" />
-                                        <AlertDialogTitle>Hapus Foto?</AlertDialogTitle>
-                                    </div>
-                                    <AlertDialogDescription>
-                                        Tindakan ini tidak bisa dibatalkan. Anda bakal menghapus <strong>{selected.length} foto</strong> dari galeri. Yakin?
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="cursor-pointer">Batal</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={handleDelete}
-                                        className="bg-red-600 hover:bg-red-700 focus:ring-red-600 cursor-pointer"
-                                    >
-                                        Hapus
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                            }
+                            title="Hapus Permanen?"
+                            description={`Anda akan menghapus ${selected.length} foto. Foto yang dihapus tidak bisa dikembalikan lagi.`}
+                            onConfirm={handleDelete}
+                            isLoading={isPending}
+                            confirmText="Hapus"
+                        />
+
                     </div>
                 </div>
             )}
 
-            {initialGallery.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] py-20 w-full">
-                    <Empty className="flex flex-col items-center text-center">
-                        <EmptyHeader className="flex flex-col items-center">
-                            <EmptyMedia variant="icon" className="mb-4 bg-muted/50 p-4 rounded-full">
-                                <ImageOff className="w-10 h-10 text-muted-foreground" />
-                            </EmptyMedia>
-                            <EmptyTitle className="text-xl font-semibold">
-                                {emptyTitle || "Galeri kosong"}
-                            </EmptyTitle>
-                            <EmptyDescription className="max-w-[300px] mx-auto">
-                                {emptyDescription || "Tidak ada foto di galeri. Tambahkan foto untuk memulai koleksi."}
-                            </EmptyDescription>
-                        </EmptyHeader>
-                        <EmptyContent className="mt-6">
-                            {emptyAction || (
-                                <CustomLink href="/admin/gallery/upload-photo">
-                                    Tambah foto
-                                </CustomLink>
-                            )}
-                        </EmptyContent>
-                    </Empty>
-                </div>
-            ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {initialGallery.map((item) => (
-                        <GalleryCard
-                            key={item._id}
-                            gallery={item}
-                            isSelected={selected.includes(item._id)}
-                            onSelect={handleSelect}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Galeri */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {initialGallery.map((item) => (
+                    <GalleryCard
+                        key={item._id}
+                        gallery={item}
+                        isSelected={selected.includes(item._id)}
+                        onSelect={handleSelect}
+                    />
+                ))}
+            </div>
         </div>
     )
 }

@@ -13,10 +13,12 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 export function PaginationControl({
     totalPages,
-    currentPage
+    currentPage,
+    onPageChange
 }: {
     totalPages: number,
-    currentPage: number
+    currentPage: number,
+    onPageChange?: (page: number) => void
 }) {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -27,6 +29,13 @@ export function PaginationControl({
         return `?${params.toString()}`
     }
 
+    const handlePageClick = (e: React.MouseEvent, page: number) => {
+        if (onPageChange) {
+            e.preventDefault()
+            onPageChange(page)
+        }
+    }
+
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
 
     return (
@@ -34,7 +43,8 @@ export function PaginationControl({
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
-                        href={currentPage > 1 ? createPageURL(currentPage - 1) : "#"}
+                        href={onPageChange ? "#" : (currentPage > 1 ? createPageURL(currentPage - 1) : "#")}
+                        onClick={(e) => handlePageClick(e, currentPage - 1)}
                         className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                 </PaginationItem>
@@ -44,8 +54,10 @@ export function PaginationControl({
                         return (
                             <PaginationItem key={page}>
                                 <PaginationLink
-                                    href={createPageURL(page)}
+                                    href={onPageChange ? "#" : createPageURL(page)}
                                     isActive={page === currentPage}
+                                    onClick={(e) => handlePageClick(e, page)}
+                                    className="cursor-pointer"
                                 >
                                     {page}
                                 </PaginationLink>
@@ -60,7 +72,8 @@ export function PaginationControl({
 
                 <PaginationItem>
                     <PaginationNext
-                        href={currentPage < totalPages ? createPageURL(currentPage + 1) : "#"}
+                        href={onPageChange ? "#" : (currentPage < totalPages ? createPageURL(currentPage + 1) : "#")}
+                        onClick={(e) => handlePageClick(e, currentPage + 1)}
                         className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                 </PaginationItem>

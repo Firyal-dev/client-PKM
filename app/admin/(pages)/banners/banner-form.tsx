@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Banner } from "@/types/banner-prop"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -11,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Image as ImageIcon, Upload, X, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useFormStatus } from "react-dom"
+import { useBaseUrl } from "@/hooks/use-base-url"
 
 interface BannerFormProps {
     initialData?: Banner
@@ -36,14 +36,13 @@ export function BannerForm({ initialData, action }: BannerFormProps) {
     const [isPublish, setIsPublish] = useState(initialData?.is_publish ?? true)
     const [error, setError] = useState<string | null>(null)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL
-    const BASE_URL = API_URL?.replace(/\/api$/, '')
+    const baseUrl = useBaseUrl()
 
     useEffect(() => {
         if (initialData?.image_path) {
-            setPreview(`${BASE_URL}${initialData.image_path}`)
+            setPreview(`${baseUrl}${initialData.image_path}`)
         }
-    }, [initialData, BASE_URL])
+    }, [initialData, baseUrl])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]

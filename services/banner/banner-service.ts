@@ -13,9 +13,10 @@ export const getBanners = async (): Promise<Banner[]> => {
     if (!token) redirect("/admin/login")
 
     try {
-        const response = await api.get('/v1/admin/banner', {
+        const response = await api.get(`/v1/admin/banner`, {
             headers: { Authorization: `Bearer ${token}` }
         })
+
         return response.data
     } catch (error: any) {
         throw new Error(error?.response?.data?.message || "Gagal mengambil data banner")

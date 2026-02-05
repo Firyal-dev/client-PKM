@@ -1,10 +1,14 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { GalleryList } from "../../gallery/gallery-list"
-import { CustomLink } from "@/components/ui/link"
 import { getAlbumDetail } from "@/services/album/album-service"
 import { getGallery } from "@/services/gallery/gallery-service"
-import { PaginationControl } from "@/components/admin/pagination-control"
+import { PaginationControl } from "@/components/pagination-control"
 import { notFound } from "next/navigation"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { ImageOff } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default async function AlbumDetailPage({
     params,
@@ -16,7 +20,7 @@ export default async function AlbumDetailPage({
     const { id } = await params
     const qParams = await searchParams
     const currentPage = Number(qParams.page) || 1
-    const limit = 12
+    const limit = 15
 
     try {
         const [album, galleryResponse] = await Promise.all([
@@ -25,6 +29,7 @@ export default async function AlbumDetailPage({
         ])
 
         if (!album) return notFound()
+        const hasData = galleryResponse.data.length > 0
 
         return (
             <div className="px-5 pb-10">
@@ -35,17 +40,27 @@ export default async function AlbumDetailPage({
                     linkLabel="Atur Foto Album"
                 />
 
-                <div className="mt-8 rounded-xl bg-muted/30 border border-border p-5">
-                    <GalleryList
-                        initialGallery={galleryResponse.data}
-                        emptyTitle="Album ini masih kosong"
-                        emptyDescription="Belum ada foto yang ditambahkan ke album ini."
-                        emptyAction={
-                            <CustomLink href={`/admin/albums/${id}/upload-photo-to-album`}>
-                                Pilih foto dari Galeri
-                            </CustomLink>
-                        }
-                    />
+                <div className={cn(
+                    "mt-8 rounded-2xl bg-muted/50 border border-border p-6 min-h-[500px] flex flex-col",
+                    !hasData && "justify-center"
+                )}>
+                    {!hasData ? (
+                        <Empty className="flex flex-col items-center text-center">
+                            <EmptyHeader className="flex flex-col items-center">
+                                <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
+                                    <ImageOff className="w-10 h-10 text-primary/40" />
+                                </EmptyMedia>
+                                <EmptyTitle className="text-xl font-bold">
+                                    Album ini masih kosong
+                                </EmptyTitle>
+                                <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
+                                    Belum ada foto yang ditambahkan ke album ini.
+                                </EmptyDescription>
+                            </EmptyHeader>
+                        </Empty>
+                    ) : (
+                        <GalleryList initialGallery={galleryResponse.data} />
+                    )}
                 </div>
 
                 {galleryResponse.totalPages > 1 && (

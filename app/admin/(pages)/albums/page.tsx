@@ -2,10 +2,11 @@ import { PageHeader } from "@/components/admin/page-header"
 import { Folder } from "lucide-react"
 import { AlbumCard } from "./album-card"
 import { getAlbums } from "@/services/album/album-service"
-import { PaginationControl } from "@/components/admin/pagination-control"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { PaginationControl } from "@/components/pagination-control"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { CreateAlbumDialog } from "./create-album-dialog"
 import { Album } from "@/types/album-prop"
+import { cn } from "@/lib/utils"
 
 export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
@@ -14,16 +15,26 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
 
     return (
         <div className="px-5 pb-10">
-            <PageHeader title="Albums">
+            <PageHeader title="Albums" description="Daftar Album">
                 <CreateAlbumDialog />
             </PageHeader>
 
-            <div className="rounded-xl bg-muted/50 border border-border mt-5 p-5 min-h-[500px]">
+            <div className={cn(
+                "rounded-xl bg-muted/50 border border-border mt-5 p-5 min-h-[500px] flex flex-col",
+                !data?.length && "justify-center"
+            )}>
                 {!data?.length ? (
-                    <Empty className="flex flex-col items-center py-20">
-                        <EmptyHeader>
-                            <EmptyMedia variant="icon"><Folder className="w-10 h-10" /></EmptyMedia>
-                            <EmptyTitle>Album Kosong</EmptyTitle>
+                    <Empty className="flex flex-col items-center text-center">
+                        <EmptyHeader className="flex flex-col items-center">
+                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
+                                <Folder className="w-10 h-10 text-primary/40" />
+                            </EmptyMedia>
+                            <EmptyTitle className="text-xl font-bold">
+                                Tidak ada album
+                            </EmptyTitle>
+                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
+                                Belum ada album yang dibuat.
+                            </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
                 ) : (
@@ -38,7 +49,11 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
                 )}
             </div>
 
-            {totalPages > 1 && <PaginationControl totalPages={totalPages} currentPage={currentPage} />}
+            {totalPages > 1 && (
+                <div className="mt-8">
+                    <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+                </div>
+            )}
         </div>
     )
 }

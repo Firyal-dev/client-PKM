@@ -1,8 +1,20 @@
 import '@/app/globals.css'
-import { ThemeProvider } from '@/components/admin/theme-provider'
 import { Toaster } from "@/components/ui/sonner"
+import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 
 import type { Metadata } from "next";
+
+const jakarta = Plus_Jakarta_Sans({
+    subsets: ['latin'],
+    variable: '--font-jakarta',
+    display: 'swap',
+})
+
+const inter = Inter({
+    subsets: ['latin'],
+    variable: '--font-inter',
+    display: 'swap',
+})
 
 export const metadata: Metadata = {
     title: "Puskesmas",
@@ -16,16 +28,9 @@ export default function Layout({
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body>
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="light"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    {children}
-                    <Toaster />
-                </ThemeProvider>
+            <body className={`${jakarta.variable} ${inter.variable} font-sans antialiased`}>
+                {children}
+                <Toaster />
             </body>
         </html>
     );

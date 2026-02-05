@@ -7,17 +7,8 @@ import { NavUserExperience } from "@/components/admin/nav/nav-user-experience"
 import { NavAdminManage } from "@/components/admin/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/admin/nav/nav-web-config"
 import { NavActivities } from "@/components/admin/nav/nav-activities"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+
 import { ModeToggle } from "@/components/admin/toggle-theme"
 import { Button } from "@/components/ui/button"
 import {
@@ -60,8 +51,8 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
       </SidebarContent>
       <SidebarFooter>
         <div className="flex flex-row gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <ConfirmDialog
+            trigger={
               <Button
                 variant="destructive"
                 className="cursor-pointer flex-1 gap-2"
@@ -69,28 +60,22 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
               >
                 {logoutIsLoading ? "Memuat..." : "Logout"}
               </Button>
-            </AlertDialogTrigger>
+            }
+            title="Yakin mau keluar?"
+            description="Sesi berakhir dan anda harus login ulang untuk akses dashboard admin."
+            onConfirm={() => {
+              const form = document.createElement('form');
+              form.action = '';
+              const button = document.getElementById('hidden-logout-submit');
+              button?.click();
+            }}
+            isLoading={logoutIsLoading}
+            confirmText="Keluar"
+          />
+          <form action={formLogoutAction} className="hidden">
+            <button id="hidden-logout-submit" type="submit" />
+          </form>
 
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Yakin mau keluar?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Sesi berakhir dan anda harus login ulang untuk akses dashboard admin.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="cursor-pointer">Batal</AlertDialogCancel>
-                <form action={formLogoutAction}>
-                  <AlertDialogAction
-                    type="submit"
-                    className="bg-red-600 hover:bg-red-700 focus:ring-red-600 cursor-pointer"
-                  >
-                    Keluar
-                  </AlertDialogAction>
-                </form>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           <ModeToggle />
         </div>

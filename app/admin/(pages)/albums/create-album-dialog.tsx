@@ -1,76 +1,88 @@
 'use client'
 
+import { useActionState, useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-    Field,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { createAlbum } from '@/services/album/album-service'
-import { Plus } from "lucide-react"
-import { useActionState, useEffect, useState } from "react"
-import { toast } from "sonner"
 
 export function CreateAlbumDialog() {
     const [open, setOpen] = useState(false)
     const [state, formAction, isPending] = useActionState(createAlbum, null)
 
-    // Reset open state when redirected (page reloads) or on success
     useEffect(() => {
         if (state?.success) {
             setOpen(false)
-            toast.success("Album berhasil dibuat")
+            toast.success("Album baru berhasil dibuat")
         }
     }, [state])
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
-                    <Plus className="w-4 h-4" />
+                <Button>
                     Buat Album
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+
+            <DialogContent className="sm:max-w-[425px] rounded-2xl">
                 <form action={formAction}>
                     <DialogHeader>
-                        <DialogTitle>Buat Album Baru</DialogTitle>
+                        <DialogTitle className="text-xl">Buat Album Baru</DialogTitle>
                         <DialogDescription>
-                            Masukkan judul untuk album foto baru Anda.
+                            Beri judul untuk album koleksi foto lu. Judul ini bisa diubah nanti.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+
+                    <div className="py-6">
                         <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="album_title">Judul Album</FieldLabel>
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor="album_title" className="text-sm font-semibold">
+                                    Judul Album
+                                </FieldLabel>
                                 <Input
                                     id="album_title"
                                     name="album_title"
-                                    placeholder="Contoh: Kegiatan Puskesmas 2024"
+                                    placeholder="Contoh: Dokumentasi Posyandu 2026"
                                     required
+                                    autoComplete="off"
+                                    className="h-11 bg-slate-50/50 focus-visible:ring-primary/20"
                                 />
+                                {state?.error && (
+                                    <p className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">
+                                        {state.error}
+                                    </p>
+                                )}
                             </Field>
-                            {state?.error && (
-                                <p className="text-sm font-medium text-destructive">{state.error}</p>
-                            )}
                         </FieldGroup>
                     </div>
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setOpen(false)}
+                            className="rounded-xl"
+                        >
                             Batal
                         </Button>
-                        <Button type="submit" disabled={isPending}>
-                            {isPending ? "Menyimpan..." : "Buat Album"}
+                        <Button
+                            type="submit"
+                            disabled={isPending}
+                            className="rounded-xl min-w-[120px]"
+                        >
+                            {isPending ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                "Simpan Album"
+                            )}
                         </Button>
                     </DialogFooter>
                 </form>
