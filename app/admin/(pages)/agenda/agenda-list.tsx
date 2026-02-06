@@ -4,7 +4,6 @@ import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 
-
 import { Button } from "@/components/ui/button"
 import { Agenda } from "@/types/agenda-prop"
 import { deleteAgenda } from "@/services/agenda/agenda-service"
@@ -16,8 +15,6 @@ import { id } from "date-fns/locale"
 
 // Tampilan list agenda
 export function AgendaList({ agendas }: { agendas: Agenda[] }) {
-
-
     return (
         <div className="rounded-md border bg-card">
             <Table>
