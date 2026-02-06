@@ -100,3 +100,13 @@ export const togglePublishBanner = async (id: string, is_publish: boolean) => {
         return { error: error?.response?.data?.message || "Gagal mengubah status publish" }
     }
 }
+
+// endpoint user
+export const getBannersUser = async (): Promise<Banner[]> => {
+    try {
+        const response = await api.get(`/v1/public/banner`)
+        return response.data
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || "Gagal mengambil data banner")
+    }
+}
