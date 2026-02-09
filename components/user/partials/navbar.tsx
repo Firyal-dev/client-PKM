@@ -15,6 +15,12 @@ export default function Navbar() {
             <div className="container flex h-16 items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3">
+                    <Image
+                        src="/kotabogor.webp"
+                        alt="Logo Kota Bogor"
+                        width={28}
+                        height={28}
+                    />
                     <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                         <Image
                             src="/puskesmasLogo.png"

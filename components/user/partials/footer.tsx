@@ -16,8 +16,8 @@ import { CustomLink } from "@/components/ui/link"
 export default function Footer() {
     return (
         <footer className="border-t border-slate-800 bg-slate-900 text-slate-200">
-            <div className="container py-14">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+            <div className="container">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-10 py-7">
 
                     {/* Brand */}
                     <div className="md:col-span-4 space-y-4">
@@ -144,7 +144,7 @@ export default function Footer() {
                 </div>
 
                 {/* Copyright */}
-                <div className="mt-12 pt-6 border-t border-slate-800 text-xs text-slate-500 text-center">
+                <div className="border-t border-slate-800 text-xs text-slate-500 text-center py-3">
                     © {new Date().getFullYear()} Puskesmas Kecamatan Sehat. Seluruh hak cipta dilindungi.
                 </div>
             </div>
