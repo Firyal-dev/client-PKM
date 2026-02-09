@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Image as ImageIcon, Upload, X, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useFormStatus } from "react-dom"
-import { useBaseUrl } from "@/hooks/use-base-url"
+import { getMediaUrl } from "@/lib/getMediaUrl"
+import { Input } from "@/components/ui/input"
 
 interface BannerFormProps {
     initialData?: Banner
@@ -36,13 +37,11 @@ export function BannerForm({ initialData, action }: BannerFormProps) {
     const [isPublish, setIsPublish] = useState(initialData?.is_publish ?? true)
     const [error, setError] = useState<string | null>(null)
 
-    const baseUrl = useBaseUrl()
-
     useEffect(() => {
         if (initialData?.image_path) {
-            setPreview(`${baseUrl}${initialData.image_path}`)
+            setPreview(getMediaUrl(initialData.image_path))
         }
-    }, [initialData, baseUrl])
+    }, [initialData])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -111,6 +110,15 @@ export function BannerForm({ initialData, action }: BannerFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-6">
                     <div className="space-y-2">
+                        <Label htmlFor="title" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Judul</Label>
+                        <Input
+                            id="title"
+                            name="title"
+                            placeholder="Masukkan judul banner..."
+                            className="focus-visible:ring-primary"
+                            defaultValue={initialData?.title}
+                            required
+                        />
                         <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Deskripsi (Opsional)</Label>
                         <Textarea
                             id="description"

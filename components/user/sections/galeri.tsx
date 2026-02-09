@@ -1,132 +1,110 @@
 "use client"
 
-import { ImageOff } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { CustomLink } from "@/components/ui/link"
-import { EmptyState } from "@/components/ui/empty-user"
-import { useBaseUrl } from "@/hooks/use-base-url"
+import Image from "next/image"
+import Link from "next/link"
+import { ImageOff, LayoutGrid } from "lucide-react"
+
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
 
-// Sub-components
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
-import Image from "next/image"
-
 export default function Gallery({ data }: { data: Gallery[] }) {
-    const baseUrl = useBaseUrl();
-    const hasData = data && data.length > 0;
+    const hasData = Array.isArray(data) && data.length > 0
 
     return (
-        <section className="py-15 overflow-hidden">
-            <div className="container flex flex-col items-center mx-auto">
+        <section className="py-16 bg-slate-50" id="galeri">
+            <div className="container mx-auto px-4">
+
                 <HeaderSection />
 
                 {!hasData ? (
-                    <EmptyState
-                        title="Belum ada dokumentasi"
-                        description="Saat ini belum ada foto kegiatan yang tersedia."
-                        icon={ImageOff}
-                        className="max-w-4xl mx-auto"
-                    />
+                    <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-dashed border-slate-200 text-center max-w-xl mx-auto">
+                        <ImageOff className="w-12 h-12 text-slate-300 mb-4" />
+                        <h3 className="text-base font-semibold text-slate-900 mb-1">
+                            Belum ada dokumentasi
+                        </h3>
+                        <p className="text-sm text-slate-500">
+                            Saat ini belum tersedia foto kegiatan puskesmas.
+                        </p>
+                    </div>
                 ) : (
-                    <>
-                        <DesktopGallery data={data} baseUrl={baseUrl} />
-                        <MobileGallery data={data} baseUrl={baseUrl} />
-                    </>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                        {data.map((item, index) => (
+                            <GalleryItem
+                                key={item._id}
+                                item={item}
+                                isPriority={index === 0}
+                            />
+                        ))}
+                    </div>
                 )}
 
-                {data?.length > 5 && (
-                    <CustomLink href="/" variant="outline" className="mt-8 mx-auto">
-                        Lihat Semua
-                    </CustomLink>
+                {data?.length >= 3 && (
+                    <div className="mt-10 flex justify-center">
+                        <Link
+                            href="/galeri"
+                            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold border border-slate-300 text-slate-700 rounded-xl hover:border-blue-600 hover:text-blue-600 hover:bg-white transition-colors"
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                            Lihat Galeri Foto
+                        </Link>
+                    </div>
                 )}
             </div>
         </section>
     )
 }
 
-// Header
+/* ================= HEADER ================= */
+
 function HeaderSection() {
     return (
         <div className="flex flex-col items-center text-center mb-12 space-y-3">
             <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold uppercase tracking-wide">
                 Dokumentasi
             </span>
+
             <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">
-                Galeri Kegiatan
+                Galeri Kegiatan & Layanan
             </h2>
+
             <p className="max-w-xl text-sm md:text-base text-slate-600 leading-relaxed">
-                Momen berharga pelayanan kesehatan kami.
+                Dokumentasi kegiatan pelayanan kesehatan dan edukasi masyarakat.
             </p>
         </div>
     )
 }
 
-// Tampilan desktop
-function DesktopGallery({ data, baseUrl }: { data: Gallery[], baseUrl: string }) {
-    return (
-        <div className="hidden md:flex flex-row gap-3 h-[420px] w-full max-w-6xl mx-auto">
-            {data.map((item, index) => (
-                <div
-                    key={item._id}
-                    className={cn(
-                        "group relative flex-1 min-h-[80px] md:min-h-full",
-                        "bg-slate-200 rounded-2xl overflow-hidden cursor-pointer",
-                        "transition-all duration-500 ease-out",
-                        "hover:flex-[2.5] hover:shadow-xl hover:shadow-blue-900/20"
-                    )}
-                >
-                    <Image
-                        src={`${baseUrl}${item.image}`}
-                        alt={item.image_title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="33vw"
-                        priority={index === 0}
-                        unoptimized
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-5 translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <h3 className="text-lg font-bold text-white leading-snug">{item.image_title}</h3>
-                        <p className="text-slate-200 text-xs line-clamp-2">{item.description}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    )
-}
+/* ================= ITEM ================= */
 
-// Tampilan mobile
-function MobileGallery({ data, baseUrl }: { data: Gallery[], baseUrl: string }) {
+function GalleryItem({
+    item,
+    isPriority,
+}: {
+    item: Gallery
+    isPriority: boolean
+}) {
     return (
-        <div className="relative md:hidden w-full max-w-sm px-4">
-            {/* Gradients */}
-            <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+        <div className="group bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition">
+            <div className="relative aspect-[4/3] w-full bg-slate-200">
+                <Image
+                    src={getMediaUrl(item.image) || "/placeholder.jpg"}
+                    alt={item.image_title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={isPriority}
+                    unoptimized
+                />
+            </div>
 
-            <Carousel opts={{ align: "center", loop: true }} className="w-full">
-                <CarouselContent className="-ml-2">
-                    {data.map((item, index) => (
-                        <CarouselItem key={item._id} className="pl-2 basis-[85%]">
-                            <div className="relative h-[400px] w-full bg-slate-200 rounded-2xl overflow-hidden group">
-                                <Image
-                                    src={`${baseUrl}${item.image}`}
-                                    alt={item.image_title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="85vw"
-                                    priority={index === 0}
-                                    unoptimized
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                <div className="absolute inset-x-0 bottom-0 p-5">
-                                    <h3 className="text-xl font-bold text-white leading-snug">{item.image_title}</h3>
-                                    <p className="text-slate-200 text-sm mt-1 line-clamp-2">{item.description}</p>
-                                </div>
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-            </Carousel>
+            <div className="p-4">
+                <h3 className="text-base font-semibold text-slate-900 line-clamp-1 mb-1">
+                    {item.image_title}
+                </h3>
+                <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                    {item.description}
+                </p>
+            </div>
         </div>
     )
 }

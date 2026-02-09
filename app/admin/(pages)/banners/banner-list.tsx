@@ -8,7 +8,7 @@ import { toast } from "sonner"
 
 import { Banner } from "@/types/banner-prop"
 import { deleteBanner, togglePublishBanner } from "@/services/banner/banner-service"
-import { useBaseUrl } from "@/hooks/use-base-url"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import { cn } from "@/lib/utils"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
@@ -18,7 +18,6 @@ import { Badge } from "@/components/ui/badge"
 
 export function BannerList({ banners }: { banners: Banner[] }) {
     const [isPending, startTransition] = useTransition()
-    const baseUrl = useBaseUrl()
 
     const handleDelete = (id: string) =>
         startTransition(async () => {
@@ -52,7 +51,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
                         {/* Image */}
                         <div className="relative aspect-[21/9] sm:aspect-video w-full sm:w-48 md:w-64 shrink-0 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800">
                             <Image
-                                src={`${baseUrl}${banner.image_path}`}
+                                src={getMediaUrl(banner.image_path) || "/placeholder.jpg"}
                                 alt={banner.description || "Banner"}
                                 fill
                                 unoptimized
@@ -80,11 +79,21 @@ export function BannerList({ banners }: { banners: Banner[] }) {
 
                         {/* Content */}
                         <div className="flex flex-1 flex-col justify-between min-w-0">
-                            {/* Description */}
-                            <div className="flex-1 mb-3">
+                            <div className="flex-1">
+                                {/* Title */}
                                 <p
                                     className={cn(
-                                        "line-clamp-2 text-sm font-medium",
+                                        "text-lg font-medium",
+                                        "text-slate-700 dark:text-slate-200",
+                                        !banner.title && "italic text-slate-400 dark:text-slate-500"
+                                    )}
+                                >
+                                    {banner.title || "Tidak ada judul banner"}
+                                </p>
+                                {/* Description */}
+                                <p
+                                    className={cn(
+                                        "line-clamp-2 text-sm",
                                         "text-slate-700 dark:text-slate-200",
                                         !banner.description && "italic text-slate-400 dark:text-slate-500"
                                     )}

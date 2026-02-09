@@ -14,8 +14,7 @@ import { Album } from "@/types/album-prop"
 import { updateAlbumName, deleteAlbum } from "@/services/album/album-service"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
-
-import { useBaseUrl } from "@/hooks/use-base-url"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 
 export function AlbumCard({ _id, album_title, count, album_cover, created_at }: Album) {
     const [isEditing, setIsEditing] = useState(false)
@@ -91,8 +90,7 @@ export function AlbumCard({ _id, album_title, count, album_cover, created_at }: 
 
 // Cover album
 function AlbumCover({ id, count, disabled, cover }: { id: string, count: number, disabled: boolean, cover?: string | null }) {
-    const baseUrl = useBaseUrl()
-    const fullUrl = cover ? `${baseUrl}${cover}` : null
+    const fullUrl = getMediaUrl(cover)
 
     return (
         <Link

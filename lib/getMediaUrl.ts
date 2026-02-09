@@ -1,9 +1,20 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api";
+
+/**
+ * Mendapatkan domain dasar dari API URL (tanpa /api)
+ */
+export function getBaseUrl() {
+    return API_URL.replace(/\/api$/, '').replace(/\/$/, '');
+}
+
+/**
+ * Mengubah path media menjadi URL lengkap
+ */
 export function getMediaUrl(path: string | null | undefined, defaultFolder: string = '') {
     if (!path) return null;
     if (path.startsWith('http')) return path;
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api";
-    const BASE_URL = API_URL.replace(/\/api$/, '').replace(/\/$/, '');
+    const BASE_URL = getBaseUrl();
 
     let finalPath = path;
     if (!path.startsWith('/') && defaultFolder) {

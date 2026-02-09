@@ -3,12 +3,16 @@
 import api from "@/services/api";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { tryAction } from "../utils";
 
 const getToken = async () => (await cookies()).get("token")?.value
 
+/**
+ * Update admin profile including optional photo
+ */
 export async function updateProfileAction(prevState: any, formData: FormData) {
     const token = await getToken()
-    if (!token) return { error: "Sesi habis, silakan login lagi" };
+    if (!token) return { success: false, error: "Sesi habis, silakan login lagi" };
 
     const photo = formData.get("photo") as File;
 
@@ -16,20 +20,12 @@ export async function updateProfileAction(prevState: any, formData: FormData) {
         formData.delete("photo");
     }
 
-    try {
-        // ✅ API UPDATE: /v1/admin/profile (PUT)
+    return tryAction(async () => {
         const response = await api.put("/v1/admin/profile", formData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
+            headers: { Authorization: `Bearer ${token}` }
         });
 
         revalidatePath('/', 'layout');
-
-        return { success: true, message: "Profil berhasil diupdate!" };
-    } catch (error: any) {
-        return {
-            error: error?.response?.data?.message || "Gagal update profile ke server"
-        };
-    }
+        return { message: "Profil berhasil diupdate!" };
+    }, "Gagal update profile ke server")
 }

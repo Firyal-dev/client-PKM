@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
-import { Loader2, Calendar as CalendarIcon, Clock, MapPin, Type } from "lucide-react"
+import { Loader2, Calendar as CalendarIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"

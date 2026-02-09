@@ -1,10 +1,7 @@
 import { useMemo } from "react";
+import { getBaseUrl } from "@/lib/getMediaUrl";
 
 export const useBaseUrl = () => {
-    const baseUrl = useMemo(() => {
-        const url = process.env.NEXT_PUBLIC_API_URL || "";
-        return url.replace(/\/api$/, "");
-    }, []);
-
+    const baseUrl = useMemo(() => getBaseUrl(), []);
     return baseUrl;
 }

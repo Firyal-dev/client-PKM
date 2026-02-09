@@ -67,12 +67,12 @@ export const sidebarData = {
     navUserExperience: [
         {
             name: "Kritik & Saran",
-            url: "/admin/critic-suggestion",
+            url: "/admin/reviews",
             icon: UserStar,
         },
         {
             name: "Konsultasi",
-            url: "/admin/consultation",
+            url: "/admin/consultations",
             icon: Headset,
         }
     ],

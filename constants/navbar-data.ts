@@ -29,12 +29,4 @@ export const menuList: menu[] = [
         label: "Kegiatan",
         href: "/kegiatan",
     },
-    {
-        label: "Jejaring PKM",
-        href: "/jejaring-pkm",
-    },
-    {
-        label: "Kontak",
-        href: "/kontak",
-    },
 ]

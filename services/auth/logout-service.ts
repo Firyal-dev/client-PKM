@@ -2,16 +2,20 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { tryAction } from "../utils"
 
+/**
+ * Handle admin logout by removing token cookie
+ */
 export async function logoutAction(prevState: any) {
-    try {
+    const result = await tryAction(async () => {
         const cookieStore = await cookies()
         cookieStore.delete('token')
-    } catch (error: any) {
-        return {
-            error: error?.response?.data?.message || "Logout gagal"
-        }
+    }, "Logout gagal")
+
+    if (result.success) {
+        redirect('/admin/login')
     }
 
-    redirect('/admin/login')
+    return result
 }
