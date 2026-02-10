@@ -2,7 +2,11 @@ import { CustomLink } from "@/components/ui/link"
 import { PageHeaderProps } from "@/types/page-header-prop"
 import React from "react"
 
-interface ExtendedPageHeaderProps extends PageHeaderProps {
+interface ExtendedPageHeaderProps {
+    title: string
+    description?: string
+    linkHref?: string
+    linkLabel?: string
     children?: React.ReactNode
 }
 

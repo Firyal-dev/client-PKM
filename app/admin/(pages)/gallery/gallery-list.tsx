@@ -92,9 +92,9 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {initialGallery.map((item) => (
                     <GalleryCard
-                        key={item._id}
+                        key={item.id}
                         gallery={item}
-                        isSelected={selected.includes(item._id)}
+                        isSelected={selected.includes(item.id)}
                         onSelect={handleSelect}
                     />
                 ))}

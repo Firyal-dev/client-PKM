@@ -30,7 +30,7 @@ export default function Gallery({ data }: { data: Gallery[] }) {
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-7xl mx-auto">
                         {data.slice(0, 10).map((item, index) => (
                             <GalleryItem
-                                key={item._id}
+                                key={item.id}
                                 item={item}
                                 isPriority={index === 0}
                             />

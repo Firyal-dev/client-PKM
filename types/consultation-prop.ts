@@ -1,5 +1,5 @@
 export interface ConsultationProp {
-    _id: string;
+    id: string;
     username: string;
     phone_number?: string;
     message: string;

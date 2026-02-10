@@ -3,7 +3,7 @@ interface BaseAlbum {
 }
 
 export interface Album extends BaseAlbum {
-    _id: string;
+    id: string;
     album_cover?: string;
     count: number;
     created_at: Date;

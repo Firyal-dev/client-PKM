@@ -90,9 +90,9 @@ export function PhotoSelector({ initialGallery, albumId }: { initialGallery: Gal
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {initialGallery.map((item) => (
                         <GalleryCard
-                            key={item._id}
+                            key={item.id}
                             gallery={item}
-                            isSelected={selected.includes(item._id)}
+                            isSelected={selected.includes(item.id)}
                             onSelect={handleSelect}
                         />
                     ))}

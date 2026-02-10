@@ -55,7 +55,7 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                         {paginatedAgendas.length > 0 ? (
                             <>
                                 {paginatedAgendas.map((item) => (
-                                    <AgendaItem key={item._id} item={item} />
+                                    <AgendaItem key={item.id} item={item} />
                                 ))}
 
                                 {totalPages > 1 && (
@@ -139,7 +139,7 @@ function CalendarCard({ date, onSelect, count }: any) {
 // Agenda Item
 function AgendaItem({ item }: { item: Agenda }) {
     return (
-        <Link href={`/agenda/${item._id}`} className="group">
+        <Link href={`/agenda/${item.id}`} className="group">
             <Card className="border border-slate-100 hover:border-blue-200 hover:shadow-sm transition rounded-xl">
                 <CardContent className="p-4 flex items-start gap-4">
                     {/* Waktu */}

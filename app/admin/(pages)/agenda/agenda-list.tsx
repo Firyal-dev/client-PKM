@@ -28,7 +28,7 @@ export function AgendaList({ agendas }: { agendas: Agenda[] }) {
                 </TableHeader>
                 <TableBody>
                     {agendas.map((agenda) => (
-                        <AgendaRow key={agenda._id} agenda={agenda} />
+                        <AgendaRow key={agenda.id} agenda={agenda} />
                     ))}
                 </TableBody>
             </Table>
@@ -89,7 +89,7 @@ function AgendaRow({ agenda }: { agenda: Agenda }) {
 
             <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                    <Link href={`/admin/agenda/${agenda._id}`}>
+                    <Link href={`/admin/agenda/${agenda.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50">
                             <Edit className="h-4 w-4" />
                         </Button>
@@ -102,7 +102,7 @@ function AgendaRow({ agenda }: { agenda: Agenda }) {
                         }
                         title="Hapus Agenda?"
                         description={`Anda akan menghapus ${agenda.activity_name}. Tindakan ini permanen.`}
-                        onConfirm={() => handleDelete(agenda._id)}
+                        onConfirm={() => handleDelete(agenda.id)}
                         isLoading={isPending}
                         confirmText="Hapus"
                     />
