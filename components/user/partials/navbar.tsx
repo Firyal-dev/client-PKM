@@ -12,7 +12,7 @@ import MobileNavbar from "./mobile-navbar"
 export default function Navbar() {
     return (
         <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur border-b">
-            <div className="container flex h-16 items-center justify-between">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16 flex h-16 items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3">
                     <Image

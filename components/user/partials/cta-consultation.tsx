@@ -3,8 +3,8 @@ import { MessageSquare, ArrowRight } from "lucide-react";
 
 export default function CtaConsultation() {
     return (
-        <section className="py-15">
-            <div className="container mx-auto">
+        <section className="py-16 md:py-24 bg-white" id="konsultasi">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
                 <div className="grid lg:grid-cols-2 gap-8 items-center bg-white rounded-2xl border border-blue-100 shadow-sm p-6 md:p-10">
 
                     {/* Text Content */}

@@ -36,11 +36,11 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
     )
 
     return (
-        <section className="py-16 bg-white" id="agenda">
-            <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 bg-slate-50" id="agenda">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
                 <HeaderSection />
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-7xl mx-auto">
                     {/* Kalender */}
                     <aside className="lg:col-span-5 xl:col-span-4">
                         <CalendarCard

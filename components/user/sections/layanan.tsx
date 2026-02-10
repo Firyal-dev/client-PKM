@@ -5,8 +5,8 @@ import Link from "next/link"
 
 export default function Layanan() {
     return (
-        <section className="py-20 bg-white" id="layanan">
-            <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 bg-white" id="layanan">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
 
                 {/* ================= LAYANAN ================= */}
                 <div className="mb-24">
@@ -16,7 +16,7 @@ export default function Layanan() {
                         desc="Berbagai layanan kesehatan yang tersedia dan dikelola oleh tenaga medis profesional."
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                         {layananList.map((item, index) => (
                             <Link
                                 key={index}
@@ -59,7 +59,7 @@ export default function Layanan() {
                     <div className="relative max-w-5xl mx-auto mt-16">
 
                         {/* GARIS DESKTOP */}
-                        <div className="hidden md:block absolute top-8 left-0 right-0 h-px bg-slate-200 z-0" />
+                        <div className="hidden md:block absolute top-8 left-0 right-0 h-px bg-slate-500 z-0" />
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10">
                             {steps.map((step, index) => (

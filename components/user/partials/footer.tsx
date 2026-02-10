@@ -16,8 +16,8 @@ import { CustomLink } from "@/components/ui/link"
 export default function Footer() {
     return (
         <footer className="border-t border-slate-800 bg-slate-900 text-slate-200">
-            <div className="container">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-10 py-7">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-10 py-12 md:py-16">
 
                     {/* Brand */}
                     <div className="md:col-span-4 space-y-4">

@@ -4,12 +4,12 @@ import { Quote } from "lucide-react"
 export default function Sambutan() {
     return (
         <section
-            className="py-16 bg-slate-50 border-t border-slate-100"
+            className="py-16 md:py-24 bg-slate-50 border-t border-slate-100"
             id="sambutan"
         >
-            <div className="container mx-auto px-4 md:px-6">
-                <div className="max-w-5xl mx-auto bg-white rounded-2xl p-8 md:p-12 border border-slate-100 shadow-sm">
-                    <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
+                <div className="max-w-7xl mx-auto bg-white rounded-2xl p-6 md:p-10 border border-slate-100 shadow-sm">
+                    <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
 
                         {/* Foto Kepala Puskesmas */}
                         <div className="relative w-full lg:w-[32%] max-w-[260px] shrink-0">

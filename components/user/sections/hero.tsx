@@ -20,8 +20,7 @@ export default function Hero({ data }: { data: Banner[] }) {
                     />
 
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent" />
-
-                    <div className="relative container h-full flex items-center">
+                    <div className="relative container mx-auto px-6 md:px-12 lg:px-16 h-full flex items-center">
                         <div className="max-w-3xl space-y-5">
                             <span className="inline-block px-3 py-1 text-xs font-bold bg-blue-600 text-white rounded-md">
                                 Puskesmas Bogor Tengah

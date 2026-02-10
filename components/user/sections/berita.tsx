@@ -25,12 +25,12 @@ const news = [
 
 export default function Berita() {
     return (
-        <section className="py-16 bg-white" id="berita">
-            <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 bg-white" id="berita">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
 
                 <HeaderSection />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                     {news.map((item, index) => (
                         <Link
                             key={index}

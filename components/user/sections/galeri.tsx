@@ -11,8 +11,8 @@ export default function Gallery({ data }: { data: Gallery[] }) {
     const hasData = Array.isArray(data) && data.length > 0
 
     return (
-        <section className="py-16 bg-slate-50" id="galeri">
-            <div className="container mx-auto px-4">
+        <section className="py-16 md:py-24 bg-slate-50" id="galeri">
+            <div className="container mx-auto px-6 md:px-12 lg:px-16">
 
                 <HeaderSection />
 
@@ -27,8 +27,8 @@ export default function Gallery({ data }: { data: Gallery[] }) {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                        {data.map((item, index) => (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-7xl mx-auto">
+                        {data.slice(0, 10).map((item, index) => (
                             <GalleryItem
                                 key={item._id}
                                 item={item}
@@ -38,7 +38,7 @@ export default function Gallery({ data }: { data: Gallery[] }) {
                     </div>
                 )}
 
-                {data?.length >= 3 && (
+                {data?.length > 10 && (
                     <div className="mt-10 flex justify-center">
                         <Link
                             href="/galeri"
@@ -58,17 +58,17 @@ export default function Gallery({ data }: { data: Gallery[] }) {
 
 function HeaderSection() {
     return (
-        <div className="flex flex-col items-center text-center mb-12 space-y-3">
-            <span className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold uppercase tracking-wide">
+        <div className="flex flex-col items-center text-center mb-10 space-y-2">
+            <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider">
                 Dokumentasi
             </span>
 
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900">
-                Galeri Kegiatan & Layanan
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                Galeri Kegiatan
             </h2>
 
-            <p className="max-w-xl text-sm md:text-base text-slate-600 leading-relaxed">
-                Dokumentasi kegiatan pelayanan kesehatan dan edukasi masyarakat.
+            <p className="max-w-xl text-sm text-slate-500">
+                Dokumentasi kegiatan pelayanan dan aktivitas terbaru.
             </p>
         </div>
     )
@@ -84,24 +84,23 @@ function GalleryItem({
     isPriority: boolean
 }) {
     return (
-        <div className="group bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition">
-            <div className="relative aspect-[4/3] w-full bg-slate-200">
-                <Image
-                    src={getMediaUrl(item.image) || "/placeholder.jpg"}
-                    alt={item.image_title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={isPriority}
-                    unoptimized
-                />
-            </div>
+        <div className="group relative rounded-lg overflow-hidden aspect-square bg-slate-200">
+            <Image
+                src={getMediaUrl(item.image) || "/placeholder.jpg"}
+                alt={item.image_title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                priority={isPriority}
+                unoptimized
+            />
 
-            <div className="p-4">
-                <h3 className="text-base font-semibold text-slate-900 line-clamp-1 mb-1">
+            {/* Overlay Gradient & Content */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 translate-y-2 group-hover:translate-y-0">
+                <h3 className="text-sm font-bold text-white line-clamp-1 mb-0.5">
                     {item.image_title}
                 </h3>
-                <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-[10px] text-white/80 line-clamp-2 leading-tight">
                     {item.description}
                 </p>
             </div>
