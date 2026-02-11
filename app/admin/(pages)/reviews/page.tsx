@@ -3,13 +3,13 @@ import { PaginationControl } from "@/components/pagination-control"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getReviews } from "@/services/review/review-service"
+import { getAdminReviewList } from "@/services/review/review-service"
 import { ReviewList } from "./review-list"
 
 export default async function ReviewsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const { data, totalPages } = await getReviews(currentPage, 10);
+    const { data, totalPages } = await getAdminReviewList(currentPage, 10);
 
     return (
         <div className="px-5 pb-10">

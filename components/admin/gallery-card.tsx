@@ -12,7 +12,7 @@ export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCardProp) 
     return (
         <Card
             className="group overflow-hidden border-none shadow-none bg-transparent cursor-pointer"
-            onClick={() => onSelect(gallery._id)}
+            onClick={() => onSelect(gallery.id)}
         >
             <CardContent className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-muted p-0">
                 <Image
@@ -37,7 +37,7 @@ export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCardProp) 
                     <Checkbox
                         className="h-6 w-6 rounded-full border-white bg-white/20 backdrop-blur-md"
                         checked={isSelected}
-                        onCheckedChange={() => onSelect(gallery._id)}
+                        onCheckedChange={() => onSelect(gallery.id)}
                     />
                 </div>
             </CardContent>

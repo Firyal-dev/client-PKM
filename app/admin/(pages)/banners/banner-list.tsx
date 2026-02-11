@@ -7,7 +7,7 @@ import { Edit, Trash2, Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Banner } from "@/types/banner-prop"
-import { deleteBanner, togglePublishBanner } from "@/services/banner/banner-service"
+import { deleteBannerAction, toggleBannerPublishAction } from "@/services/banner/banner-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { cn } from "@/lib/utils"
 
@@ -21,7 +21,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
 
     const handleDelete = (id: string) =>
         startTransition(async () => {
-            const res = await deleteBanner(id)
+            const res = await deleteBannerAction(id)
             res.success
                 ? toast.success("Banner berhasil dihapus")
                 : toast.error(res.error || "Gagal menghapus banner")
@@ -29,7 +29,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
 
     const handleTogglePublish = (id: string, current: boolean) =>
         startTransition(async () => {
-            const res = await togglePublishBanner(id, !current)
+            const res = await toggleBannerPublishAction(id, !current)
             res.success
                 ? toast.success(!current ? "Banner dipublish" : "Banner diarsipkan")
                 : toast.error(res.error || "Gagal mengubah status")
@@ -39,7 +39,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
         <div className="space-y-3">
             {banners.map((banner) => (
                 <div
-                    key={banner._id}
+                    key={banner.id}
                     className={cn(
                         "group relative overflow-hidden rounded-lg border transition-all duration-200",
                         "bg-white dark:bg-slate-900",
@@ -110,7 +110,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
                                         checked={banner.is_publish}
                                         disabled={isPending}
                                         onCheckedChange={() =>
-                                            handleTogglePublish(banner._id, banner.is_publish)
+                                            handleTogglePublish(banner.id, banner.is_publish)
                                         }
                                         className="scale-90"
                                     />
@@ -131,7 +131,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
                                         size="sm"
                                         className="h-8 px-2.5 gap-1.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
                                     >
-                                        <Link href={`/admin/banners/${banner._id}`}>
+                                        <Link href={`/admin/banners/${banner.id}`}>
                                             <Edit className="h-3.5 w-3.5" />
                                             <span className="hidden sm:inline">Edit</span>
                                         </Link>
@@ -152,7 +152,7 @@ export function BannerList({ banners }: { banners: Banner[] }) {
                                         description="Banner ini akan dihapus secara permanen."
                                         confirmText="Hapus"
                                         isLoading={isPending}
-                                        onConfirm={() => handleDelete(banner._id)}
+                                        onConfirm={() => handleDelete(banner.id)}
                                     />
                                 </div>
                             </div>

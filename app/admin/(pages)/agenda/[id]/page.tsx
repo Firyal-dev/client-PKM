@@ -1,4 +1,4 @@
-import { getAgendaById, updateAgenda } from "@/services/agenda/agenda-service"
+import { getAdminAgendaById, updateAgendaAction } from "@/services/agenda/agenda-service"
 import { AgendaForm } from "../agenda-form"
 import { PageHeader } from "@/components/admin/page-header"
 import { notFound } from "next/navigation"
@@ -10,10 +10,10 @@ export default async function EditAgendaPage({ params }: { params: Promise<{ id:
     const { id } = await params
 
     try {
-        const agenda = await getAgendaById(id)
+        const agenda = await getAdminAgendaById(id)
         if (!agenda) return notFound()
 
-        const updateAction = updateAgenda.bind(null, id)
+        const updateAction = updateAgendaAction.bind(null, id)
 
         return (
             <div className="px-5 pb-10">

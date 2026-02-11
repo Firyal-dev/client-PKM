@@ -1,5 +1,5 @@
 export interface Reviews {
-    _id: string;
+    id: string;
     username?: string;
     category: string;
     message: string;

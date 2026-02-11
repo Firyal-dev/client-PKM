@@ -11,14 +11,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImagePlus, X } from "lucide-react"
-import { useActionState } from 'react'
-import { uploadPhoto } from '@/services/gallery/gallery-service'
+import { useActionState, useEffect } from 'react'
+import { uploadPhotoAction } from '@/services/gallery/gallery-service'
 import { useImagePreview } from '@/hooks/use-photo-preview'
 import { CustomLink } from '@/components/ui/link'
+import { toast } from 'sonner'
+import { useRouter } from "next/navigation"
 
 export default function UploadPhotoPage() {
-    const [state, formAction, isPending] = useActionState(uploadPhoto, null)
+    const [state, formAction, isPending] = useActionState(uploadPhotoAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (state?.error) toast.error(state.error)
+        if (state?.success) {
+            toast.success("Foto berhasil diunggah!")
+            router.push('/admin/gallery')
+        }
+    }, [state, router])
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 p-4">

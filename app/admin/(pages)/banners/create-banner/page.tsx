@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { BannerForm } from "../banner-form"
-import { createBanner } from "@/services/banner/banner-service"
+import { createBannerAction } from "@/services/banner/banner-service"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -17,7 +17,7 @@ export default function CreateBannerPage() {
             </PageHeader>
 
             <div className="mt-8 max-w-5xl">
-                <BannerForm action={createBanner} />
+                <BannerForm action={createBannerAction} />
             </div>
         </div>
     )

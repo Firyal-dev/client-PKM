@@ -10,7 +10,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { loginService } from "@/services/auth/login-service"
+import { loginAction } from "@/services/auth/login-service"
 import Image from 'next/image'
 import { useActionState } from 'react'
 
@@ -20,7 +20,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, action, pending] = useActionState(loginService, null);
+  const [state, action, pending] = useActionState(loginAction, null);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

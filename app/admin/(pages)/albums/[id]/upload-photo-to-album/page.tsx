@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header"
-import { getAlbumDetail } from "@/services/album/album-service"
-import { getGallery } from "@/services/gallery/gallery-service"
+import { getAdminAlbumById } from "@/services/album/album-service"
+import { getAdminGallery } from "@/services/gallery/gallery-service"
 import { PhotoSelector } from "./photo-selector"
 import { PaginationControl } from "@/components/pagination-control"
 import { notFound } from "next/navigation"
@@ -24,8 +24,8 @@ export default async function UploadPhotoToAlbum({
 
     try {
         const [album, galleryResponse] = await Promise.all([
-            getAlbumDetail(id),
-            getGallery(currentPage, limit, undefined, true)
+            getAdminAlbumById(id),
+            getAdminGallery(currentPage, limit, { albumId: undefined, noAlbum: true })
         ])
 
         if (!album) return notFound()

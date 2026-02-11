@@ -1,6 +1,6 @@
 import { AgendaForm } from "../agenda-form"
 import { PageHeader } from "@/components/admin/page-header"
-import { createAgenda } from "@/services/agenda/agenda-service"
+import { createAgendaAction } from "@/services/agenda/agenda-service"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
@@ -19,7 +19,7 @@ export default function CreateAgendaPage() {
                 </Link>
             </PageHeader>
             <div className="mt-8 max-w-4xl">
-                <AgendaForm action={createAgenda} />
+                <AgendaForm action={createAgendaAction} />
             </div>
         </div>
     )

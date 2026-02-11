@@ -8,8 +8,7 @@ import { toast } from "sonner"
 import { Gallery } from "@/types/gallery-prop"
 import { GalleryCard } from "@/components/admin/gallery-card"
 import { Button } from "@/components/ui/button"
-import { addPhotosToAlbum } from "@/services/album/album-service"
-import { cn } from "@/lib/utils"
+import { addPhotosToAlbumAction } from "@/services/album/album-service"
 
 export function PhotoSelector({ initialGallery, albumId }: { initialGallery: Gallery[], albumId: string }) {
     const [selected, setSelected] = useState<string[]>([])
@@ -27,10 +26,14 @@ export function PhotoSelector({ initialGallery, albumId }: { initialGallery: Gal
 
         startTransition(async () => {
             try {
-                await addPhotosToAlbum(albumId, selected)
-                toast.success(`${selected.length} foto berhasil ditambahkan`)
-                router.push(`/admin/albums/${albumId}`)
-                router.refresh()
+                const result = await addPhotosToAlbumAction(albumId, selected)
+                if (result?.success) {
+                    toast.success(`${selected.length} foto berhasil ditambahkan`)
+                    router.push(`/admin/albums/${albumId}`)
+                    router.refresh()
+                } else {
+                    toast.error(result?.error || "Gagal menambahkan foto")
+                }
             } catch (error: any) {
                 toast.error(error.message || "Gagal menambahkan foto")
             }
@@ -90,9 +93,9 @@ export function PhotoSelector({ initialGallery, albumId }: { initialGallery: Gal
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {initialGallery.map((item) => (
                         <GalleryCard
-                            key={item._id}
+                            key={item.id}
                             gallery={item}
-                            isSelected={selected.includes(item._id)}
+                            isSelected={selected.includes(item.id)}
                             onSelect={handleSelect}
                         />
                     ))}

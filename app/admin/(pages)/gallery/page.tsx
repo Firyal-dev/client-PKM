@@ -1,4 +1,4 @@
-import { getGallery } from "@/services/gallery/gallery-service"
+import { getAdminGallery } from "@/services/gallery/gallery-service"
 import { GalleryList } from "./gallery-list"
 import { PaginationControl } from "@/components/pagination-control"
 import { PageHeader } from "@/components/admin/page-header"
@@ -11,7 +11,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
     const currentPage = Number(params.page) || 1
     const limit = 12
 
-    const response = await getGallery(currentPage, limit)
+    const response = await getAdminGallery(currentPage, limit)
     const hasData = response.data.length > 0
 
     return (

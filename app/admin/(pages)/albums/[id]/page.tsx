@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { GalleryList } from "../../gallery/gallery-list"
-import { getAlbumDetail } from "@/services/album/album-service"
-import { getGallery } from "@/services/gallery/gallery-service"
+import { getAdminAlbumById } from "@/services/album/album-service"
+import { getAdminGallery } from "@/services/gallery/gallery-service"
 import { PaginationControl } from "@/components/pagination-control"
 import { notFound } from "next/navigation"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -24,8 +24,8 @@ export default async function AlbumDetailPage({
 
     try {
         const [album, galleryResponse] = await Promise.all([
-            getAlbumDetail(id),
-            getGallery(currentPage, limit, id)
+            getAdminAlbumById(id),
+            getAdminGallery(currentPage, limit, { albumId: id })
         ])
 
         if (!album) return notFound()

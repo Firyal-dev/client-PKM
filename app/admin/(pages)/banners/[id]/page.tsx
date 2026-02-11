@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { BannerForm } from "../banner-form"
-import { updateBanner, getBannerDetail } from "@/services/banner/banner-service"
+import { updateBannerAction, getAdminBannerById } from "@/services/banner/banner-service"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -9,10 +9,10 @@ export default async function UpdateBannerPage({ params }: { params: Promise<{ i
     const { id } = await params
 
     try {
-        const banner = await getBannerDetail(id)
+        const banner = await getAdminBannerById(id)
         if (!banner) return notFound()
 
-        const updateAction = updateBanner.bind(null, id)
+        const updateAction = updateBannerAction.bind(null, id)
 
         return (
             <div className="px-5 pb-10">

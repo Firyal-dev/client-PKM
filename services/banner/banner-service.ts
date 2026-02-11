@@ -1,37 +1,72 @@
 'use server'
 
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
-import api from "@/services/api"
-import { Banner } from "@/types/banner-prop"
-import { handleServiceError, tryAction } from "../utils"
+import api from '@/services/api'
+import { getAuthToken } from '@/services/auth-token'
+import { parsePaginatedResponse, tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
+import { Banner } from '@/types/banner-prop'
+import { revalidateTag } from 'next/cache'
+import { redirect } from 'next/navigation'
 
-const getToken = async () => (await cookies()).get("token")?.value
+// ============================================
+// PUBLIC SERVICES (SSG/ISR)
+// ============================================
 
 /**
- * Get all banners for admin
+ * Get banners for public users (SSG with ISR)
  */
-export const getBanners = async (): Promise<Banner[]> => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function getPublicBanners(): Promise<Banner[]> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
 
     try {
-        const response = await api.get(`/v1/admin/banner`, {
+        const response = await fetch(`${baseUrl}/v1/banner`, {
+            next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.BANNER] }
+        })
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch banners')
+        }
+
+        const data: { docs: Banner[] } = await response.json()
+        return data.docs || []
+    } catch (error) {
+        throw new Error(handleServiceError(error, 'Gagal mengambil data banner'))
+    }
+}
+
+// ============================================
+// ADMIN SERVICES (SSR with Authentication)
+// ============================================
+
+/**
+ * Get paginated banner list for admin (SSR)
+ */
+export async function getAdminBannerList(
+    page = 1,
+    limit = 10
+): Promise<{ data: Banner[]; totalPages: number; currentPage: number }> {
+    const token = await getAuthToken()
+    if (!token) {
+        throw new Error('UNAUTHORIZED')
+    }
+
+    try {
+        const response = await api.get(`/v1/admin/banner?page=${page}&limit=${limit}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-        return response.data
+        return parsePaginatedResponse<Banner>(response, page)
     } catch (error) {
-        throw new Error(handleServiceError(error, "Gagal mengambil data banner"))
+        throw new Error(handleServiceError(error, 'Gagal mengambil data banner'))
     }
 }
 
 /**
- * Get banner detail by ID
+ * Get single banner by ID for admin (SSR)
  */
-export const getBannerDetail = async (id: string): Promise<Banner> => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function getAdminBannerById(id: string): Promise<Banner> {
+    const token = await getAuthToken()
+    if (!token) {
+        throw new Error('UNAUTHORIZED')
+    }
 
     try {
         const response = await api.get(`/v1/admin/banner/${id}`, {
@@ -39,96 +74,88 @@ export const getBannerDetail = async (id: string): Promise<Banner> => {
         })
         return response.data
     } catch (error) {
-        throw new Error(handleServiceError(error, "Gagal mengambil detail banner"))
+        throw new Error(handleServiceError(error, 'Gagal mengambil detail banner'))
     }
 }
 
 /**
- * Create a new banner
+ * Create new banner (Server Action)
  */
-export const createBanner = async (prevState: any, data: FormData) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function createBannerAction(prevState: unknown, formData: FormData) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
 
     const result = await tryAction(async () => {
-        await api.post('/v1/admin/banner', data, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data'
-            }
+        await api.post('/v1/admin/banner', formData, {
+            headers: { Authorization: `Bearer ${token}` }
         })
-        revalidatePath('/admin/banners')
-    }, "Gagal membuat banner baru")
+        revalidateTag(CACHE_TAGS.BANNER, 'max')
+    }, 'Gagal membuat banner baru')
 
     if (result.success) {
         redirect('/admin/banners')
     }
+
     return result
 }
 
 /**
- * Update an existing banner
+ * Update existing banner (Server Action)
  */
-export const updateBanner = async (id: string, prevState: any, data: FormData) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function updateBannerAction(id: string, prevState: unknown, formData: FormData) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
 
     const result = await tryAction(async () => {
-        await api.put(`/v1/admin/banner/${id}`, data, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data'
-            }
+        await api.put(`/v1/admin/banner/${id}`, formData, {
+            headers: { Authorization: `Bearer ${token}` }
         })
-        revalidatePath('/admin/banners')
-    }, "Gagal memperbarui banner")
+        revalidateTag(CACHE_TAGS.BANNER, 'max')
+    }, 'Gagal memperbarui banner')
 
     if (result.success) {
         redirect('/admin/banners')
     }
+
     return result
 }
 
 /**
- * Delete a banner
+ * Delete banner (Server Action)
  */
-export const deleteBanner = async (id: string) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function deleteBannerAction(id: string) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
 
     return tryAction(async () => {
         await api.delete(`/v1/admin/banner/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-        revalidatePath('/admin/banners')
-        return { success: true }
-    }, "Gagal menghapus banner")
+        revalidateTag(CACHE_TAGS.BANNER, 'max')
+        return { message: 'Banner berhasil dihapus!' }
+    }, 'Gagal menghapus banner')
 }
 
 /**
- * Toggle publish status of a banner
+ * Toggle banner publish status (Server Action)
  */
-export const togglePublishBanner = async (id: string, is_publish: boolean) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function toggleBannerPublishAction(id: string, isPublish: boolean) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
 
     return tryAction(async () => {
-        await api.put(`/v1/admin/banner/${id}`, { is_publish }, {
+        await api.put(`/v1/admin/banner/${id}`, { is_publish: isPublish }, {
             headers: { Authorization: `Bearer ${token}` }
         })
-        revalidatePath('/admin/banners')
-        return { success: true }
-    }, "Gagal mengubah status publish")
-}
-
-/**
- * Get banners for public users
- */
-export const getBannersPublic = async (): Promise<Banner[]> => {
-    try {
-        const response = await api.get(`/v1/banner`)
-        return response.data
-    } catch (error) {
-        throw new Error(handleServiceError(error, "Gagal mengambil data banner"))
-    }
+        revalidateTag(CACHE_TAGS.BANNER, 'max')
+        return { message: `Banner ${isPublish ? 'ditampilkan' : 'disembunyikan'}!` }
+    }, 'Gagal mengubah status banner')
 }

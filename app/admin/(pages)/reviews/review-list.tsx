@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, User, Eye, EyeOff } from "lucide-react"
 import { Reviews } from "@/types/review-prop"
-import { updateReviewStatus } from "@/services/review/review-service"
+import { toggleReviewPublishAction } from "@/services/review/review-service"
 import { format, isValid } from "date-fns"
 import { id } from "date-fns/locale"
 import { toast } from "sonner"
@@ -28,7 +28,7 @@ export function ReviewList({ reviews }: { reviews: Reviews[] }) {
                 </TableHeader>
                 <TableBody>
                     {reviews.map((item) => (
-                        <ReviewRow key={item._id} item={item} />
+                        <ReviewRow key={item.id} item={item} />
                     ))}
                 </TableBody>
             </Table>
@@ -42,8 +42,8 @@ function ReviewRow({ item }: { item: Reviews }) {
 
     const handleUpdateStatus = (id: string, currentStatus: boolean) => {
         startTransition(async () => {
-            const result = await updateReviewStatus(id, !currentStatus)
-            if (result.success) {
+            const result = await toggleReviewPublishAction(id, !currentStatus)
+            if (result?.success) {
                 toast.success(`Ulasan berhasil ${!currentStatus ? 'ditampilkan' : 'disembunyikan'}`)
                 router.refresh()
             } else {
@@ -105,7 +105,7 @@ function ReviewRow({ item }: { item: Reviews }) {
                         size="icon"
                         className={`h-8 w-8 ${item.is_publish ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
                         disabled={isPending}
-                        onClick={() => handleUpdateStatus(item._id, item.is_publish)}
+                        onClick={() => handleUpdateStatus(item.id, item.is_publish)}
                     >
                         {item.is_publish ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>

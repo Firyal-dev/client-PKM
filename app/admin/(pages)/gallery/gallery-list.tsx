@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from "react"
-import { Loader2, Trash2, X, AlertTriangle, CheckSquare } from "lucide-react"
+import { Loader2, Trash2, X, CheckSquare } from "lucide-react"
 import { toast } from "sonner"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { GalleryCard } from "@/components/admin/gallery-card"
 import { Gallery } from "@/types/gallery-prop"
-import { deleteGalleryBatch } from "@/services/gallery/gallery-service"
+import { deleteGalleryBatchAction } from "@/services/gallery/gallery-service"
 
 export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
     const [selected, setSelected] = useState<string[]>([])
@@ -23,7 +23,7 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
 
     const handleDelete = () => {
         startTransition(async () => {
-            const result = await deleteGalleryBatch(selected);
+            const result = await deleteGalleryBatchAction(selected);
             if (result?.success) {
                 toast.success(`${selected.length} foto berhasil dihapus`);
                 setSelected([]);
@@ -92,9 +92,9 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {initialGallery.map((item) => (
                     <GalleryCard
-                        key={item._id}
+                        key={item.id}
                         gallery={item}
-                        isSelected={selected.includes(item._id)}
+                        isSelected={selected.includes(item.id)}
                         onSelect={handleSelect}
                     />
                 ))}

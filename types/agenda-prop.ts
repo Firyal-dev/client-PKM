@@ -1,5 +1,5 @@
 export interface Agenda {
-    _id: string;
+    id: string;
     activity_name: string;
     date: string;
     time: string;

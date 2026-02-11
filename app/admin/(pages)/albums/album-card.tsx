@@ -11,12 +11,12 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Album } from "@/types/album-prop"
-import { updateAlbumName, deleteAlbum } from "@/services/album/album-service"
+import { updateAlbumNameAction, deleteAlbumAction } from "@/services/album/album-service"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 
-export function AlbumCard({ _id, album_title, count, album_cover, created_at }: Album) {
+export function AlbumCard({ id, album_title, count, album_cover, created_at }: Album) {
     const [isEditing, setIsEditing] = useState(false)
     const [title, setTitle] = useState(album_title)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -33,9 +33,15 @@ export function AlbumCard({ _id, album_title, count, album_cover, created_at }: 
         }
 
         try {
-            await updateAlbumName(_id, trimmedTitle)
-            toast.success("Nama album diperbarui")
-            setIsEditing(false)
+            const result = await updateAlbumNameAction(id, trimmedTitle)
+            if (result.success) {
+                toast.success("Nama album diperbarui")
+                setIsEditing(false)
+            } else {
+                toast.error(result.error || "Gagal mengubah nama")
+                setTitle(album_title)
+                setIsEditing(false)
+            }
         } catch (error) {
             toast.error("Gagal mengubah nama")
             setTitle(album_title)
@@ -53,7 +59,7 @@ export function AlbumCard({ _id, album_title, count, album_cover, created_at }: 
 
     return (
         <div className="group flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
-            <AlbumCover id={_id} count={count} disabled={isEditing} cover={album_cover} />
+            <AlbumCover id={id} count={count} disabled={isEditing} cover={album_cover} />
 
             <div className="flex items-start justify-between px-1 gap-2">
                 <div className="flex-1 min-w-0">
@@ -82,7 +88,7 @@ export function AlbumCard({ _id, album_title, count, album_cover, created_at }: 
                     </p>
                 </div>
 
-                <AlbumActions id={_id} onRename={() => setIsEditing(true)} />
+                <AlbumActions id={id} onRename={() => setIsEditing(true)} />
             </div>
         </div>
     )
@@ -157,7 +163,7 @@ function AlbumActions({ id, onRename }: { id: string, onRename: () => void }) {
                 onOpenChange={setIsDelOpen}
                 title="Hapus Album?"
                 description="Data foto di dalamnya tidak akan terhapus, hanya albumnya saja yang hilang."
-                onConfirm={() => deleteAlbum(id)}
+                onConfirm={() => deleteAlbumAction(id)}
                 confirmText="Hapus"
             />
 

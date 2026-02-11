@@ -8,16 +8,18 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { createAlbum } from '@/services/album/album-service'
+import { createAlbumAction } from '@/services/album/album-service'
 
 export function CreateAlbumDialog() {
     const [open, setOpen] = useState(false)
-    const [state, formAction, isPending] = useActionState(createAlbum, null)
+    const [state, formAction, isPending] = useActionState(createAlbumAction, null)
 
     useEffect(() => {
         if (state?.success) {
             setOpen(false)
             toast.success("Album baru berhasil dibuat")
+        } else if (state?.error) {
+            toast.error(state.error)
         }
     }, [state])
 

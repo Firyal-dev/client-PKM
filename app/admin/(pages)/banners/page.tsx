@@ -1,13 +1,13 @@
 import { PageHeader } from "@/components/admin/page-header"
-import { getBanners } from "@/services/banner/banner-service"
+import { getAdminBannerList } from "@/services/banner/banner-service"
 import { BannerList } from "./banner-list"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Image as ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default async function BannerPage() {
-    const banners = await getBanners()
-    const hasData = banners.length > 0
+    const banners = await getAdminBannerList(1, 10)
+    const hasData = banners.data.length > 0
 
     return (
         <div className="px-5 pb-10">
@@ -37,7 +37,7 @@ export default async function BannerPage() {
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <BannerList banners={banners} />
+                    <BannerList banners={banners.data} />
                 )}
             </div>
         </div>

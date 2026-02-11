@@ -1,37 +1,64 @@
 'use server'
 
-import api from "@/services/api";
-import { cookies } from 'next/headers'
+import api from '@/services/api'
+import { setAuthToken, getAuthToken, clearAuthToken } from '@/services/auth-token'
+import { tryAction } from '@/services/utils'
 import { redirect } from 'next/navigation'
-import { tryAction } from "../utils";
 
 /**
- * Handle user login and set cookie
+ * Login credentials interface
  */
-export async function loginService(_prevState: any, formData: FormData) {
-    const name = formData.get("name");
-    const password = formData.get("password");
+export interface LoginCredentials {
+    name: string
+    password: string
+}
+
+/**
+ * Login response interface
+ */
+export interface LoginResponse {
+    access_token: string
+    user: {
+        id: string
+        name: string
+        email: string
+    }
+}
+
+/**
+ * Handle user login (Server Action)
+ */
+export async function loginAction(prevState: unknown, formData: FormData) {
+    const name = formData.get('name') as string
+    const password = formData.get('password') as string
 
     if (!name || !password) {
-        return { error: "Username dan password wajib diisi", success: false }
+        return { success: false, error: 'Username dan password wajib diisi' }
     }
 
-    const result = await tryAction(async () => {
-        const res = await api.post("/v1/auth/login", { name, password })
-        const cookieStore = await cookies();
-        cookieStore.set("token", res.data.access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 8, // 8 jam
-            path: '/'
-        });
-        return res.data;
-    }, "Login gagal")
+    const result = await tryAction<LoginResponse>(async () => {
+        const response = await api.post<LoginResponse>('/v1/auth/login', { name, password })
+        await setAuthToken(response.data.access_token)
+        return response.data
+    }, 'Login gagal')
 
     if (result.success) {
-        redirect('/admin/dashboard');
+        redirect('/admin/dashboard')
     }
 
-    return result;
+    return result
+}
+
+/**
+ * Check if user is authenticated
+ */
+export async function checkAuthStatus(): Promise<boolean> {
+    return (await getAuthToken()) !== null
+}
+
+/**
+ * Get current auth token
+ */
+export async function getCurrentAuthToken(): Promise<string | null> {
+    return getAuthToken()
 }

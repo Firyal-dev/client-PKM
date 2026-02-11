@@ -1,21 +1,20 @@
 'use server'
 
-import { cookies } from 'next/headers'
+import { clearAuthToken } from '@/services/auth-token'
 import { redirect } from 'next/navigation'
-import { tryAction } from "../utils"
 
 /**
- * Handle admin logout by removing token cookie
+ * Handle admin logout (Server Action)
  */
-export async function logoutAction(prevState: any) {
-    const result = await tryAction(async () => {
-        const cookieStore = await cookies()
-        cookieStore.delete('token')
-    }, "Logout gagal")
+export async function logoutAction() {
+    await clearAuthToken()
+    redirect('/admin/login')
+}
 
-    if (result.success) {
-        redirect('/admin/login')
-    }
-
-    return result
+/**
+ * Logout and return to login page (no redirect, returns result)
+ */
+export async function logoutActionWithResult() {
+    await clearAuthToken()
+    return { success: true, message: 'Logout berhasil' }
 }

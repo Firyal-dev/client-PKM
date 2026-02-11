@@ -9,7 +9,7 @@ export default function Hero({ data }: { data: Banner[] }) {
     return (
         <section className="relative">
             {data.map((banner) => (
-                <div key={banner._id} className="relative h-[80vh] min-h-[420px] bg-slate-900">
+                <div key={banner.id} className="relative h-[80vh] min-h-[420px] bg-slate-900">
                     <Image
                         src={getMediaUrl(banner.image_path) || "/placeholder.jpg"}
                         alt={banner.title || "Banner"}

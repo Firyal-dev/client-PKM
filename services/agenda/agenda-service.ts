@@ -1,109 +1,177 @@
 'use server'
 
-import api from "@/services/api"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
-import { Agenda } from "@/types/agenda-prop"
-import { handleServiceError, tryAction } from "../utils"
+import api from '@/services/api'
+import { getAuthToken } from '@/services/auth-token'
+import { parsePaginatedResponse, tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
+import { Agenda } from '@/types/agenda-prop'
+import { revalidateTag } from 'next/cache'
 
-const getToken = async () => (await cookies()).get("token")?.value
+// ============================================
+// PUBLIC SERVICES (SSG/ISR)
+// ============================================
 
 /**
- * Fetch list of agendas with pagination
+ * Get agenda list for public users (SSG with ISR)
  */
-export const getAgendas = async (page: number = 1, limit: number = 10): Promise<{ data: Agenda[], totalPages: number, currentPage: number }> => {
+export async function getPublicAgenda(
+    page = 1,
+    limit = 10
+): Promise<{ data: Agenda[]; totalPages: number; currentPage: number }> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
+
     try {
-        const response = await api.get(`/v1/agenda?page=${page}&limit=${limit}`)
-        if (response.data.docs) {
-            return {
-                data: response.data.docs,
-                totalPages: response.data.totalPages,
-                currentPage: response.data.page
-            }
+        const response = await fetch(`${baseUrl}/v1/agenda?page=${page}&limit=${limit}`, {
+            next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
+        })
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch agenda')
         }
+
+        const data = await response.json()
         return {
-            data: response.data,
-            totalPages: 1,
-            currentPage: 1
+            data: data.docs || [],
+            totalPages: data.totalPages || 1,
+            currentPage: data.page || page
         }
     } catch (error) {
-        throw new Error(handleServiceError(error, "Gagal mengambil data agenda"))
+        throw new Error(handleServiceError(error, 'Gagal mengambil data agenda'))
     }
 }
 
 /**
- * Create a new agenda
+ * Get single agenda by slug or ID (SSG)
  */
-export const createAgenda = async (prevState: any, formData: FormData) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function getPublicAgendaBySlug(slug: string): Promise<Agenda | null> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
 
-    return tryAction(async () => {
-        const payload = {
-            activity_name: formData.get("activity_name"),
-            date: formData.get("date"),
-            time: formData.get("time"),
-            location: formData.get("location"),
-            effective_date: formData.get("effective_date")
+    try {
+        const response = await fetch(`${baseUrl}/v1/agenda/${slug}`, {
+            next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
+        })
+
+        if (!response.ok) {
+            return null
         }
 
-        const res = await api.post('/v1/admin/agenda', payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        revalidatePath('/admin/agenda')
-        return res.data
-    }, "Gagal membuat agenda")
+        return response.json()
+    } catch (error) {
+        console.error('[AgendaService] Failed to fetch agenda by slug:', handleServiceError(error, 'Error'))
+        return null
+    }
 }
 
-/**
- * Delete an agenda
- */
-export const deleteAgenda = async (id: string) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
-
-    return tryAction(async () => {
-        const res = await api.delete(`/v1/admin/agenda/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        revalidatePath('/admin/agenda')
-        return res.data
-    }, "Gagal menghapus agenda")
-}
+// ============================================
+// ADMIN SERVICES (SSR with Authentication)
+// ============================================
 
 /**
- * Get agenda details by ID
+ * Get paginated agenda list for admin (SSR)
  */
-export const getAgendaById = async (id: string): Promise<Agenda> => {
+export async function getAdminAgendaList(
+    page = 1,
+    limit = 10
+): Promise<{ data: Agenda[]; totalPages: number; currentPage: number }> {
+    const token = await getAuthToken()
+    if (!token) {
+        throw new Error('UNAUTHORIZED')
+    }
+
     try {
-        const response = await api.get(`/v1/admin/agenda/${id}`)
+        const response = await api.get(`/v1/admin/agenda?page=${page}&limit=${limit}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        return parsePaginatedResponse<Agenda>(response, page)
+    } catch (error) {
+        throw new Error(handleServiceError(error, 'Gagal mengambil data agenda'))
+    }
+}
+
+/**
+ * Get single agenda by ID for admin (SSR)
+ */
+export async function getAdminAgendaById(id: string): Promise<Agenda> {
+    const token = await getAuthToken()
+    if (!token) {
+        throw new Error('UNAUTHORIZED')
+    }
+
+    try {
+        const response = await api.get(`/v1/admin/agenda/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
         return response.data
     } catch (error) {
-        throw new Error(handleServiceError(error, "Gagal mengambil detail agenda"))
+        throw new Error(handleServiceError(error, 'Gagal mengambil detail agenda'))
     }
 }
 
 /**
- * Update an existing agenda
+ * Create new agenda (Server Action)
  */
-export const updateAgenda = async (id: string, prevState: any, formData: FormData) => {
-    const token = await getToken()
-    if (!token) redirect("/admin/login")
+export async function createAgendaAction(prevState: unknown, formData: FormData) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
+
+    const payload = {
+        activity_name: formData.get("activity_name") as string,
+        date: formData.get("date") as string,
+        effective_date: formData.get("effective_date") as string,
+        time: formData.get("time") as string,
+        location: formData.get("location") as string,
+    }
 
     return tryAction(async () => {
-        const payload = {
-            activity_name: formData.get("activity_name"),
-            date: formData.get("date"),
-            time: formData.get("time"),
-            location: formData.get("location"),
-            effective_date: formData.get("effective_date")
-        }
-
-        const res = await api.put(`/v1/admin/agenda/${id}`, payload, {
+        const response = await api.post('/v1/admin/agenda', payload, {
             headers: { Authorization: `Bearer ${token}` }
         })
-        revalidatePath('/admin/agenda')
-        return res.data
-    }, "Gagal memperbarui agenda")
+        revalidateTag(CACHE_TAGS.AGENDA, 'max')
+        return response.data 
+    }, 'Gagal membuat agenda')
+}
+
+/**
+ * Update existing agenda (Server Action)
+ */
+export async function updateAgendaAction(id: string, prevState: unknown, formData: FormData) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
+
+    const payload = {
+        activity_name: formData.get("activity_name") as string,
+        date: formData.get("date") as string,
+        effective_date: formData.get("effective_date") as string,
+        time: formData.get("time") as string,
+        location: formData.get("location") as string,
+    }
+
+    return tryAction(async () => {
+        const response = await api.put(`/v1/admin/agenda/${id}`, payload, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        revalidateTag(CACHE_TAGS.AGENDA, 'max')
+        return { message: 'Agenda berhasil diperbarui!', data: response.data }
+    }, 'Gagal memperbarui agenda')
+}
+
+/**
+ * Delete agenda (Server Action)
+ */
+export async function deleteAgendaAction(id: string) {
+    const token = await getAuthToken()
+    if (!token) {
+        return { success: false, error: 'Sesi habis, silakan login lagi' }
+    }
+
+    return tryAction(async () => {
+        await api.delete(`/v1/admin/agenda/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        revalidateTag(CACHE_TAGS.AGENDA, 'max')
+        return { message: 'Agenda berhasil dihapus!' }
+    }, 'Gagal menghapus agenda')
 }

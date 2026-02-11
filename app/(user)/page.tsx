@@ -1,31 +1,35 @@
+import { Metadata } from "next";
+
 import Hero from "@/components/user/sections/hero";
+import Sambutan from "@/components/user/sections/sambutan";
 import Layanan from "@/components/user/sections/layanan";
 import Agenda from "@/components/user/sections/agenda";
+import Galeri from "@/components/user/sections/galeri";
 import Berita from "@/components/user/sections/berita";
-import Gallery from "@/components/user/sections/galeri";
-import Sambutan from "@/components/user/sections/sambutan";
-import CtaConsultation from "@/components/user/partials/cta-consultation";
 
 // services
-import { getGallery } from "@/services/gallery/gallery-service";
-import { getAgendas } from "@/services/agenda/agenda-service";
-import { getBannersPublic } from "@/services/banner/banner-service";
+import { getPublicBanners } from "@/services/banner/banner-service";
+import { getPublicAgenda } from "@/services/agenda/agenda-service";
+import { getPublicGallery } from "@/services/gallery/gallery-service";
 
-export default async function HomePage() {
-    const galleryData = await getGallery(1, 5);
-    const agendaData = await getAgendas(1, 100);
-    const bannerData = await getBannersPublic();
+export const metadata: Metadata = {
+    title: "Puskesmas",
+    description: "Sistem Informasi Manajemen Puskesmas",
+};
+
+export default async function Home() {
+    const banners = await getPublicBanners();
+    const agendas = await getPublicAgenda(1, 3);
+    const galeri = await getPublicGallery(1, 10);
 
     return (
-        <main className="flex flex-col">
-            <Hero data={bannerData} />
-            <Layanan />
+        <main className="min-h-screen">
+            <Hero data={banners} />
             <Sambutan />
-            <CtaConsultation />
-            <Agenda data={agendaData.data} />
+            <Layanan />
+            <Agenda data={agendas.data} />
+            <Galeri data={galeri.data} />
             <Berita />
-            <Gallery data={galleryData.data} />
         </main>
-
-    )
+    );
 }

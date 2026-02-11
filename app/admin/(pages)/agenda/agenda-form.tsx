@@ -37,7 +37,7 @@ export function AgendaForm({ initialData, action }: { initialData?: Agenda, acti
     useEffect(() => {
         if (state?.error) toast.error(state.error)
         if (state?.success) {
-            toast.success(initialData ? "Agenda diperbarui" : "Agenda dibuat")
+            toast.success(initialData ? "Agenda berhasil diperbarui" : "Agenda berhasil dibuat")
             router.push('/admin/agenda')
             router.refresh()
         }
@@ -149,7 +149,7 @@ export function AgendaForm({ initialData, action }: { initialData?: Agenda, acti
                         </div>
                     </FieldGroup>
 
-                    <div className="flex justify-end border-t border-slate-100">
+                    <div className="flex justify-end border-slate-100">
                         <Button type="submit" disabled={isPending}>
                             {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</> : (initialData ? "Perbarui Agenda" : "Simpan Agenda")}
                         </Button>
