@@ -12,7 +12,13 @@ interface ExtendedPageHeaderProps extends PageHeaderProps {
     children?: React.ReactNode
 }
 
-export function PageHeader({ title, description, linkHref, linkLabel, children }: ExtendedPageHeaderProps) {
+export function PageHeader({ 
+    title, 
+    description, 
+    linkHref, 
+    linkLabel, 
+    children 
+}: ExtendedPageHeaderProps) {
     return (
         <div className="flex items-center justify-between">
             <div>
