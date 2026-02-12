@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 
 import type { Metadata } from "next";
+import VisitorTracker from '@/components/VisitorTracker';
 
 const jakarta = Plus_Jakarta_Sans({
     subsets: ['latin'],
@@ -31,6 +32,7 @@ export default function Layout({
             <body className={`${jakarta.variable} ${inter.variable} font-sans antialiased`}>
                 {children}
                 <Toaster />
+                <VisitorTracker />
             </body>
         </html>
     );
