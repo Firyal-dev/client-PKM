@@ -4,140 +4,91 @@ import { updateProfileAction } from "@/services/admin/update-profile-action"
 import { useImagePreview } from '@/hooks/use-photo-preview'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
-import { useActionState, useEffect, useState } from "react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { useActionState, useEffect, useRef, useState } from "react"
 import Image from 'next/image'
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-
 import { getMediaUrl } from "@/lib/getMediaUrl"
 
 export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
-    if (!profile) return null;
-
-    const [updateState, formUpdateAction, updateIsLoading] = useActionState(updateProfileAction, null)
+    const [state, formAction, isPending] = useActionState(updateProfileAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
-    const [isProcessing, setIsProcessing] = useState(false);
+    const hasHandledRef = useRef(false)
 
-    const photoSrc = getMediaUrl(profile?.photo, '/profiles') || "/userPlaceholder.jpg";
+    const handleOpenChange = (isOpen: boolean) => {
+        if (!isOpen) {
+            hasHandledRef.current = false
+        }
+        setOpen(isOpen)
+    }
 
-    const displayPreview = previewUrl || photoSrc;
+    const photoSrc = getMediaUrl(profile?.photo, '/profiles') || "/userPlaceholder.jpg"
 
     useEffect(() => {
-        if (updateIsLoading) {
-            setIsProcessing(true);
-        }
-        if (!updateIsLoading && isProcessing && updateState) {
-            if (updateState.success) {
-                toast.success("Profil berhasil diperbarui!");
-                resetPreview();
-                setOpen(false);
-            } else if (updateState.error) {
-                toast.error("Gagal: " + updateState.error);
+        if (!isPending && state && !hasHandledRef.current) {
+            hasHandledRef.current = true
+            if (state.success) {
+                toast.success("Profil diperbarui!")
+                resetPreview()
+                setTimeout(() => setOpen(false), 100)
+            } else if (state.error) {
+                toast.error("Gagal: " + state.error)
             }
-            setIsProcessing(false);
         }
-    }, [updateState, updateIsLoading, isProcessing, resetPreview]);
+    }, [state, isPending, resetPreview])
+
+    if (!profile) return null
 
     return (
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet open={open} onOpenChange={handleOpenChange}>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <SheetTrigger asChild>
                         <SidebarMenuButton size="lg" className="cursor-pointer">
-                            <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                <Image
-                                    src={photoSrc}
-                                    width={100}
-                                    height={100}
-                                    className="w-full h-full object-cover rounded-full"
-                                    alt="Profil"
-                                    unoptimized
-                                />
+                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                                <Image src={photoSrc} width={100} height={100} className="w-full h-full object-cover rounded-full" alt="Profil" unoptimized />
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">{profile.name}</span>
-                                <span className="truncate text-xs">Puskesmas Bogor Barat</span>
+                                <span className="truncate text-xs">Puskesmas</span>
                             </div>
                         </SidebarMenuButton>
                     </SheetTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="right">
-                    <p>Edit Profil</p>
-                </TooltipContent>
+                <TooltipContent side="right"><p>Edit Profil</p></TooltipContent>
             </Tooltip>
 
             <SheetContent>
                 <SheetHeader>
                     <SheetTitle>Edit Profil</SheetTitle>
-                    <SheetDescription>
-                        Edit profil anda disini. Klik simpan ketika selesai.
-                    </SheetDescription>
+                    <SheetDescription>Edit profil. Klik simpan.</SheetDescription>
                 </SheetHeader>
 
                 <div className="flex flex-col items-center justify-center gap-3 py-8">
-                    <div className="relative group">
-                        <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-primary/10 shadow-lg">
-                            <Image
-                                src={displayPreview}
-                                alt="Preview Foto Profil"
-                                fill
-                                className="object-cover"
-                                unoptimized
-                            />
-                        </div>
+                    <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-primary/10">
+                        <Image src={previewUrl || photoSrc} alt="Preview" fill className="object-cover" unoptimized />
                     </div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
-                        {previewUrl ? "Preview Foto Baru" : "Foto Profil Saat Ini"}
-                    </p>
+                    <p className="text-xs text-muted-foreground uppercase">{previewUrl ? "Preview Baru" : "Foto Saat Ini"}</p>
                 </div>
 
-                <form action={formUpdateAction}>
-                    <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                <form action={formAction}>
+                    <div className="grid gap-6 px-4">
                         <div className="grid gap-3">
-                            <Label htmlFor="photo-upload">Foto Profil</Label>
-                            <Input
-                                id="photo-upload"
-                                onChange={handleFileChange}
-                                type="file"
-                                name="photo"
-                                accept="image/*"
-                            />
-                            <p className="text-[11px] text-muted-foreground italic">
-                                *Kosongkan jika tidak ingin mengubah foto
-                            </p>
+                            <Label htmlFor="photo-upload">Foto</Label>
+                            <Input id="photo-upload" onChange={handleFileChange} type="file" name="photo" accept="image/*" />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="admin-name">Nama</Label>
-                            <Input
-                                id="admin-name"
-                                defaultValue={profile.name}
-                                name="name"
-                                required
-                            />
+                            <Input id="admin-name" defaultValue={profile.name} name="name" required />
                         </div>
                     </div>
-
                     <SheetFooter className="pt-10">
-                        <Button type="submit" disabled={updateIsLoading}>
-                            {updateIsLoading ? "Memuat..." : "Simpan Perubahan"}
-                        </Button>
+                        <Button type="submit" disabled={isPending}>{isPending ? "Memuat..." : "Simpan"}</Button>
                     </SheetFooter>
                 </form>
             </SheetContent>

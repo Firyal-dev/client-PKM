@@ -2,50 +2,38 @@
 
 import { cookies } from 'next/headers'
 
-/**
- * Centralized token helper for all services
- */
+// Ambil token
 export async function getAuthToken(): Promise<string | null> {
-    const cookieStore = await cookies()
-    return cookieStore.get('token')?.value ?? null
+    const store = await cookies()
+    return store.get('token')?.value ?? null
 }
 
-/**
- * Check if user is authenticated (has valid token)
- */
+// Cek auth
 export async function isAuthenticated(): Promise<boolean> {
     return (await getAuthToken()) !== null
 }
 
-/**
- * Require authentication - throws redirect if not authenticated
- */
+// Require auth - throw jika tidak login
 export async function requireAuth(): Promise<string> {
     const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
+    if (!token) throw new Error('UNAUTHORIZED')
     return token
 }
 
-/**
- * Set auth token cookie
- */
+// Set token cookie
 export async function setAuthToken(token: string): Promise<void> {
-    const cookieStore = await cookies()
-    cookieStore.set('token', token, {
+    const store = await cookies()
+    store.set('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 8, // 8 hours
+        maxAge: 60 * 60 * 8, // 8 jam
         path: '/'
     })
 }
 
-/**
- * Clear auth token cookie
- */
+// Hapus token
 export async function clearAuthToken(): Promise<void> {
-    const cookieStore = await cookies()
-    cookieStore.delete('token')
+    const store = await cookies()
+    store.delete('token')
 }

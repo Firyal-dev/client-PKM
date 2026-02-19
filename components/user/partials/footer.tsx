@@ -1,151 +1,103 @@
-import Image from "next/image"
-import Link from "next/link"
-import { socialList, informasi, layanan, lokasi } from "@/constants/footer-data"
-import {
-    Map,
-    MapControls,
-    MapMarker,
-    MarkerContent,
-    MarkerLabel,
-    MarkerPopup,
-} from "@/components/ui/map"
-import { Card } from "@/components/ui/card"
-import { Clock, Navigation } from "lucide-react"
-import { CustomLink } from "@/components/ui/link"
+import { Phone, Mail, MapPin } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import SocialIcon from './navbar/social-icon'
+
+// Dummy data - bisa diganti dari database
+const dummyPhone = '(0251) 1234567'
+const dummyEmail = 'puskesmas@kecamatansaht.co.id'
+const dummyAddress = 'Jl. Raya Bogor No.XX, Kecamatan Sehat, Kota Bogor'
+const dummyName = 'Puskesmas Kecamatan Sehat'
+const dummyLongitude = 106.7995
+const dummyLatitude = -6.5973
 
 export default function Footer() {
     return (
-        <footer className="border-t border-slate-800 bg-slate-900 text-slate-200">
-            <div className="container mx-auto px-6 md:px-12 lg:px-16">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-10 py-12 md:py-16">
+        <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 py-12 md:py-16">
+            <div className="max-w-7xl mx-auto px-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
 
-                    {/* Brand */}
-                    <div className="md:col-span-4 space-y-4">
-                        <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center">
-                                <Image
-                                    src="/puskesmasLogo.png"
-                                    alt="Logo"
-                                    width={26}
-                                    height={26}
-                                />
+                    {/* Map Section */}
+                    <div className="space-y-6">
+                        <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-800">
+                            {/* Placeholder map - bisa diganti sama Map component asli */}
+                            <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                                <div className="text-center">
+                                    <MapPin className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                                    <p className="text-xs text-slate-400">Peta Lokasi</p>
+                                    <p className="text-xs text-slate-500">{dummyAddress}</p>
+                                </div>
                             </div>
-                            <span className="font-bold text-lg text-white">
-                                Puskesmas Kecamatan Sehat
-                            </span>
                         </div>
+                    </div>
 
-                        <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
-                            Melayani masyarakat dengan sepenuh hati melalui
-                            pelayanan kesehatan yang profesional, terbuka,
-                            dan berkelanjutan.
+                    {/* Brand Section */}
+                    <div className="space-y-6">
+                        {/* Logo */}
+                        <Link href="/" className="flex items-center gap-3">
+                            <Image
+                                src="/puskesmasLogo.png"
+                                alt="Logo Puskesmas"
+                                width={40}
+                                height={40}
+                                className="rounded-lg"
+                            />
+                            <div>
+                                <p className="font-bold text-lg text-white leading-none">
+                                    PUSKESMAS
+                                </p>
+                                <p className="text-xs text-slate-400 uppercase tracking-widest mt-1">
+                                    Kecamatan Sehat
+                                </p>
+                            </div>
+                        </Link>
+
+                        <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
+                            Memberikan pelayanan kesehatan yang bermutu, merata, dan terjangkau bagi seluruh
+                            masyarakat di wilayah Kota Bogor.
                         </p>
 
-                        <div className="flex gap-3 mt-3">
-                            {socialList.map((social, i) => (
-                                <Link
-                                    key={i}
-                                    href={social.href}
-                                    className="w-9 h-9 rounded-full border border-slate-700
-                                        flex items-center justify-center
-                                        text-slate-400 bg-slate-800
-                                        hover:bg-primary hover:text-white hover:border-primary
-                                        transition"
+                        <SocialIcon className="text-slate-400" />
+                    </div>
+
+                    {/* Contact Info Section */}
+                    <div className="space-y-6">
+                        <h4 className="font-semibold text-white text-sm uppercase tracking-wider">
+                            Hubungi Kami
+                        </h4>
+
+                        <div className="space-y-4">
+                            {/* Alamat */}
+                            <div className="flex items-start gap-3">
+                                <MapPin className="w-5 h-5 text-blue-500 mt-0.5" />
+                                <div>
+                                    <p className="text-sm text-slate-300">{dummyAddress}</p>
+                                </div>
+                            </div>
+
+                            {/* Telepon */}
+                            <div className="flex items-center gap-3">
+                                <Phone className="w-5 h-5 text-blue-500" />
+                                <a
+                                    href={`tel:${dummyPhone.replace(/[^0-9]/g, '')}`}
+                                    className="text-sm text-slate-300 hover:text-blue-400 transition"
                                 >
-                                    <social.icon size={16} />
-                                </Link>
-                            ))}
+                                    {dummyPhone}
+                                </a>
+                            </div>
+
+                            {/* Email */}
+                            <div className="flex items-center gap-3">
+                                <Mail className="w-5 h-5 text-blue-500" />
+                                <a
+                                    href={`mailto:${dummyEmail}`}
+                                    className="text-sm text-slate-300 hover:text-blue-400 transition"
+                                >
+                                    {dummyEmail}
+                                </a>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Layanan */}
-                    <div className="md:col-span-2">
-                        <h4 className="font-semibold text-sm mb-4 text-white">
-                            Layanan
-                        </h4>
-                        <ul className="space-y-2 text-sm">
-                            {layanan.map((item, i) => (
-                                <li key={i}>
-                                    <Link
-                                        href={item.href}
-                                        className="text-slate-400 hover:text-primary transition"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Informasi */}
-                    <div className="md:col-span-2">
-                        <h4 className="font-semibold text-sm mb-4 text-white">
-                            Informasi
-                        </h4>
-                        <ul className="space-y-2 text-sm">
-                            {informasi.map((item, i) => (
-                                <li key={i}>
-                                    <Link
-                                        href={item.href}
-                                        className="text-slate-400 hover:text-primary transition"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Lokasi */}
-                    <div className="md:col-span-4">
-                        <Card className="h-[260px] md:h-full p-0 overflow-hidden border-slate-800 bg-slate-800">
-                            <Map center={[lokasi.lng, lokasi.lat]} zoom={16}>
-                                <MapMarker longitude={lokasi.lng} latitude={lokasi.lat}>
-                                    <MarkerContent>
-                                        <div className="size-5 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform" />
-                                        <MarkerLabel position="bottom">
-                                            {lokasi.nama}
-                                        </MarkerLabel>
-                                    </MarkerContent>
-
-                                    <MarkerPopup className="p-0 w-48 shadow-2xl border-none bg-transparent">
-                                        <div className="relative h-24 overflow-hidden rounded-t-xl">
-                                            <Image
-                                                fill
-                                                src={lokasi.gambar}
-                                                alt={lokasi.nama}
-                                                className="object-cover"
-                                            />
-                                        </div>
-
-                                        <div className="p-3 bg-background rounded-b-xl border border-t-0">
-                                            <h4 className="font-bold text-xs mb-1">
-                                                {lokasi.nama}
-                                            </h4>
-
-                                            <p className="flex items-center text-[12px] text-muted-foreground">
-                                                <Clock className="size-3.5 mr-1.5" />
-                                                {lokasi.jam}
-                                            </p>
-
-                                            <CustomLink href={lokasi.lokasi} className="mt-3 w-full">
-                                                <Navigation className="size-3.5 mr-1.5" />
-                                                Buka Maps
-                                            </CustomLink>
-                                        </div>
-                                    </MarkerPopup>
-
-                                    <MapControls />
-                                </MapMarker>
-                            </Map>
-                        </Card>
-                    </div>
-
-                </div>
-
-                {/* Copyright */}
-                <div className="border-t border-slate-800 text-xs text-slate-500 text-center py-3">
-                    © {new Date().getFullYear()} Puskesmas Kecamatan Sehat. Seluruh hak cipta dilindungi.
                 </div>
             </div>
         </footer>

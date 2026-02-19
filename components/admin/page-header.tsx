@@ -1,24 +1,14 @@
 import { CustomLink } from "@/components/ui/link"
-import React from "react"
 
 interface PageHeaderProps {
     title: string
     description?: string
     linkHref?: string
     linkLabel?: string
-}
-
-interface ExtendedPageHeaderProps extends PageHeaderProps {
     children?: React.ReactNode
 }
 
-export function PageHeader({ 
-    title, 
-    description, 
-    linkHref, 
-    linkLabel, 
-    children 
-}: ExtendedPageHeaderProps) {
+export function PageHeader({ title, description, linkHref, linkLabel, children }: PageHeaderProps) {
     return (
         <div className="flex items-center justify-between">
             <div>
@@ -27,11 +17,7 @@ export function PageHeader({
             </div>
             <div className="flex items-center gap-2">
                 {children}
-                {linkHref && linkLabel && (
-                    <CustomLink href={linkHref}>
-                        {linkLabel}
-                    </CustomLink>
-                )}
+                {linkHref && linkLabel && <CustomLink href={linkHref}>{linkLabel}</CustomLink>}
             </div>
         </div>
     )

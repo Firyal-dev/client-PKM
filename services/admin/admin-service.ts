@@ -2,33 +2,21 @@
 
 import api from '@/services/api'
 import { getAuthToken, requireAuth } from '@/services/auth-token'
-import { handleServiceError, CACHE_TAGS } from '@/services/utils'
+import { handleServiceError } from '@/services/utils'
 import { AdminProfileProp } from '@/types/admin-profile-prop'
-import { revalidateTag } from 'next/cache'
 
-/**
- * Get current admin profile
- */
+// Ambil profile admin
 export async function getAdminProfile(): Promise<AdminProfileProp | null> {
     const token = await getAuthToken()
-    if (!token) {
-        return null
-    }
+    if (!token) return null
 
     try {
-        const response = await api.get('/v1/admin/profile', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return response.data
-    } catch (error) {
-        console.error('[AdminService] Failed to fetch profile:', handleServiceError(error, 'Error fetching admin profile'))
-        return null
-    }
+        const res = await api.get('/v1/admin/profile', { headers: { Authorization: `Bearer ${token}` } })
+        return res.data
+    } catch { return null }
 }
 
-/**
- * Require authentication and return token (throws redirect if not authenticated)
- */
+// Require auth - throw if not authenticated
 export async function requireAdminAuth(): Promise<string> {
     return requireAuth()
 }

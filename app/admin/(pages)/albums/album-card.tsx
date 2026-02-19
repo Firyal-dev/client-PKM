@@ -7,7 +7,6 @@ import { formatDistanceToNow } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import { Folder, MoreVertical, Image as ImageIcon, Trash2, Pencil } from "lucide-react"
 import { toast } from "sonner"
-
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Album } from "@/types/album-prop"

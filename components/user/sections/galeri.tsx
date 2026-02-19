@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ImageOff, LayoutGrid } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-user"
 
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
@@ -17,15 +18,12 @@ export default function Gallery({ data }: { data: Gallery[] }) {
                 <HeaderSection />
 
                 {!hasData ? (
-                    <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-dashed border-slate-200 text-center max-w-xl mx-auto">
-                        <ImageOff className="w-12 h-12 text-slate-300 mb-4" />
-                        <h3 className="text-base font-semibold text-slate-900 mb-1">
-                            Belum ada dokumentasi
-                        </h3>
-                        <p className="text-sm text-slate-500">
-                            Saat ini belum tersedia foto kegiatan puskesmas.
-                        </p>
-                    </div>
+                    <EmptyState
+                        title="Belum ada dokumentasi"
+                        description="Saat ini belum tersedia foto kegiatan puskesmas."
+                        icon={ImageOff}
+                        className="max-w-xl mx-auto"
+                    />
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-7xl mx-auto">
                         {data.slice(0, 10).map((item, index) => (

@@ -24,10 +24,12 @@ export default function UploadPhotoPage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (state?.error) toast.error(state.error)
         if (state?.success) {
             toast.success("Foto berhasil diunggah!")
             router.push('/admin/gallery')
+            router.refresh()
+        } else if (state?.error) {
+            toast.error(state.error)
         }
     }, [state, router])
 

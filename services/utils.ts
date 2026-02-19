@@ -1,114 +1,60 @@
 import { isAxiosError } from 'axios'
 import { redirect } from 'next/navigation'
 
-/**
- * Generic interface for paginated response
- */
-export interface PaginatedResponse<T> {
-    data: T[]
-    totalPages: number
-    currentPage: number
-    totalDocs?: number
+// Response paginated
+export interface PaginatedResponse<T> { data: T[]; totalPages: number; currentPage: number; totalDocs?: number }
+
+// Response action
+export interface ActionResponse<T = unknown> { success: boolean; data?: T; error?: string; message?: string }
+
+// Handle error
+export const handleServiceError = (err: unknown, fallback: string): string => {
+    if (isAxiosError(err)) return err.response?.data?.message || err.message || fallback
+    if (err instanceof Error) return err.message
+    return fallback
 }
 
-/**
- * Interface for action/mutation response
- */
-export interface ActionResponse<T = unknown> {
-    success: boolean
-    data?: T
-    error?: string
-    message?: string
-}
+// Parse response paginated
+export const parsePaginatedResponse = <T>(res: { data: { docs?: T[]; data?: T[] } & Record<string, unknown> }, defPage = 1): PaginatedResponse<T> => ({
+    data: res.data.docs || res.data.data || [],
+    totalPages: (res.data.totalPages as number) || 1,
+    currentPage: (res.data.page as number) || defPage,
+    totalDocs: res.data.totalDocs as number | undefined
+})
 
-/**
- * Handle error from API/Axios consistently
- */
-export const handleServiceError = (error: unknown, fallbackMessage: string): string => {
-    if (isAxiosError(error)) {
-        return error.response?.data?.message || error.message || fallbackMessage
-    }
-    if (error instanceof Error) {
-        return error.message
-    }
-    return fallbackMessage
-}
-
-/**
- * Parse pagination from API response
- */
-export const parsePaginatedResponse = <T>(
-    response: { data: { docs?: T[]; data?: T[] } & Record<string, unknown> },
-    defaultPage = 1
-): PaginatedResponse<T> => {
-    const docs = response.data.docs || response.data.data || []
-    return {
-        data: docs,
-        totalPages: (response.data.totalPages as number) || 1,
-        currentPage: (response.data.page as number) || defaultPage,
-        totalDocs: response.data.totalDocs as number | undefined
-    }
-}
-
-/**
- * Wrapper for async action returning ActionResponse
- */
-export async function tryAction<T>(
-    action: () => Promise<T>,
-    fallbackMessage: string
-): Promise<ActionResponse<T>> {
+// Wrapper action - return ActionResponse
+export async function tryAction<T>(action: () => Promise<T>, fallback: string): Promise<ActionResponse<T>> {
     try {
         const result = await action()
-        return {
-            success: true,
-            data: result
-        }
-    } catch (error) {
-        return {
-            success: false,
-            error: handleServiceError(error, fallbackMessage)
-        }
+        return { success: true, data: result }
+    } catch (err) {
+        return { success: false, error: handleServiceError(err, fallback) }
     }
 }
 
-/**
- * Wrapper for async action with redirect on unauthorized
- */
-export async function tryActionWithAuth<T>(
-    action: () => Promise<T>,
-    fallbackMessage: string,
-    redirectPath = '/admin/login'
-): Promise<ActionResponse<T>> {
+// Wrapper action - redirect jika unauthorized
+export async function tryActionWithAuth<T>(action: () => Promise<T>, fallback: string, redirectPath = '/admin/login'): Promise<ActionResponse<T>> {
     try {
         const result = await action()
-        return {
-            success: true,
-            data: result
-        }
-    } catch (error) {
-        if (error instanceof Error && error.message === 'UNAUTHORIZED') {
-            redirect(redirectPath)
-        }
-        return {
-            success: false,
-            error: handleServiceError(error, fallbackMessage)
-        }
+        return { success: true, data: result }
+    } catch (err) {
+        if (err instanceof Error && err.message === 'UNAUTHORIZED') redirect(redirectPath)
+        return { success: false, error: handleServiceError(err, fallback) }
     }
 }
 
-/**
- * Default revalidation time for SSG (1 hour)
- */
+// Revalidation time (1 jam)
 export const SSG_REVALIDATE_TIME = 3600
 
-/**
- * Cache tag separator
- */
+// Cache tags
 export const CACHE_TAGS = {
     AGENDA: 'agenda',
     ALBUM: 'album',
     BANNER: 'banners',
     GALLERY: 'gallery',
     REVIEW: 'reviews',
-    PROFILE: 'profile'
+    PROFILE: 'profile',
+    NEWS: 'news',
+    MENU: 'menu',
+    PAGE: 'page'
 } as const

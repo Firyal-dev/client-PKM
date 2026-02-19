@@ -9,10 +9,7 @@ import { cn } from "@/lib/utils"
 export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const limit = 12
-
-    const response = await getAdminGallery(currentPage, limit)
-    const hasData = response.data.length > 0
+    const { data, totalPages } = await getAdminGallery(currentPage, 12)
 
     return (
         <div className="px-5 pb-10">
@@ -26,9 +23,9 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
             {/* Konten */}
             <div className={cn(
                 "rounded-2xl bg-muted/50 border border-border mt-6 p-6 min-h-[500px] flex flex-col",
-                !hasData && "justify-center"
+                data.length === 0 && "justify-center"
             )}>
-                {!hasData ? (
+                {data.length === 0 ? (
                     <Empty className="flex flex-col items-center text-center">
                         <EmptyHeader className="flex flex-col items-center">
                             <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
@@ -43,20 +40,20 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <GalleryList initialGallery={response.data} />
+                    <GalleryList gallery={data} />
                 )}
             </div>
 
             {/* Pagination */}
-            {response.totalPages > 1 && (
+            {totalPages > 1 && (
                 <div className="mt-8 flex flex-col items-center gap-3">
                     <PaginationControl
-                        totalPages={response.totalPages}
-                        currentPage={response.currentPage}
+                        totalPages={totalPages}
+                        currentPage={currentPage}
                     />
                     <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         <Images className="w-3 h-3" />
-                        Halaman {response.currentPage} dari {response.totalPages}
+                        Halaman {currentPage} dari {totalPages}
                     </div>
                 </div>
             )}

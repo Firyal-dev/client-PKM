@@ -1,7 +1,6 @@
 import {
     Settings2,
     LayoutDashboard,
-    GitCommitHorizontal,
     BookImage,
     Album,
     Video,
@@ -12,7 +11,8 @@ import {
     ClipboardClock,
     Hospital,
     ClipboardList,
-    Newspaper
+    Newspaper,
+    Cross
 } from "lucide-react"
 
 export const sidebarData = {
@@ -27,19 +27,14 @@ export const sidebarData = {
             icon: Settings2,
             items: [
                 {
-                    title: "Menu Dinamis",
-                    url: "/admin/dynamic-menu",
+                    title: "Menu",
+                    url: "/admin/menus",
                 },
                 {
-                    title: "Konten Dinamis",
-                    url: "/admin/dynamic-content",
+                    title: "Halaman",
+                    url: "/admin/pages",
                 },
             ],
-        },
-        {
-            title: "Konten Statis",
-            url: "/admin/static-content",
-            icon: GitCommitHorizontal,
         },
     ],
     navMedia: [
@@ -86,7 +81,17 @@ export const sidebarData = {
             name: "Berita",
             url: "/admin/news",
             icon: Newspaper,
-        }
+        },
+        {
+            name: "Layanan",
+            url: "/admin/services",
+            icon: Cross,
+        },
+        {
+            name: "Pengunjung",
+            url: "/admin/visitors",
+            icon: Users,
+        },
     ],
     navAdminManage: [
         {

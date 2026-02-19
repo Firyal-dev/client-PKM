@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
-
 import { Button } from "@/components/ui/button"
 import { Agenda } from "@/types/agenda-prop"
 import { deleteAgendaAction } from "@/services/agenda/agenda-service"

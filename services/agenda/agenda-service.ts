@@ -1,177 +1,86 @@
 'use server'
 
 import api from '@/services/api'
-import { getAuthToken } from '@/services/auth-token'
-import { parsePaginatedResponse, tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
+import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Agenda } from '@/types/agenda-prop'
 import { revalidateTag } from 'next/cache'
 
-// ============================================
-// PUBLIC SERVICES (SSG/ISR)
-// ============================================
-
-/**
- * Get agenda list for public users (SSG with ISR)
- */
-export async function getPublicAgenda(
-    page = 1,
-    limit = 10
-): Promise<{ data: Agenda[]; totalPages: number; currentPage: number }> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
-
+// Publik: Ambil agenda (paginated)
+export async function getPublicAgenda(page = 1, limit = 10) {
     try {
-        const response = await fetch(`${baseUrl}/v1/agenda?page=${page}&limit=${limit}`, {
+        const res = await fetch(`${getBaseUrl()}/v1/agenda?${buildParams(page, limit)}`, {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch agenda')
-        }
-
-        const data = await response.json()
-        return {
-            data: data.docs || [],
-            totalPages: data.totalPages || 1,
-            currentPage: data.page || page
-        }
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data agenda'))
-    }
+        if (!res.ok) throw new Error('Gagal ambil agenda')
+        const data = await res.json()
+        return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil agenda')) }
 }
 
-/**
- * Get single agenda by slug or ID (SSG)
- */
+// Publik: Ambil agenda by slug
 export async function getPublicAgendaBySlug(slug: string): Promise<Agenda | null> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
-
     try {
-        const response = await fetch(`${baseUrl}/v1/agenda/${slug}`, {
+        const res = await fetch(`${getBaseUrl()}/v1/agenda/${slug}`, {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
-
-        if (!response.ok) {
-            return null
-        }
-
-        return response.json()
-    } catch (error) {
-        console.error('[AgendaService] Failed to fetch agenda by slug:', handleServiceError(error, 'Error'))
-        return null
-    }
+        return res.ok ? await res.json() : null
+    } catch { return null }
 }
 
-// ============================================
-// ADMIN SERVICES (SSR with Authentication)
-// ============================================
-
-/**
- * Get paginated agenda list for admin (SSR)
- */
-export async function getAdminAgendaList(
-    page = 1,
-    limit = 10
-): Promise<{ data: Agenda[]; totalPages: number; currentPage: number }> {
-    const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
-
+// Admin: Ambil agenda (paginated)
+export async function getAdminAgendaList(page = 1, limit = 10) {
     try {
-        const response = await api.get(`/v1/admin/agenda?page=${page}&limit=${limit}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return parsePaginatedResponse<Agenda>(response, page)
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data agenda'))
-    }
+        const res = await api.get(`/v1/admin/agenda?${buildParams(page, limit)}`, { headers: await authHeaders() })
+        return parseResponse<Agenda>(res, page)
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil agenda')) }
 }
 
-/**
- * Get single agenda by ID for admin (SSR)
- */
+// Admin: Ambil agenda by ID
 export async function getAdminAgendaById(id: string): Promise<Agenda> {
-    const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
-
     try {
-        const response = await api.get(`/v1/admin/agenda/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return response.data
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil detail agenda'))
-    }
+        const res = await api.get(`/v1/admin/agenda/${id}`, { headers: await authHeaders() })
+        return res.data
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil agenda')) }
 }
 
-/**
- * Create new agenda (Server Action)
- */
-export async function createAgendaAction(prevState: unknown, formData: FormData) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
+// Admin: Buat agenda
+export async function createAgendaAction(_: unknown, formData: FormData) {
     const payload = {
-        activity_name: formData.get("activity_name") as string,
-        date: formData.get("date") as string,
-        effective_date: formData.get("effective_date") as string,
-        time: formData.get("time") as string,
-        location: formData.get("location") as string,
+        activity_name: formData.get("activity_name"),
+        date: formData.get("date"),
+        effective_date: formData.get("effective_date"),
+        time: formData.get("time"),
+        location: formData.get("location"),
     }
-
     return tryAction(async () => {
-        const response = await api.post('/v1/admin/agenda', payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        const res = await api.post('/v1/admin/agenda', payload, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.AGENDA, 'max')
-        return response.data 
-    }, 'Gagal membuat agenda')
+        return res.data
+    }, 'Gagal buat agenda')
 }
 
-/**
- * Update existing agenda (Server Action)
- */
-export async function updateAgendaAction(id: string, prevState: unknown, formData: FormData) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
+// Admin: Update agenda
+export async function updateAgendaAction(id: string, _: unknown, formData: FormData) {
     const payload = {
-        activity_name: formData.get("activity_name") as string,
-        date: formData.get("date") as string,
-        effective_date: formData.get("effective_date") as string,
-        time: formData.get("time") as string,
-        location: formData.get("location") as string,
+        activity_name: formData.get("activity_name"),
+        date: formData.get("date"),
+        effective_date: formData.get("effective_date"),
+        time: formData.get("time"),
+        location: formData.get("location"),
     }
-
     return tryAction(async () => {
-        const response = await api.put(`/v1/admin/agenda/${id}`, payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        const res = await api.put(`/v1/admin/agenda/${id}`, payload, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.AGENDA, 'max')
-        return { message: 'Agenda berhasil diperbarui!', data: response.data }
-    }, 'Gagal memperbarui agenda')
+        return { message: 'Agenda berhasil diperbarui!', data: res.data }
+    }, 'Gagal update agenda')
 }
 
-/**
- * Delete agenda (Server Action)
- */
+// Admin: Hapus agenda
 export async function deleteAgendaAction(id: string) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.delete(`/v1/admin/agenda/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.delete(`/v1/admin/agenda/${id}`, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.AGENDA, 'max')
         return { message: 'Agenda berhasil dihapus!' }
-    }, 'Gagal menghapus agenda')
+    }, 'Gagal hapus agenda')
 }

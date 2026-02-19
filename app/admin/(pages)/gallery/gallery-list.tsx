@@ -3,15 +3,13 @@
 import { useState, useTransition } from "react"
 import { Loader2, Trash2, X, CheckSquare } from "lucide-react"
 import { toast } from "sonner"
-
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
-
 import { Button } from "@/components/ui/button"
 import { GalleryCard } from "@/components/admin/gallery-card"
 import { Gallery } from "@/types/gallery-prop"
 import { deleteGalleryBatchAction } from "@/services/gallery/gallery-service"
 
-export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
+export function GalleryList({ gallery }: { gallery: Gallery[] }) {
     const [selected, setSelected] = useState<string[]>([])
     const [isPending, startTransition] = useTransition()
 
@@ -90,7 +88,7 @@ export function GalleryList({ initialGallery }: { initialGallery: Gallery[] }) {
 
             {/* Galeri */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {initialGallery.map((item) => (
+                {gallery.map((item) => (
                     <GalleryCard
                         key={item.id}
                         gallery={item}

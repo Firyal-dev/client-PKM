@@ -4,6 +4,7 @@ import { updateBannerAction, getAdminBannerById } from "@/services/banner/banner
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
 
 export default async function UpdateBannerPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -21,7 +22,9 @@ export default async function UpdateBannerPage({ params }: { params: Promise<{ i
                     description="Perbarui informasi atau gambar banner."
                 >
                     <Link href="/admin/banners">
-                        <Button variant="outline">Batal</Button>
+                        <Button variant="outline">
+                            <ChevronLeft className="w-4 h-4" />Batal
+                        </Button>
                     </Link>
                 </PageHeader>
 

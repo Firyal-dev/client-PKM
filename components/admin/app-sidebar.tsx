@@ -8,17 +8,9 @@ import { NavAdminManage } from "@/components/admin/nav/nav-admin-manage"
 import { NavWebConfig } from "@/components/admin/nav/nav-web-config"
 import { NavActivities } from "@/components/admin/nav/nav-activities"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
-
 import { ModeToggle } from "@/components/admin/toggle-theme"
 import { Button } from "@/components/ui/button"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
 import { logoutAction } from "@/services/auth/logout-service"
@@ -26,9 +18,8 @@ import { useActionState } from "react"
 import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 
-
 export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } & React.ComponentProps<typeof Sidebar>) {
-  const [logoutState, formLogoutAction, logoutIsLoading] = useActionState(logoutAction, null)
+  const [state, logout, isLoading] = useActionState(logoutAction, null)
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -47,36 +38,10 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
         <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
         <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
         <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex flex-row gap-2">
-          <ConfirmDialog
-            trigger={
-              <Button
-                variant="destructive"
-                className="cursor-pointer flex-1 gap-2"
-                disabled={logoutIsLoading}
-              >
-                {logoutIsLoading ? "Memuat..." : "Logout"}
-              </Button>
-            }
-            title="Yakin mau keluar?"
-            description="Sesi berakhir dan anda harus login ulang untuk akses dashboard admin."
-            onConfirm={() => {
-              const form = document.createElement('form');
-              form.action = '';
-              const button = document.getElementById('hidden-logout-submit');
-              button?.click();
-            }}
-            isLoading={logoutIsLoading}
-            confirmText="Keluar"
-          />
-          <form action={formLogoutAction} className="hidden">
-            <button id="hidden-logout-submit" type="submit" />
-          </form>
-
-
+        <div className="flex gap-2">
+          <ConfirmDialog trigger={<Button variant="destructive" className="flex-1 cursor-pointer">{isLoading ? "Memuat..." : "Logout"}</Button>} title="Yakin keluar?" description="Sesi akan berakhir." onConfirm={() => logout()} confirmText="Keluar" />
           <ModeToggle />
         </div>
       </SidebarFooter>

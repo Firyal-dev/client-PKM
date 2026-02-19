@@ -1,114 +1,54 @@
 'use server'
 
 import api from '@/services/api'
-import { getAuthToken } from '@/services/auth-token'
-import { parsePaginatedResponse, tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
+import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Reviews } from '@/types/review-prop'
 import { revalidateTag } from 'next/cache'
 
-// ============================================
-// PUBLIC SERVICES (SSG/ISR)
-// ============================================
-
-/**
- * Get reviews for public users (SSG with ISR)
- */
-export async function getPublicReviews(
-    page = 1,
-    limit = 10
-): Promise<{ data: Reviews[]; totalPages: number; currentPage: number }> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
-
+// Publik: Ambil review (paginated)
+export async function getPublicReviews(page = 1, limit = 10) {
     try {
-        const response = await fetch(`${baseUrl}/v1/reviews?page=${page}&limit=${limit}`, {
+        const res = await fetch(`${getBaseUrl()}/v1/reviews?${buildParams(page, limit)}`, {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.REVIEW] }
         })
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch reviews')
-        }
-
-        const data = await response.json()
-        return {
-            data: data.docs || [],
-            totalPages: data.totalPages || 1,
-            currentPage: data.page || page
-        }
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data ulasan'))
-    }
+        if (!res.ok) throw new Error('Gagal ambil review')
+        const data = await res.json()
+        return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil review')) }
 }
 
-/**
- * Create review (public user)
- */
+// Publik: Buat review
 export async function createReviewAction(data: Omit<Reviews, 'id' | 'created_at'>) {
-    // Public endpoint, no auth required
     return tryAction(async () => {
         await api.post('/v1/reviews', data)
         revalidateTag(CACHE_TAGS.REVIEW, 'max')
-        return { message: 'Ulasan berhasil dikirim!' }
-    }, 'Gagal membuat ulasan')
+        return { message: 'Ulasan dikirim!' }
+    }, 'Gagal buat ulasan')
 }
 
-// ============================================
-// ADMIN SERVICES (SSR with Authentication)
-// ============================================
-
-/**
- * Get paginated review list for admin (SSR)
- */
-export async function getAdminReviewList(
-    page = 1,
-    limit = 10
-): Promise<{ data: Reviews[]; totalPages: number; currentPage: number }> {
-    const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
-
+// Admin: Ambil review (paginated)
+export async function getAdminReviewList(page = 1, limit = 10) {
     try {
-        const response = await api.get(`/v1/admin/reviews?page=${page}&limit=${limit}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return parsePaginatedResponse<Reviews>(response, page)
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data ulasan'))
-    }
+        const res = await api.get(`/v1/admin/reviews?${buildParams(page, limit)}`, { headers: await authHeaders() })
+        return parseResponse<Reviews>(res, page)
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil review')) }
 }
 
-/**
- * Update review publish status (Server Action)
- */
+// Admin: Toggle publish
 export async function toggleReviewPublishAction(id: string, isPublish: boolean) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.put(`/v1/admin/reviews/${id}`, { is_publish: isPublish }, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.put(`/v1/admin/reviews/${id}`, { is_publish: isPublish }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.REVIEW, 'max')
         return { message: `Ulasan ${isPublish ? 'ditampilkan' : 'disembunyikan'}!` }
-    }, 'Gagal mengubah status ulasan')
+    }, 'Gagal ubah status')
 }
 
-/**
- * Delete review (Server Action)
- */
+// Admin: Hapus review
 export async function deleteReviewAction(id: string) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.delete(`/v1/admin/reviews/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.delete(`/v1/admin/reviews/${id}`, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.REVIEW, 'max')
-        return { message: 'Ulasan berhasil dihapus!' }
-    }, 'Gagal menghapus ulasan')
+        return { message: 'Ulasan dihapus!' }
+    }, 'Gagal hapus ulasan')
 }

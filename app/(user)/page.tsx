@@ -11,6 +11,7 @@ import Berita from "@/components/user/sections/berita";
 import { getPublicBanners } from "@/services/banner/banner-service";
 import { getPublicAgenda } from "@/services/agenda/agenda-service";
 import { getPublicGallery } from "@/services/gallery/gallery-service";
+import { getPublicNews } from "@/services/news/news-service";
 
 export const metadata: Metadata = {
     title: "Puskesmas",
@@ -21,6 +22,7 @@ export default async function Home() {
     const banners = await getPublicBanners();
     const agendas = await getPublicAgenda(1, 3);
     const galeri = await getPublicGallery(1, 10);
+    const berita = await getPublicNews(1, 3);
 
     return (
         <main className="min-h-screen">
@@ -29,7 +31,7 @@ export default async function Home() {
             <Layanan />
             <Agenda data={agendas.data} />
             <Galeri data={galeri.data} />
-            <Berita />
+            <Berita data={berita.data} />
         </main>
     );
 }

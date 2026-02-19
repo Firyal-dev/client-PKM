@@ -6,7 +6,7 @@ export interface Gallery {
     created_at: Date;
 }
 
-export interface GalleryCardProp {
+export interface GalleryCard {
     gallery: Gallery
     isSelected: boolean
     onSelect: (id: string) => void

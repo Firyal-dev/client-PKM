@@ -1,233 +1,106 @@
 'use server'
 
 import api from '@/services/api'
-import { getAuthToken } from '@/services/auth-token'
-import { parsePaginatedResponse, tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
+import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Album } from '@/types/album-prop'
 import { revalidateTag } from 'next/cache'
 
-// ============================================
-// PUBLIC SERVICES (SSG/ISR)
-// ============================================
-
-/**
- * Get album list for public users (SSG with ISR)
- */
-export async function getPublicAlbums(
-    page = 1,
-    limit = 10
-): Promise<{ data: Album[]; totalPages: number; currentPage: number }> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
-
+// Publik: Ambil album (paginated)
+export async function getPublicAlbums(page = 1, limit = 10) {
     try {
-        const response = await fetch(`${baseUrl}/v1/album?page=${page}&limit=${limit}`, {
+        const res = await fetch(`${getBaseUrl()}/v1/album?${buildParams(page, limit)}`, {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.ALBUM] }
         })
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch albums')
-        }
-
-        const data = await response.json()
-        return {
-            data: data.docs || [],
-            totalPages: data.totalPages || 1,
-            currentPage: data.page || page
-        }
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data album'))
-    }
+        if (!res.ok) throw new Error('Gagal ambil album')
+        const data = await res.json()
+        return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil album')) }
 }
 
-/**
- * Get single album by ID for public users (SSG)
- */
+// Publik: Ambil album by ID
 export async function getPublicAlbumById(id: string): Promise<Album | null> {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
-
     try {
-        const response = await fetch(`${baseUrl}/v1/album/${id}`, {
+        const res = await fetch(`${getBaseUrl()}/v1/album/${id}`, {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.ALBUM] }
         })
-
-        if (!response.ok) {
-            return null
-        }
-
-        return response.json()
-    } catch (error) {
-        console.error('[AlbumService] Failed to fetch album by ID:', handleServiceError(error, 'Error'))
-        return null
-    }
+        return res.ok ? await res.json() : null
+    } catch { return null }
 }
 
-// ============================================
-// ADMIN SERVICES (SSR with Authentication)
-// ============================================
-
-/**
- * Get paginated album list for admin (SSR)
- */
-export async function getAdminAlbumList(
-    page = 1,
-    limit = 10
-): Promise<{ data: Album[]; totalPages: number; currentPage: number }> {
-    const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
-
+// Admin: Ambil album (paginated)
+export async function getAdminAlbumList(page = 1, limit = 10) {
     try {
-        const response = await api.get(`/v1/admin/album?page=${page}&limit=${limit}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return parsePaginatedResponse<Album>(response, page)
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil data album'))
-    }
+        const res = await api.get(`/v1/admin/album?${buildParams(page, limit)}`, { headers: await authHeaders() })
+        return parseResponse<Album>(res, page)
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil album')) }
 }
 
-/**
- * Get single album by ID for admin (SSR)
- */
+// Admin: Ambil album by ID
 export async function getAdminAlbumById(id: string): Promise<Album> {
-    const token = await getAuthToken()
-    if (!token) {
-        throw new Error('UNAUTHORIZED')
-    }
-
     try {
-        const response = await api.get(`/v1/admin/album/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return response.data
-    } catch (error) {
-        throw new Error(handleServiceError(error, 'Gagal mengambil detail album'))
-    }
+        const res = await api.get(`/v1/admin/album/${id}`, { headers: await authHeaders() })
+        return res.data
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil album')) }
 }
 
-/**
- * Create new album (Server Action)
- */
-export async function createAlbumAction(prevState: unknown, formData: FormData) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
+// Admin: Buat album
+export async function createAlbumAction(_: unknown, formData: FormData) {
     const payload = {
         album_title: formData.get('album_title'),
         description: formData.get('description') || '',
         album_cover: null,
         photo_ids: []
     }
-
     return tryAction(async () => {
-        const response = await api.post('/v1/admin/album', payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        const res = await api.post('/v1/admin/album', payload, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
-        return { message: 'Album berhasil dibuat!', data: response.data }
-    }, 'Gagal membuat album baru')
+        return { message: 'Album berhasil dibuat!', data: res.data }
+    }, 'Gagal buat album')
 }
 
-/**
- * Update album details (Server Action)
- */
-export async function updateAlbumAction(id: string, prevState: unknown, formData: FormData) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
-    const payload = {
-        album_title: formData.get('album_title'),
-        description: formData.get('description')
-    }
-
+// Admin: Update album
+export async function updateAlbumAction(id: string, _: unknown, formData: FormData) {
+    const payload = { album_title: formData.get('album_title'), description: formData.get('description') }
     return tryAction(async () => {
-        await api.put(`/v1/admin/album/${id}`, payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.put(`/v1/admin/album/${id}`, payload, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
         return { message: 'Album berhasil diperbarui!' }
-    }, 'Gagal memperbarui album')
+    }, 'Gagal update album')
 }
 
-/**
- * Delete album (Server Action)
- */
+// Admin: Hapus album
 export async function deleteAlbumAction(id: string) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.delete(`/v1/admin/album/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.delete(`/v1/admin/album/${id}`, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
         return { message: 'Album berhasil dihapus!' }
-    }, 'Gagal menghapus album')
+    }, 'Gagal hapus album')
 }
 
-/**
- * Update album name (Server Action) - Simple name update without FormData
- */
+// Admin: Update nama album
 export async function updateAlbumNameAction(id: string, newTitle: string) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.put(`/v1/admin/album/${id}`, { album_title: newTitle }, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.put(`/v1/admin/album/${id}`, { album_title: newTitle }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
         return { message: 'Nama album berhasil diperbarui!' }
-    }, 'Gagal mengubah nama album')
+    }, 'Gagal ubah nama album')
 }
 
-/**
- * Add photos to album (Server Action)
- */
+// Admin: Tambah foto ke album
 export async function addPhotosToAlbumAction(albumId: string, photoIds: string[]) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.put('/v1/admin/gallery/album', {
-            photo_ids: photoIds,
-            album_id: albumId
-        }, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.put('/v1/admin/gallery/album', { photo_ids: photoIds, album_id: albumId }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
-        return { message: 'Foto berhasil ditambahkan ke album!' }
-    }, 'Gagal menambahkan foto ke album')
+        return { message: 'Foto berhasil ditambahkan!' }
+    }, 'Gagal tambah foto')
 }
 
-/**
- * Remove photos from album (Server Action)
- */
+// Admin: Hapus foto dari album
 export async function removePhotosFromAlbumAction(albumId: string, photoIds: string[]) {
-    const token = await getAuthToken()
-    if (!token) {
-        return { success: false, error: 'Sesi habis, silakan login lagi' }
-    }
-
     return tryAction(async () => {
-        await api.put('/v1/admin/gallery/remove-from-album', {
-            photo_ids: photoIds,
-            album_id: albumId
-        }, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        await api.put('/v1/admin/gallery/remove-from-album', { photo_ids: photoIds, album_id: albumId }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.ALBUM, 'max')
-        return { message: 'Foto berhasil dihapus dari album!' }
-    }, 'Gagal menghapus foto dari album')
+        return { message: 'Foto berhasil dihapus!' }
+    }, 'Gagal hapus foto')
 }

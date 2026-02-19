@@ -3,17 +3,13 @@
 import { clearAuthToken } from '@/services/auth-token'
 import { redirect } from 'next/navigation'
 
-/**
- * Handle admin logout (Server Action)
- */
+// Logout - redirect ke login
 export async function logoutAction() {
     await clearAuthToken()
     redirect('/admin/login')
 }
 
-/**
- * Logout and return to login page (no redirect, returns result)
- */
+// Logout - return result
 export async function logoutActionWithResult() {
     await clearAuthToken()
     return { success: true, message: 'Logout berhasil' }
