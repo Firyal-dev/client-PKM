@@ -78,16 +78,6 @@ export const sidebarData = {
             icon: ClipboardList,
         },
         {
-            name: "Berita",
-            url: "/admin/news",
-            icon: Newspaper,
-        },
-        {
-            name: "Layanan",
-            url: "/admin/services",
-            icon: Cross,
-        },
-        {
             name: "Pengunjung",
             url: "/admin/visitors",
             icon: Users,

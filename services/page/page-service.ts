@@ -82,8 +82,9 @@ export async function getAdminPageById(id: string): Promise<Page> {
 
 // Admin: Buat halaman
 export async function createPageAction(_: unknown, formData: FormData) {
+  const menuId = formData.get('menu_id')
   const payload = {
-    menu_id: formData.get('menu_id'),
+    menu_id: menuId && String(menuId).trim() !== '' ? menuId : null,
     title: formData.get('title'),
     content: formData.get('content') || '',
     image: formData.get('image') || undefined,
@@ -99,8 +100,9 @@ export async function createPageAction(_: unknown, formData: FormData) {
 
 // Admin: Update halaman
 export async function updatePageAction(id: string, _: unknown, formData: FormData) {
+  const menuId = formData.get('menu_id')
   const payload = {
-    menu_id: formData.get('menu_id'),
+    menu_id: menuId && String(menuId).trim() !== '' ? menuId : null,
     title: formData.get('title'),
     content: formData.get('content') || '',
     image: formData.get('image') || undefined,
@@ -108,7 +110,7 @@ export async function updatePageAction(id: string, _: unknown, formData: FormDat
     status: Number(formData.get('status')) || 1,
   }
   return tryAction(async () => {
-    const res = await api.put(`/v1/admin/pages/${id}`, payload, { headers: await authHeaders() })
+    const res = await api.patch(`/v1/admin/pages/${id}`, payload, { headers: await authHeaders() })
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal update halaman')
@@ -126,7 +128,7 @@ export async function deletePageAction(id: string) {
 // Admin: Toggle status
 export async function togglePageStatusAction(id: string) {
   return tryAction(async () => {
-    const res = await api.put(`/v1/admin/pages/${id}/toggle-status`, {}, { headers: await authHeaders() })
+    const res = await api.patch(`/v1/admin/pages/${id}/toggle-status`, {}, { headers: await authHeaders() })
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')

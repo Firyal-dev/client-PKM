@@ -104,6 +104,7 @@ export function PageForm({ action, initialData, menus = [] }: PageFormProps) {
         <div className="grid gap-2">
           <Label htmlFor="content">Konten</Label>
           <RichEditor
+            name="content"
             id="content"
             defaultValue={initialData?.content || ""}
           />

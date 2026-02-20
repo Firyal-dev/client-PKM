@@ -5,17 +5,18 @@ import { authHeaders, getBaseUrl } from "@/services/helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
-// Tipe Menu
+
 export interface Menu {
   id: string
   title: string
   slug: string
-  parent_id: string | null
+  parent?: { id: string; title: string } | null 
+  parent_id?: string | null 
   order: number
   status: number
   children?: Menu[]
-  created_at: string
-  updated_at: string
+  createdAt: string 
+  updatedAt: string 
 }
 
 // Publik: Ambil semua menu aktif
@@ -51,18 +52,20 @@ export async function getAdminMenus(): Promise<Menu[]> {
 // Admin: Menu flat (dropdown)
 export async function getAdminMenusFlat(): Promise<Menu[]> {
   try {
-    const res = await api.get('/v1/admin/menus/flat', { headers: await authHeaders() })
+    const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     return res.data || []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
 // Admin: Menu utama saja (dropdown)
+// Di menu-service.ts -> fungsi getAdminParentMenus
 export async function getAdminParentMenus(): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
-    // Filter only parent menus (no parent_id)
-    return menus.filter(menu => !menu.parent_id)
+    
+    // FIX: Cek apakah object 'parent' bernilai null / falsey
+    return menus.filter(menu => !menu.parent) 
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -90,7 +93,6 @@ export async function createMenuAction(_: unknown, formData: FormData) {
   }, 'Gagal buat menu')
 }
 
-// Admin: Update menu
 export async function updateMenuAction(id: string, _: unknown, formData: FormData) {
   const parentId = formData.get('parent_id')
   const payload = {
@@ -99,13 +101,15 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     order: Number(formData.get('order')) || 0,
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
+
   return tryAction(async () => {
-    const res = await api.put(`/v1/admin/menus/${id}`, payload, { headers: await authHeaders() })
+    const res = await api.patch(`/v1/admin/menus/${id}`, payload, {
+      headers: await authHeaders()
+    })
     revalidateTag(CACHE_TAGS.MENU, 'max')
     return res.data
   }, 'Gagal update menu')
 }
-
 // Admin: Hapus menu
 export async function deleteMenuAction(id: string) {
   return tryAction(async () => {
@@ -118,7 +122,9 @@ export async function deleteMenuAction(id: string) {
 // Admin: Toggle status
 export async function toggleMenuStatusAction(id: string) {
   return tryAction(async () => {
-    const res = await api.put(`/v1/admin/menus/${id}/toggle-status`, {}, { headers: await authHeaders() })
+    const res = await api.patch(`/v1/admin/menus/${id}/toggle-status`, {}, {
+      headers: await authHeaders()
+    })
     revalidateTag(CACHE_TAGS.MENU, 'max')
     return res.data
   }, 'Gagal ubah status')

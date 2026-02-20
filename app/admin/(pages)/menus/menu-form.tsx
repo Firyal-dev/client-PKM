@@ -85,7 +85,7 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
           <Label htmlFor="parent_id">Menu Induk</Label>
           <Select
             name="parent_id"
-            defaultValue={initialData?.parent_id ? initialData.parent_id.toString() : "__none__"}
+            defaultValue={initialData?.parent?.id ? initialData.parent.id.toString() : "__none__"}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Pilih menu induk" />

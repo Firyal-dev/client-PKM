@@ -46,22 +46,17 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
 
     return (
         <Sheet open={open} onOpenChange={handleOpenChange}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <SheetTrigger asChild>
-                        <SidebarMenuButton size="lg" className="cursor-pointer">
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                <Image src={photoSrc} width={100} height={100} className="w-full h-full object-cover rounded-full" alt="Profil" unoptimized />
-                            </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{profile.name}</span>
-                                <span className="truncate text-xs">Puskesmas</span>
-                            </div>
-                        </SidebarMenuButton>
-                    </SheetTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Edit Profil</p></TooltipContent>
-            </Tooltip>
+            <SheetTrigger asChild>
+                <SidebarMenuButton size="lg" className="cursor-pointer" tooltip="Edit Profil">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                        <Image src={photoSrc} width={100} height={100} className="w-full h-full object-cover rounded-full" alt="Profil" unoptimized />
+                    </div>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">{profile.name}</span>
+                        <span className="truncate text-xs">Puskesmas</span>
+                    </div>
+                </SidebarMenuButton>
+            </SheetTrigger>
 
             <SheetContent>
                 <SheetHeader>
