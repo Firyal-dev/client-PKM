@@ -5,7 +5,7 @@ import { ConsultationProp } from "@/types/consultation-prop"
 // Data Dummy
 const dummyConsultations: ConsultationProp[] = [
     {
-        _id: "1",
+        id: "1",
         username: "Budi Santoso",
         phone_number: "081234567890",
         message: "Saya ingin bertanya mengenai jadwal praktek dokter gigi di hari Sabtu apakah ada?",
@@ -14,7 +14,7 @@ const dummyConsultations: ConsultationProp[] = [
         created_at: new Date('2024-02-01T08:00:00Z')
     },
     {
-        _id: "2",
+        id: "2",
         username: "Siti Aminah",
         phone_number: "085712345678",
         message: "Apakah bisa melakukan pendaftaran online untuk poli anak?",
@@ -22,7 +22,7 @@ const dummyConsultations: ConsultationProp[] = [
         created_at: new Date('2024-02-05T10:30:00Z')
     },
     {
-        _id: "3",
+        id: "3",
         username: "Andi Wijaya",
         message: "Tes konsultasi tanpa nomor telepon.",
         answer: "Diterima, terima kasih.",

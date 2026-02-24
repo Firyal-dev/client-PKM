@@ -59,7 +59,7 @@ export default async function AlbumDetailPage({
                             </EmptyHeader>
                         </Empty>
                     ) : (
-                        <GalleryList initialGallery={galleryResponse.data} />
+                        <GalleryList gallery={galleryResponse.data} />
                     )}
                 </div>
 

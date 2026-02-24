@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from "react"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
-import { id as localeId } from "date-fns/locale"
 import { MoreVertical, Pencil, Trash2, ChevronRight, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
+import { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,22 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { deleteMenuAction, toggleMenuStatusAction, Menu } from "@/services/menu/menu-service"
+import { DataTable } from "@/components/ui/data-table"
 
 export function MenuList({ menus }: { menus: Menu[] }) {
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
-
-  const toggleExpand = (id: string) => {
-    setExpandedIds((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(id)) {
-        newSet.delete(id)
-      } else {
-        newSet.add(id)
-      }
-      return newSet
-    })
-  }
-
   const handleDelete = async (id: string) => {
     try {
       const result = await deleteMenuAction(id)
@@ -59,47 +44,68 @@ export function MenuList({ menus }: { menus: Menu[] }) {
     }
   }
 
-  const renderMenuItem = (menu: Menu, level: number = 0) => {
-    const hasChildren = menu.children && menu.children.length > 0
-    const isExpanded = expandedIds.has(menu.id)
-    const leftMargin = level * 24
+  const columns: ColumnDef<Menu>[] = [
+    {
+      accessorKey: "title",
+      header: "Judul Menu",
+      cell: ({ row }) => {
+        const menu = row.original
+        const paddingLeft = `${row.depth * 2}rem`
 
-    return (
-      <div key={menu.id}>
-        <div
-          className="flex items-center justify-between p-4 rounded-lg border bg-card mb-2 hover:shadow-sm transition-all"
-          style={{ marginLeft: leftMargin }}
-        >
-          <div className="flex items-center gap-3">
-            {hasChildren && (
+        return (
+          <div className="flex items-center gap-2" style={{ paddingLeft }}>
+            {row.getCanExpand() ? (
               <button
-                onClick={() => toggleExpand(menu.id)}
+                onClick={row.getToggleExpandedHandler()}
                 className="p-1 hover:bg-muted rounded"
               >
-                {isExpanded ? (
+                {row.getIsExpanded() ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
                   <ChevronRight className="w-4 h-4" />
                 )}
               </button>
+            ) : (
+              <div className="w-6" /> // spacer for alignment without children
             )}
-            {!hasChildren && <div className="w-6" />}
-
             <div>
-              <h3 className="font-medium">{menu.title}</h3>
-              <p className="text-sm text-muted-foreground">/{menu.slug}</p>
+              <h3 className="font-medium whitespace-nowrap">{menu.title}</h3>
+              <p className="text-sm text-muted-foreground whitespace-nowrap">/{menu.slug}</p>
             </div>
           </div>
+        )
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.status
+        return (
+          <Badge variant={status === 1 ? 'default' : 'secondary'}>
+            {status === 1 ? 'Aktif' : 'Tidak Aktif'}
+          </Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "order",
+      header: "Urutan",
+      cell: ({ row }) => {
+        return (
+          <span className="text-sm text-muted-foreground">
+            Order: {row.original.order}
+          </span>
+        )
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const menu = row.original
 
-          <div className="flex items-center gap-3">
-            <Badge variant={menu.status === 1 ? 'default' : 'secondary'}>
-              {menu.status === 1 ? 'Aktif' : 'Tidak Aktif'}
-            </Badge>
-
-            <span className="text-sm text-muted-foreground">
-              Order: {menu.order}
-            </span>
-
+        return (
+          <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -130,20 +136,14 @@ export function MenuList({ menus }: { menus: Menu[] }) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-
-        {hasChildren && isExpanded && (
-          <div>
-            {menu.children!.map((child) => renderMenuItem(child, level + 1))}
-          </div>
-        )}
-      </div>
-    )
-  }
+        )
+      },
+    }
+  ]
 
   return (
-    <div className="space-y-2">
-      {menus.map((menu) => renderMenuItem(menu))}
+    <div className="space-y-4">
+      <DataTable columns={columns} data={menus} />
     </div>
   )
 }

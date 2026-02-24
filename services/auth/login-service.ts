@@ -12,11 +12,13 @@ export interface LoginResponse { access_token: string; user: { id: string; name:
 export async function loginAction(_: unknown, formData: FormData) {
     const name = formData.get('name') as string
     const password = formData.get('password') as string
+    const recaptchaToken = formData.get('recaptchaToken') as string
 
     if (!name || !password) return { success: false, error: 'Username dan password wajib diisi' }
+    if (!recaptchaToken) return { success: false, error: 'Silakan verifikasi reCAPTCHA Anda' }
 
     const result = await tryAction<LoginResponse>(async () => {
-        const res = await api.post<LoginResponse>('/v1/auth/login', { name, password })
+        const res = await api.post<LoginResponse>('/v1/auth/login', { name, password, recaptchaToken })
         await setAuthToken(res.data.access_token)
         return res.data
     }, 'Login gagal')
