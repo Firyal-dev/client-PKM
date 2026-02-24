@@ -8,13 +8,17 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 export function NavWebConfig({ navWebConfig }: { navWebConfig: { name: string; url: string; icon: LucideIcon }[] }) {
     const pathname = usePathname()
 
+    const isMatch = (url: string) => {
+        return pathname === url || pathname.startsWith(url + "/")
+    }
+
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>Web Config</SidebarGroupLabel>
             <SidebarMenu>
                 {navWebConfig.map((item) => (
                     <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton asChild isActive={item.url === pathname}>
+                        <SidebarMenuButton asChild isActive={isMatch(item.url)}>
                             <Link href={item.url}><item.icon /><span>{item.name}</span></Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

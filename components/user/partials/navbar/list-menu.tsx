@@ -35,15 +35,18 @@ export default function ListMenu({ menus }: ListMenuProps) {
                 {isOpen ? <X size={28} /> : <MenuIcon size={28} />}
             </button>
 
-            {/* Desktop Menu */}
+            {/* Menu Desktop */}
             <ul className="hidden md:flex items-center gap-6">
                 <li>
+                    {/* Menu Beranda selalu ada */}
                     <NavLink href="/" active={pathname === '/'}>
                         Beranda
                     </NavLink>
                 </li>
+
+                {/* Tampilkan menu dinamis dari database */}
                 {mainMenus.map((menu) => {
-                    // Cek submenu
+                    // Cari anak menu (submenu)
                     const subMenus = menus
                         .filter(sub => sub.parent_id === menu.id && sub.status === 1)
                         .sort((a, b) => a.order - b.order)
@@ -56,7 +59,7 @@ export default function ListMenu({ menus }: ListMenuProps) {
                                 <NavLink href={`/${menu.slug}`} active={pathname === `/${menu.slug}`}>
                                     {menu.title}
                                 </NavLink>
-                                {/* Submenu Dropdown */}
+                                {/* Dropdown Submenu */}
                                 <ul className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                     {subMenus.map((subMenu) => (
                                         <li key={subMenu.id}>
@@ -94,9 +97,12 @@ export default function ListMenu({ menus }: ListMenuProps) {
         `}
             >
                 <ul className="flex flex-col gap-2">
+                    {/* Menu Beranda Mobile */}
                     <MobileLink href="/" onClick={() => setIsOpen(false)} active={pathname === '/'}>
                         Beranda
                     </MobileLink>
+
+                    {/* Loop Menu Dinamis Mobile */}
                     {mainMenus.map((menu) => {
                         const subMenus = menus
                             .filter(sub => sub.parent_id === menu.id && sub.status === 1)

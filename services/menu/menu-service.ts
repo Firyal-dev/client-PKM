@@ -10,13 +10,14 @@ export interface Menu {
   id: string
   title: string
   slug: string
-  parent?: { id: string; title: string } | null 
-  parent_id?: string | null 
+  url_target?: string
+  parent?: { id: string; title: string } | null
+  parent_id?: string | null
   order: number
   status: number
   children?: Menu[]
-  createdAt: string 
-  updatedAt: string 
+  createdAt: string
+  updatedAt: string
 }
 
 // Publik: Ambil semua menu aktif
@@ -49,23 +50,16 @@ export async function getAdminMenus(): Promise<Menu[]> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
-// Admin: Menu flat (dropdown)
-export async function getAdminMenusFlat(): Promise<Menu[]> {
-  try {
-    const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
-    return res.data || []
-  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
-}
+// Alias untuk getAdminMenus (backward compat)
+export const getAdminMenusFlat = getAdminMenus
 
 // Admin: Menu utama saja (dropdown)
-// Di menu-service.ts -> fungsi getAdminParentMenus
 export async function getAdminParentMenus(): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
-    
-    // FIX: Cek apakah object 'parent' bernilai null / falsey
-    return menus.filter(menu => !menu.parent) 
+
+    return menus.filter(menu => !menu.parent)
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -82,8 +76,10 @@ export async function createMenuAction(_: unknown, formData: FormData) {
   const parentId = formData.get('parent_id')
   const payload = {
     title: formData.get('title'),
+    slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
     url_target: formData.get('url_target') || '/',
     order: Number(formData.get('order')) || 0,
+    status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
   return tryAction(async () => {
@@ -97,8 +93,10 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
   const parentId = formData.get('parent_id')
   const payload = {
     title: formData.get('title'),
+    slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
     url_target: formData.get('url_target') || '/',
     order: Number(formData.get('order')) || 0,
+    status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
 

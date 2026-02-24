@@ -223,3 +223,5 @@ export function RichEditor({ id, name, defaultValue, placeholder = "Tulis konten
         </div>
     )
 }
+
+export default RichEditor

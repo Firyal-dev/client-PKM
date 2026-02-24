@@ -12,13 +12,11 @@ export default function VisitorTracker() {
 
             try {
                 const response = await api.post('/v1/visitor/track');
-
                 if (response.status === 200 || response.status === 201) {
                     sessionStorage.setItem('has_visited_today', 'true');
-                    console.log('Visitor tracked!');
                 }
-            } catch (error) {
-                console.error('Failed to track visitor:', error);
+            } catch {
+                // Silently fail - visitor tracking is non-critical
             }
 
         };

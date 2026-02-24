@@ -1,7 +1,7 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, parseResponse } from "@/services/helpers"
+import { authHeaders, getBaseUrl, parseResponse } from "@/services/helpers"
 import { handleServiceError } from "@/services/utils"
 
 export interface Visitor {
@@ -28,7 +28,7 @@ export async function getAdminVisitors(): Promise<Visitor[]> {
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil visitor')) }
 }
 
-// Admin: Ambil statistik visitor
+// Admin: Ambil statistik visitor (Authenticated)
 export async function getVisitorStats(): Promise<VisitorStats> {
     try {
         const [total, today, thisMonth, thisYear] = await Promise.all([
@@ -45,4 +45,27 @@ export async function getVisitorStats(): Promise<VisitorStats> {
             thisYear: thisYear.data,
         }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil statistik visitor')) }
+}
+
+// Public: Ambil statistik visitor (Unauthenticated untuk Footer)
+export async function getPublicVisitorStats(): Promise<VisitorStats> {
+    try {
+        const url = getBaseUrl()
+        const [total, today, thisMonth, thisYear] = await Promise.all([
+            fetch(`${url}/v1/visitor/count`).then(r => r.json()),
+            fetch(`${url}/v1/visitor/count-day`).then(r => r.json()),
+            fetch(`${url}/v1/visitor/count-month`).then(r => r.json()),
+            fetch(`${url}/v1/visitor/count-year`).then(r => r.json()),
+        ])
+
+        return {
+            total: total || 0,
+            today: today || 0,
+            thisMonth: thisMonth || 0,
+            thisYear: thisYear || 0,
+        }
+    } catch (e) {
+        console.error('Gagal ambil statistik visitor:', e)
+        return { total: 0, today: 0, thisMonth: 0, thisYear: 0 }
+    }
 }

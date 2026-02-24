@@ -2,7 +2,7 @@
 
 import api from "@/services/api"
 import { authHeaders, buildParams, parseResponse } from "@/services/helpers"
-import { tryAction, handleServiceError } from "@/services/utils"
+import { tryAction, handleServiceError, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
 export interface Video {
@@ -28,7 +28,7 @@ export async function getAdminVideos(page = 1, limit = 10) {
 export async function createVideoAction(_: unknown, formData: FormData) {
     return tryAction(async () => {
         const res = await api.post('/v1/admin/video', formData, { headers: await authHeaders() })
-        revalidateTag('videos')
+        revalidateTag(CACHE_TAGS.VIDEO, 'max')
         return res.data
     }, 'Gagal buat video')
 }
@@ -37,7 +37,7 @@ export async function createVideoAction(_: unknown, formData: FormData) {
 export async function deleteVideoAction(id: string) {
     return tryAction(async () => {
         const res = await api.delete(`/v1/admin/video/${id}`, { headers: await authHeaders() })
-        revalidateTag('videos')
+        revalidateTag(CACHE_TAGS.VIDEO, 'max')
         return res.data
     }, 'Gagal hapus video')
 }

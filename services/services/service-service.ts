@@ -2,7 +2,7 @@
 
 import api from "@/services/api"
 import { authHeaders, buildParams, parseResponse } from "@/services/helpers"
-import { tryAction, handleServiceError, SSG_REVALIDATE_TIME } from "@/services/utils"
+import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
 export interface ServiceFlow {
@@ -52,7 +52,7 @@ export async function createServiceAction(_: unknown, formData: FormData) {
 
     return tryAction(async () => {
         const res = await api.post('/v1/admin/services', formData, { headers: await authHeaders() })
-        revalidateTag('services')
+        revalidateTag(CACHE_TAGS.SERVICES, 'max')
         return res.data
     }, 'Gagal buat service')
 }
@@ -71,7 +71,7 @@ export async function updateServiceAction(id: string, _: unknown, formData: Form
 
     return tryAction(async () => {
         const res = await api.patch(`/v1/admin/services/${id}`, formData, { headers: await authHeaders() })
-        revalidateTag('services')
+        revalidateTag(CACHE_TAGS.SERVICES, 'max')
         return res.data
     }, 'Gagal update service')
 }
@@ -80,7 +80,7 @@ export async function updateServiceAction(id: string, _: unknown, formData: Form
 export async function deleteServiceAction(id: string) {
     return tryAction(async () => {
         const res = await api.delete(`/v1/admin/services/${id}`, { headers: await authHeaders() })
-        revalidateTag('services')
+        revalidateTag(CACHE_TAGS.SERVICES, 'max')
         return res.data
     }, 'Gagal hapus service')
 }

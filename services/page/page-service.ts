@@ -9,14 +9,16 @@ import { revalidateTag } from "next/cache"
 export interface Page {
   id: string
   menu_id: string
-  menu?: { id: string; title: string }
+  menu?: { id: string; title: string; slug: string }
   title: string
+  slug: string
   content: string
-  image?: string
+  image?: string // Khusus Foto
+  file?: string // Khusus Dokumen
   layout: string
   status: number
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 // Publik: Ambil semua halaman
@@ -82,17 +84,14 @@ export async function getAdminPageById(id: string): Promise<Page> {
 
 // Admin: Buat halaman
 export async function createPageAction(_: unknown, formData: FormData) {
-  const menuId = formData.get('menu_id')
-  const payload = {
-    menu_id: menuId && String(menuId).trim() !== '' ? menuId : null,
-    title: formData.get('title'),
-    content: formData.get('content') || '',
-    image: formData.get('image') || undefined,
-    layout: formData.get('layout') || 'artikel',
-    status: Number(formData.get('status')) || 1,
-  }
+  const photo = formData.get('image') as File
+  const doc = formData.get('file') as File
+
+  if (!photo || photo.size === 0) formData.delete('image')
+  if (!doc || doc.size === 0) formData.delete('file')
+
   return tryAction(async () => {
-    const res = await api.post('/v1/admin/pages', payload, { headers: await authHeaders() })
+    const res = await api.post('/v1/admin/pages', formData, { headers: await authHeaders() })
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal buat halaman')
@@ -100,17 +99,14 @@ export async function createPageAction(_: unknown, formData: FormData) {
 
 // Admin: Update halaman
 export async function updatePageAction(id: string, _: unknown, formData: FormData) {
-  const menuId = formData.get('menu_id')
-  const payload = {
-    menu_id: menuId && String(menuId).trim() !== '' ? menuId : null,
-    title: formData.get('title'),
-    content: formData.get('content') || '',
-    image: formData.get('image') || undefined,
-    layout: formData.get('layout') || 'artikel',
-    status: Number(formData.get('status')) || 1,
-  }
+  const photo = formData.get('image') as File
+  const doc = formData.get('file') as File
+
+  if (!photo || photo.size === 0) formData.delete('image')
+  if (!doc || doc.size === 0) formData.delete('file')
+
   return tryAction(async () => {
-    const res = await api.patch(`/v1/admin/pages/${id}`, payload, { headers: await authHeaders() })
+    const res = await api.patch(`/v1/admin/pages/${id}`, formData, { headers: await authHeaders() })
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal update halaman')
@@ -132,4 +128,16 @@ export async function togglePageStatusAction(id: string) {
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')
+}
+
+// Publik: Ambil halaman pelayanan
+export async function getPublicPelayanan(): Promise<Page[]> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
+      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
+    })
+    if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
 }
