@@ -11,11 +11,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useActionState } from 'react'
-import { createAlbum } from '@/services/album/album-service'
+import { createAlbumAction } from '@/services/album/album-service'
 import { CustomLink } from '@/components/ui/link'
 
 export default function CreateAlbumPage() {
-    const [state, formAction, isPending] = useActionState(createAlbum, null)
+    const [state, formAction, isPending] = useActionState(createAlbumAction, null as any)
 
     return (
         <div className="gap-6 p-4">

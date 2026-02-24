@@ -110,17 +110,6 @@ export function PageForm({ action, initialData, menus = [] }: PageFormProps) {
           />
         </div>
 
-        {/* Image URL */}
-        <div className="grid gap-2">
-          <Label htmlFor="image">URL Gambar (Opsional)</Label>
-          <Input
-            id="image"
-            name="image"
-            defaultValue={initialData?.image || ""}
-            placeholder="https://example.com/image.jpg"
-          />
-        </div>
-
         {/* Status */}
         <div className="flex items-center gap-2">
           <Switch

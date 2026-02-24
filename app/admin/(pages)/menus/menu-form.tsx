@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -23,6 +23,13 @@ type MenuFormProps = {
   parentMenus: Menu[]
 }
 
+// Dummy data untuk halaman dinamis (nanti bisa diganti dengan fetch dari API/DB)
+const DUMMY_DYNAMIC_PAGES = [
+  { slug: "/berita/puskesmas-raih-penghargaan", title: "Berita: Puskesmas Raih Penghargaan" },
+  { slug: "/profil/sejarah", title: "Profil: Sejarah Puskesmas" },
+  { slug: "/program/posyandu-lansia", title: "Program: Posyandu Lansia" },
+]
+
 export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
   const router = useRouter()
 
@@ -30,6 +37,14 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
     success: false,
     error: "",
   })
+
+  // State untuk menentukan apakah link statis atau dinamis
+  // Cek jika initialData.slug ada di data dummy, maka set 'dinamis', sisanya 'statis'
+  const isInitialDynamic = DUMMY_DYNAMIC_PAGES.some(p => p.slug === initialData?.slug)
+  const [targetType, setTargetType] = useState<"statis" | "dinamis">(
+    isInitialDynamic ? "dinamis" : "statis"
+  )
+
   useEffect(() => {
     if (state.success) {
       toast.success(initialData ? "Menu berhasil diperbarui" : "Menu berhasil dibuat")
@@ -55,29 +70,58 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
           />
         </div>
 
-        {/* URL Target */}
+        {/* Pemilih Tipe Tautan */}
         <div className="grid gap-2">
-          <Label htmlFor="url_target">URL Target</Label>
-          <Select
-            name="url_target"
-            defaultValue={initialData?.slug || "/"}
+          <Label>Tipe Tautan</Label>
+          <Select 
+            value={targetType} 
+            onValueChange={(val: "statis" | "dinamis") => setTargetType(val)}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Pilih halaman" />
+              <SelectValue placeholder="Pilih tipe tautan" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="/">Beranda</SelectItem>
-              <SelectItem value="/profil">Profil</SelectItem>
-              <SelectItem value="/layanan">Layanan</SelectItem>
-              <SelectItem value="/berita">Berita</SelectItem>
-              <SelectItem value="/artikel">Artikel</SelectItem>
-              <SelectItem value="/galeri">Galeri Foto</SelectItem>
-              <SelectItem value="/video">Video</SelectItem>
-              <SelectItem value="/agenda">Agenda</SelectItem>
-              <SelectItem value="/ulasan">Ulasan</SelectItem>
-              <SelectItem value="/kontak">Kontak</SelectItem>
+              <SelectItem value="statis">Halaman Statis (Bawaan Sistem)</SelectItem>
+              <SelectItem value="dinamis">Halaman Dinamis (CMS / Pages)</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* URL Target (Conditional Rendering) */}
+        <div className="grid gap-2">
+          <Label htmlFor="url_target">URL Target</Label>
+          
+          {targetType === "statis" ? (
+            <Select
+              name="url_target"
+              defaultValue={!isInitialDynamic ? (initialData?.slug || "/layanan") : undefined}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Pilih halaman statis" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="/layanan">Layanan</SelectItem>
+                <SelectItem value="/tentang-kami">Tentang Kami</SelectItem>
+                <SelectItem value="/kontak">Kontak</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <Select
+              name="url_target"
+              defaultValue={isInitialDynamic ? initialData?.slug : undefined}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Pilih halaman dinamis dari sistem" />
+              </SelectTrigger>
+              <SelectContent>
+                {DUMMY_DYNAMIC_PAGES.map((page) => (
+                  <SelectItem key={page.slug} value={page.slug}>
+                    {page.title} ({page.slug})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Parent Menu */}
