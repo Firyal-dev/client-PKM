@@ -79,20 +79,66 @@ export default async function Footer() {
                             Statistik Pengunjung
                         </h4>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            {statItems.map((item) => (
+                        {/* Highlight Total */}
+                        <div className="bg-gradient-to-br from-emerald-600/20 to-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-emerald-400" />
+                                    <span className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">
+                                        Total Pengunjung
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p className="text-3xl font-extrabold text-white tabular-nums">
+                                {stats.total.toLocaleString('id-ID')}
+                            </p>
+
+                            <div className="mt-4 h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-emerald-400 rounded-full"
+                                    style={{
+                                        width: `${Math.min(
+                                            (stats.thisMonth / stats.total) * 100,
+                                            100
+                                        )}%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Other Stats */}
+                        <div className="grid grid-cols-3 gap-4">
+                            {[
+                                {
+                                    label: "Hari Ini",
+                                    value: stats.today,
+                                    icon: Clock,
+                                },
+                                {
+                                    label: "Bulan Ini",
+                                    value: stats.thisMonth,
+                                    icon: Calendar,
+                                },
+                                {
+                                    label: "Tahun Ini",
+                                    value: stats.thisYear,
+                                    icon: BarChart3,
+                                },
+                            ].map((item) => (
                                 <div
                                     key={item.label}
-                                    className="bg-slate-800/50 border border-white/5 p-4 rounded-xl flex flex-col gap-2 hover:bg-slate-800 transition-colors"
+                                    className="bg-slate-800/60 border border-white/5 p-4 rounded-xl hover:bg-slate-800 transition-all"
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <item.icon className={`w-4 h-4 ${item.color}`} />
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <item.icon className="w-4 h-4 text-blue-400" />
                                         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
                                             {item.label}
                                         </span>
                                     </div>
+
                                     <p className="text-xl font-bold text-white tabular-nums">
-                                        {item.value.toLocaleString('id-ID')}
+                                        {item.value.toLocaleString("id-ID")}
                                     </p>
                                 </div>
                             ))}

@@ -1,50 +1,70 @@
-import { notFound } from "next/navigation"
-import { getPublicMenuBySlug, Menu } from "@/services/menu/menu-service"
-import { getPublicPageByMenuId, getPublishedPages, Page } from "@/services/page/page-service"
-import { PageLayoutArtikel } from "@/components/user/sections/page-artikel"
-import { PageLayoutCards } from "@/components/user/sections/page-cards"
-import { PageLayoutList } from "@/components/user/sections/page-list"
-import Breadcrumb from "@/components/user/partials/breadcrumb"
+import { notFound, redirect } from "next/navigation"
+import { getPublicMenuBySlug } from "@/services/menu/menu-service"
+import { getPublicPageByMenuId, getPublicPagesByMenuId } from "@/services/page/page-service"
+import { getPublicStaticPageByMenuId } from "@/services/static-page/static-page-service"
+import { PageStatic } from "@/components/user/sections/page-static"
+import { PageDynamic } from "@/components/user/sections/page-dynamic"
+import { PageDokumenList } from "@/components/user/sections/page-dokumen-list"
+import { PageHalamanList } from "@/components/user/sections/page-halaman-list"
 
-async function getPageData(slug: string): Promise<{ menu: Menu; page: Page; allPages: Page[] } | null> {
+async function getMenuData(slug: string) {
   try {
     const menu = await getPublicMenuBySlug(slug)
-    const page = await getPublicPageByMenuId(menu.id)
-    const allPages = await getPublishedPages()
-    return { menu, page, allPages }
+    return { menu }
   } catch {
     return null
   }
 }
 
-export default async function DynamicPage({ params }: { params: { slug: string } }) {
+export default async function SlugPage({ params }: { params: { slug: string } }) {
   const { slug } = await params
 
-  const data = await getPageData(slug)
+  const data = await getMenuData(slug)
+  if (!data) return notFound()
 
-  if (!data) {
+  const { menu } = data
+
+  // ─── MENU TYPE: CUSTOM ─────────────────────────────────────────────────────
+  if (menu.type === 'custom') {
+    if (menu.url_target && menu.url_target !== '/') {
+      redirect(menu.url_target)
+    }
     return notFound()
   }
 
-  const { page, menu, allPages } = data
+  // ─── MENU TYPE: STATIC ─────────────────────────────────────────────────────
+  if (menu.type === 'static') {
+    try {
+      const page = await getPublicStaticPageByMenuId(menu.id)
+      return <PageStatic page={page} menu={menu} />
+    } catch {
+      return notFound()
+    }
+  }
 
-  // Filter out current page from related pages
-  const relatedPages = allPages.filter(p => p.id !== page.id)
+  // ─── MENU TYPE: DYNAMIC ────────────────────────────────────────────────────
+  try {
+    // Ambil semua pages aktif untuk menu ini
+    const pages = await getPublicPagesByMenuId(menu.id)
+    if (pages.length === 0) return notFound()
 
-  // Breadcrumb items
-  const breadcrumbItems = [
-    { label: menu.title }
-  ]
+    const firstPage = pages[0]
 
-  // Render berdasarkan layout
-  switch (page.layout) {
-    case 'cards':
-      return <PageLayoutCards page={page} menuTitle={menu.title} breadcrumbItems={breadcrumbItems} relatedPages={relatedPages} />
-    case 'list':
-      return <PageLayoutList page={page} menuTitle={menu.title} breadcrumbItems={breadcrumbItems} relatedPages={relatedPages} />
-    case 'artikel':
-    default:
-      return <PageLayoutArtikel page={page} menuTitle={menu.title} breadcrumbItems={breadcrumbItems} relatedPages={relatedPages} />
+    // Dokumen PDF → list semua dokumen + toggle preview
+    if (firstPage.type === 'pdf') {
+      return <PageDokumenList pages={pages} menu={menu} />
+    }
+
+    // Kartu (Berita / Artikel) → grid kartu, klik buka halaman detail
+    if (firstPage.type === 'kartu') {
+      return <PageHalamanList pages={pages} menu={menu} />
+    }
+
+    // Halaman konten biasa ('halaman') → tampilkan artikel tunggal
+    return <PageDynamic page={firstPage} menu={menu} />
+
+  } catch {
+    return notFound()
   }
 }
 
@@ -52,18 +72,31 @@ export default async function DynamicPage({ params }: { params: { slug: string }
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { slug } = await params
 
-  const data = await getPageData(slug)
+  try {
+    const menu = await getPublicMenuBySlug(slug)
 
-  if (!data) {
-    return {
-      title: 'Halaman Tidak Ditemukan',
+    if (menu.type === 'static') {
+      const page = await getPublicStaticPageByMenuId(menu.id)
+      return {
+        title: `${menu.title} | Puskesmas Kecamatan Sehat`,
+        description: page.static_content?.replace(/<[^>]*>/g, '').substring(0, 160) || menu.title,
+      }
     }
-  }
 
-  const { page } = data
+    if (menu.type === 'dynamic' || !menu.type) {
+      const page = await getPublicPageByMenuId(menu.id)
+      return {
+        title: `${menu.title} | Puskesmas Kecamatan Sehat`,
+        description: page.dynamic_content?.replace(/<[^>]*>/g, '').substring(0, 160) || menu.title,
+      }
+    }
 
-  return {
-    title: `${page.title} | Puskesmas Kecamatan Sehat`,
-    description: page.content?.substring(0, 160) || page.title,
+    return {
+      title: `${menu.title} | Puskesmas Kecamatan Sehat`,
+    }
+  } catch {
+    return {
+      title: 'Halaman Tidak Ditemukan | Puskesmas Kecamatan Sehat',
+    }
   }
 }

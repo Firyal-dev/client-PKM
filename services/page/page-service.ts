@@ -5,17 +5,16 @@ import { authHeaders, getBaseUrl, buildParams, parseResponse } from "@/services/
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
-// Tipe Page
+// Tipe Page (Dynamic Pages)
 export interface Page {
   id: string
   menu_id: string
-  menu?: { id: string; title: string; slug: string }
+  menu?: { id: string; title: string }
   title: string
-  slug: string
-  content: string
-  image?: string // Khusus Foto
-  file?: string // Khusus Dokumen
-  layout: string
+  dynamic_content: string
+  image?: string
+  file?: string
+  type: 'pdf' | 'halaman' | 'kartu'
   status: number
   createdAt: string
   updatedAt: string
@@ -44,10 +43,21 @@ export async function getPublishedPages(): Promise<Page[]> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
-// Publik: Ambil halaman by menu ID
+// Publik: Ambil halaman by menu ID (satu halaman)
 export async function getPublicPageByMenuId(menuId: string): Promise<Page> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}`, {
+      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
+    })
+    if (!res.ok) throw new Error('Gagal ambil halaman')
+    return await res.json()
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
+}
+
+// Publik: Ambil SEMUA halaman aktif by menu ID (untuk list dokumen)
+export async function getPublicPagesByMenuId(menuId: string): Promise<Page[]> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}/all`, {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')

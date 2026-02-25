@@ -31,9 +31,13 @@ export const sidebarData = {
                     url: "/admin/menus",
                 },
                 {
-                    title: "Halaman",
-                    url: "/admin/pages",
+                    title: "Halaman Dinamis",
+                    url: "/admin/dynamic-pages",
                 },
+                {
+                    title: "Halaman Statis",
+                    url: "/admin/static-pages",
+                }
             ],
         },
     ],

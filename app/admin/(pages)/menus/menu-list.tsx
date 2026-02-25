@@ -44,10 +44,28 @@ export function MenuList({ menus }: { menus: Menu[] }) {
     }
   }
 
+  const getTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'static': return 'Statis'
+      case 'dynamic': return 'Dinamis'
+      case 'custom': return 'Custom'
+      default: return 'Custom'
+    }
+  }
+
+  const getTypeVariant = (type?: string) => {
+    switch (type) {
+      case 'static': return 'default'
+      case 'dynamic': return 'secondary'
+      case 'custom': return 'outline'
+      default: return 'outline'
+    }
+  }
+
   const columns: ColumnDef<Menu>[] = [
     {
-      accessorKey: "title",
-      header: "Judul Menu",
+      accessorKey: "name",
+      header: "Nama Menu",
       cell: ({ row }) => {
         const menu = row.original
         const paddingLeft = `${row.depth * 2}rem`
@@ -73,6 +91,18 @@ export function MenuList({ menus }: { menus: Menu[] }) {
               <p className="text-sm text-muted-foreground whitespace-nowrap">/{menu.slug}</p>
             </div>
           </div>
+        )
+      },
+    },
+    {
+      accessorKey: "type",
+      header: "Tipe",
+      cell: ({ row }) => {
+        const type = row.original.type
+        return (
+          <Badge variant={getTypeVariant(type) as any}>
+            {getTypeLabel(type)}
+          </Badge>
         )
       },
     },

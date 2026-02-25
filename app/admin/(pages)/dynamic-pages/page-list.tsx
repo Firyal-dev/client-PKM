@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { MoreVertical, Pencil, Trash2, FileText } from "lucide-react"
+import { MoreVertical, Pencil, Trash2, FileText, File } from "lucide-react"
 import { toast } from "sonner"
 import { ColumnDef } from "@tanstack/react-table"
 
@@ -17,13 +17,12 @@ import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { deletePageAction, togglePageStatusAction, Page } from "@/services/page/page-service"
 import { DataTable } from "@/components/ui/data-table"
 
-const getLayoutBadge = (layout: string) => {
-  const layoutMap: Record<string, string> = {
-    'artikel': 'Artikel',
-    'cards': 'Kartu',
-    'list': 'Daftar',
+const getTypeBadge = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'halaman': 'Halaman',
+    'dokumen': 'Dokumen',
   }
-  return layoutMap[layout] || layout
+  return typeMap[type] || type
 }
 
 export function PageList({ pages }: { pages: Page[] }) {
@@ -53,6 +52,12 @@ export function PageList({ pages }: { pages: Page[] }) {
     }
   }
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-'
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
   const columns: ColumnDef<Page>[] = [
     {
       accessorKey: "title",
@@ -73,13 +78,38 @@ export function PageList({ pages }: { pages: Page[] }) {
       },
     },
     {
-      accessorKey: "layout",
-      header: "Layout",
+      accessorKey: "type",
+      header: "Tipe",
       cell: ({ row }) => {
         return (
           <Badge variant="outline">
-            {getLayoutBadge(row.original.layout)}
+            {getTypeBadge(row.original.type)}
           </Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "dynamic_content",
+      header: "Konten",
+      cell: ({ row }) => {
+        const page = row.original
+        if (page.type === 'dokumen') {
+          return (
+            <span className="text-sm text-muted-foreground flex items-center gap-2">
+              <File className="w-4 h-4" />
+              {page.image || 'Tidak ada dokumen'}
+            </span>
+          )
+        }
+        const content = page.dynamic_content || ''
+        const maxLength = 100
+        const truncated = content.length > maxLength
+          ? content.substring(0, maxLength) + '...'
+          : content
+        return (
+          <span className="text-sm text-muted-foreground">
+            {truncated || '-'}
+          </span>
         )
       },
     },
@@ -110,7 +140,7 @@ export function PageList({ pages }: { pages: Page[] }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href={`/admin/pages/${page.id}`}>
+                  <Link href={`/admin/dynamic-pages/${page.id}`}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit
                   </Link>

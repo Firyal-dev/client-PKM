@@ -11,6 +11,7 @@ export interface Menu {
   title: string
   slug: string
   url_target?: string
+  type?: 'static' | 'dynamic' | 'custom'
   parent?: { id: string; title: string } | null
   parent_id?: string | null
   order: number
@@ -50,6 +51,15 @@ export async function getAdminMenus(): Promise<Menu[]> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
+// Admin: Ambil menu berdasarkan tipe
+export async function getAdminMenusByType(type: 'static' | 'dynamic'): Promise<Menu[]> {
+  try {
+    const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
+    const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
+    return menus.filter(menu => menu.type === type)
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
+}
+
 // Alias untuk getAdminMenus (backward compat)
 export const getAdminMenusFlat = getAdminMenus
 
@@ -78,6 +88,7 @@ export async function createMenuAction(_: unknown, formData: FormData) {
     title: formData.get('title'),
     slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
     url_target: formData.get('url_target') || '/',
+    type: formData.get('type') || 'custom',
     order: Number(formData.get('order')) || 0,
     status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
@@ -95,6 +106,7 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     title: formData.get('title'),
     slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
     url_target: formData.get('url_target') || '/',
+    type: formData.get('type') || 'custom',
     order: Number(formData.get('order')) || 0,
     status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
