@@ -20,10 +20,10 @@ export default async function Navbar() {
           mx-2 md:mx-6 lg:mx-10
           bg-white/90 dark:bg-slate-900/90 backdrop-blur-md
           border border-gray-100 dark:border-slate-700
-          overflow-hidden
           transition-all duration-500
           rounded-b-2xl md:rounded-b-3xl
           shadow-sm
+          /* ✅ FIX: overflow-hidden DIHAPUS DARI SINI */
         "
             >
                 {/* Top Bar - Kontak & Social - Hide saat di-scroll */}

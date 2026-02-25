@@ -5,13 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu as MenuIcon, X, Phone, Mail } from 'lucide-react'
 import { Menu } from '@/services/menu/menu-service'
-import SocialIcon from './social-icon'
 
 interface ListMenuProps {
     menus: Menu[]
 }
 
-// Dummy contact info - bisa diganti dari database
 const dummyPhone = '(0251) 1234567'
 const dummyEmail = 'puskesmas@kecamatansaht.co.id'
 
@@ -19,9 +17,14 @@ export default function ListMenu({ menus }: ListMenuProps) {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
 
-    // Filter menu utama dan urutkan
+    // Normalisasi relasi parent: API kadang ngirim `parent` object tanpa `parent_id`
+    const getParentId = (menu: Menu): string | null => {
+        return menu.parent_id ?? menu.parent?.id ?? null
+    }
+
+    // Filter menu utama (yang gak punya parent)
     const mainMenus = menus
-        .filter(menu => menu.parent_id === null && menu.status === 1)
+        .filter(menu => getParentId(menu) === null && menu.status === 1)
         .sort((a, b) => a.order - b.order)
 
     return (
@@ -38,48 +41,69 @@ export default function ListMenu({ menus }: ListMenuProps) {
             {/* Menu Desktop */}
             <ul className="hidden md:flex items-center gap-6">
                 <li>
-                    {/* Menu Beranda selalu ada */}
                     <NavLink href="/" active={pathname === '/'}>
                         Beranda
                     </NavLink>
                 </li>
 
-                {/* Tampilkan menu dinamis dari database */}
                 {mainMenus.map((menu) => {
-                    // Cari anak menu (submenu)
-                    const subMenus = menus
-                        .filter(sub => sub.parent_id === menu.id && sub.status === 1)
-                        .sort((a, b) => a.order - b.order)
+                    // Ambil submenu dari menu ini
+                    const subMenus = (menu.children && menu.children.length > 0)
+                        ? menu.children.filter(sub => sub.status === 1).sort((a, b) => a.order - b.order)
+                        : menus
+                            .filter(sub => getParentId(sub) === menu.id && sub.status === 1)
+                            .sort((a, b) => a.order - b.order)
 
                     const hasSubMenus = subMenus.length > 0
+                    const menuHref = `/${menu.slug}`
 
                     if (hasSubMenus) {
                         return (
-                            <li key={menu.id} className="relative group">
-                                <NavLink href={`/${menu.slug}`} active={pathname === `/${menu.slug}`}>
+                            <li key={menu.id} className="relative group/navitem py-2">
+                                <Link
+                                    href={menuHref}
+                                    className={`
+                                        text-sm font-semibold tracking-wide transition-colors
+                                        flex items-center gap-1
+                                        ${pathname === menuHref || pathname.startsWith(menuHref + '/')
+                                            ? 'text-blue-600 dark:text-blue-400'
+                                            : 'text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400'
+                                        }
+                                    `}
+                                >
                                     {menu.title}
-                                </NavLink>
+                                </Link>
                                 {/* Dropdown Submenu */}
-                                <ul className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                    {subMenus.map((subMenu) => (
-                                        <li key={subMenu.id}>
-                                            <NavLink
-                                                href={`/${subMenu.slug}`}
-                                                active={pathname === `/${subMenu.slug}`}
-                                                className="block px-4 py-2 text-sm hover:bg-primary/5 dark:hover:bg-primary/20"
-                                            >
-                                                {subMenu.title}
-                                            </NavLink>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="absolute top-full left-0 pt-4 w-56 opacity-0 pointer-events-none translate-y-2 group-hover/navitem:opacity-100 group-hover/navitem:pointer-events-auto group-hover/navitem:translate-y-0 transition-all duration-300 z-50">
+                                    <ul className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex flex-col overflow-hidden py-1">
+                                        {subMenus.map((subMenu) => {
+                                            const subMenuHref = `/${subMenu.slug}`
+                                            return (
+                                                <li key={subMenu.id} className="w-full">
+                                                    <Link
+                                                        href={subMenuHref}
+                                                        className={`
+                                                            block px-5 py-2.5 text-sm transition-colors
+                                                            ${pathname === subMenuHref
+                                                                ? 'bg-blue-50/50 text-blue-600 dark:bg-slate-700/50 dark:text-blue-400 font-medium'
+                                                                : 'text-slate-600 dark:text-slate-300 hover:bg-blue-50/50 hover:text-blue-600 dark:hover:bg-slate-700/50 dark:hover:text-blue-400'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {subMenu.title}
+                                                    </Link>
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </div>
                             </li>
                         )
                     }
 
                     return (
                         <li key={menu.id}>
-                            <NavLink href={`/${menu.slug}`} active={pathname === `/${menu.slug}`}>
+                            <NavLink href={menuHref} active={pathname === menuHref}>
                                 {menu.title}
                             </NavLink>
                         </li>
@@ -97,18 +121,19 @@ export default function ListMenu({ menus }: ListMenuProps) {
         `}
             >
                 <ul className="flex flex-col gap-2">
-                    {/* Menu Beranda Mobile */}
                     <MobileLink href="/" onClick={() => setIsOpen(false)} active={pathname === '/'}>
                         Beranda
                     </MobileLink>
 
-                    {/* Loop Menu Dinamis Mobile */}
                     {mainMenus.map((menu) => {
-                        const subMenus = menus
-                            .filter(sub => sub.parent_id === menu.id && sub.status === 1)
-                            .sort((a, b) => a.order - b.order)
+                        const subMenus = (menu.children && menu.children.length > 0)
+                            ? menu.children.filter(sub => sub.status === 1).sort((a, b) => a.order - b.order)
+                            : menus
+                                .filter(sub => getParentId(sub) === menu.id && sub.status === 1)
+                                .sort((a, b) => a.order - b.order)
 
                         const hasSubMenus = subMenus.length > 0
+                        const menuHref = `/${menu.slug}`
 
                         if (hasSubMenus) {
                             return (
@@ -117,16 +142,19 @@ export default function ListMenu({ menus }: ListMenuProps) {
                                         {menu.title}
                                     </div>
                                     <ul className="ml-4 border-l-2 border-primary/20 pl-4 space-y-1">
-                                        {subMenus.map((subMenu) => (
-                                            <MobileLink
-                                                key={subMenu.id}
-                                                href={`/${subMenu.slug}`}
-                                                onClick={() => setIsOpen(false)}
-                                                active={pathname === `/${subMenu.slug}`}
-                                            >
-                                                {subMenu.title}
-                                            </MobileLink>
-                                        ))}
+                                        {subMenus.map((subMenu) => {
+                                            const subMenuHref = `/${subMenu.slug}`
+                                            return (
+                                                <MobileLink
+                                                    key={subMenu.id}
+                                                    href={subMenuHref}
+                                                    onClick={() => setIsOpen(false)}
+                                                    active={pathname === subMenuHref}
+                                                >
+                                                    {subMenu.title}
+                                                </MobileLink>
+                                            )
+                                        })}
                                     </ul>
                                 </li>
                             )
@@ -135,16 +163,15 @@ export default function ListMenu({ menus }: ListMenuProps) {
                         return (
                             <MobileLink
                                 key={menu.id}
-                                href={`/${menu.slug}`}
+                                href={menuHref}
                                 onClick={() => setIsOpen(false)}
-                                active={pathname === `/${menu.slug}`}
+                                active={pathname === menuHref}
                             >
                                 {menu.title}
                             </MobileLink>
                         )
                     })}
 
-                    {/* Contact Info di Mobile */}
                     <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
                         <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
                             <Phone size={16} className="text-blue-500" />
@@ -157,11 +184,10 @@ export default function ListMenu({ menus }: ListMenuProps) {
                     </div>
                 </ul>
             </div>
-        </nav>
+        </nav >
     )
 }
 
-// Desktop NavLink Component
 function NavLink({
     href,
     children,
@@ -193,7 +219,6 @@ function NavLink({
     )
 }
 
-// Mobile Link Component
 function MobileLink({
     href,
     children,

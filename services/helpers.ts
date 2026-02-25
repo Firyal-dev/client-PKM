@@ -1,5 +1,11 @@
 // Helper: Ambil base URL
-export const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
+export const getBaseUrl = () => {
+    let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'
+    if (typeof window === 'undefined') {
+        url = url.replace('localhost', '127.0.0.1')
+    }
+    return url
+}
 
 // Helper: Validasi token dan return header
 export async function authHeaders() {

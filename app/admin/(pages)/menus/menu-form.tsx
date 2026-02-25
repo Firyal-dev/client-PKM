@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { ActionResponse } from "@/services/utils"
 import { Menu } from "@/services/menu/menu-service"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 
 type MenuFormProps = {
   action: (prevState: unknown, formData: FormData) => Promise<ActionResponse>
@@ -39,11 +40,17 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
   const [menuLevel, setMenuLevel] = useState<"ROOT" | "SUB">(
     initialData?.parent?.id ? "SUB" : "ROOT"
   )
+  
+
+  const [orderValue, setOrderValue] = useState<string>(
+    initialData?.order?.toString() ?? "0"
+  )
 
   const [autoSlug, setAutoSlug] = useState(initialData?.slug || "")
   const [isCustomSlug, setIsCustomSlug] = useState(false)
-  const [menuType, setMenuType] = useState<'static' | 'dynamic' | 'custom'>(initialData?.type || 'custom')
-
+const [menuType, setMenuType] = useState<'static' | 'dynamic'>(
+  (initialData?.type as 'static' | 'dynamic') || 'static'
+)
   const [state, formAction, isPending] = useActionState(action, {
     success: false,
     error: "",
@@ -56,7 +63,25 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
       router.refresh()
     } else if (state.error) {
       toast.error(state.error)
-    }
+    } <div className="grid gap-2">
+      <Label>Jenis Menu</Label>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setMenuLevel("ROOT")}
+          className={`flex-1 py-2 px-4 rounded border ${menuLevel === "ROOT" ? "bg-slate-800 text-white" : "bg-white border-slate-300"}`}
+        >
+          Menu Utama
+        </button>
+        <button
+          type="button"
+          onClick={() => setMenuLevel("SUB")}
+          className={`flex-1 py-2 px-4 rounded border ${menuLevel === "SUB" ? "bg-slate-800 text-white" : "bg-white border-slate-300"}`}
+        >
+          Sub Menu
+        </button>
+      </div>
+    </div>
   }, [state, initialData, router])
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,10 +106,10 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <Label>Type Menu</Label>
+          <Label>Tipe Menu</Label>
           <Select
             value={menuType}
-            onValueChange={(val) => setMenuType(val as 'static' | 'dynamic' | 'custom')}
+            onValueChange={(val) => setMenuType(val as 'static' | 'dynamic')}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="-- Pilih Type Menu --" />
@@ -92,32 +117,23 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
             <SelectContent>
               <SelectItem value="static">Statis</SelectItem>
               <SelectItem value="dynamic">Dinamis</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
           <input type="hidden" name="type" id="type_input" value={menuType} readOnly />
         </div>
 
-        <div className="grid gap-2">
-          <Label>Level Menu</Label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setMenuLevel("ROOT")}
-              className={`flex-1 py-2 px-4 rounded border ${menuLevel === "ROOT" ? "bg-slate-800 text-white" : "bg-white border-slate-300"}`}
-            >
-              Menu Utama
-            </button>
-            <button
-              type="button"
-              onClick={() => setMenuLevel("SUB")}
-              className={`flex-1 py-2 px-4 rounded border ${menuLevel === "SUB" ? "bg-slate-800 text-white" : "bg-white border-slate-300"}`}
-            >
-              Sub Menu
-            </button>
-          </div>
-        </div>
+   <div className="grid gap-2">
+  <Label>Jenis Menu</Label>
 
+  <SegmentedControl
+    value={menuLevel}
+    onChange={setMenuLevel}
+    options={[
+      { label: "Menu Utama", value: "ROOT" },
+      { label: "Sub Menu", value: "SUB" },
+    ]}
+  />
+</div>
         {menuLevel === "SUB" ? (
           <div className="grid gap-2">
             <Label htmlFor="parent_id">Menu Induk</Label>
@@ -149,9 +165,26 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
           <Input
             id="order"
             name="order"
-            type="number"
+            type="text"
             min="0"
-            defaultValue={initialData?.order?.toString() || "0"}
+            value={orderValue}
+            onChange={(e) => {
+              const value = e.target.value
+
+              // Hanya izinkan angka
+              if (!/^\d*$/.test(value)) return
+
+              // 1 digit: boleh 0
+              if (value.length === 1) {
+                setOrderValue(value)
+                return
+              }
+
+              // >1 digit: tidak boleh mulai dengan 0
+              if (value.length > 1 && value.startsWith("0")) return
+
+              setOrderValue(value)
+            }}
           />
         </div>
 
