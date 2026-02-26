@@ -67,7 +67,7 @@ export async function getAdminParentMenus(): Promise<Menu[]> {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
 
-    return menus.filter(menu => !menu.parent)
+    return menus 
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -86,15 +86,13 @@ export async function createMenuAction(_: unknown, formData: FormData) {
     title: formData.get('title'),
     slug: formData.get('slug') || '',
     type: formData.get('type') || 'custom',
-    url_target: formData.get('url_target') || '', // ✅ FIX: Ambil dari input form
     order: Number(formData.get('order')) || 0,
     status: Number(formData.get('status')) || 1,
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
   return tryAction(async () => {
     const res = await api.post('/v1/admin/menus', payload, { headers: await authHeaders() })
-    // @ts-expect-error Next.js typings incorrectly require a second parameter here.
-    revalidateTag(CACHE_TAGS.MENU) // ✅ FIX: argumen 'max' dihapus supaya nggak error
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal buat menu')
 }
@@ -106,7 +104,6 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     title: formData.get('title'),
     slug: formData.get('slug') || '',
     type: formData.get('type') || 'custom',
-    url_target: formData.get('url_target') || '', // ✅ FIX: Ambil dari input form
     order: Number(formData.get('order')) || 0,
     status: Number(formData.get('status')) || 1,
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
@@ -116,8 +113,7 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     const res = await api.patch(`/v1/admin/menus/${id}`, payload, {
       headers: await authHeaders()
     })
-    // @ts-expect-error Next.js typings incorrectly require a second parameter here.
-    revalidateTag(CACHE_TAGS.MENU) // ✅ FIX: argumen 'max' dihapus
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal update menu')
 }
@@ -126,8 +122,7 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
 export async function deleteMenuAction(id: string) {
   return tryAction(async () => {
     const res = await api.delete(`/v1/admin/menus/${id}`, { headers: await authHeaders() })
-    // @ts-expect-error Next.js typings incorrectly require a second parameter here.
-    revalidateTag(CACHE_TAGS.MENU) // ✅ FIX: argumen 'max' dihapus
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal hapus menu')
 }
