@@ -3,27 +3,34 @@
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react'
 
 interface SocialIconProps {
-    className?: string
+    className?: string;
+    socialLinks?: {
+        facebook?: string | null;
+        instagram?: string | null;
+        twitter?: string | null;
+        youtube?: string | null;
+    };
 }
 
-// Dummy social icons - bisa diganti sama data dari database
-const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Youtube, href: 'https://youtube.com', label: 'Youtube' },
-]
+export default function SocialIcon({ className = '', socialLinks }: SocialIconProps) {
+    const icons = [
+        { icon: Facebook, href: socialLinks?.facebook, label: 'Facebook' },
+        { icon: Instagram, href: socialLinks?.instagram, label: 'Instagram' },
+        { icon: Twitter, href: socialLinks?.twitter, label: 'Twitter' },
+        { icon: Youtube, href: socialLinks?.youtube, label: 'Youtube' },
+    ].filter(link => link.href && link.href !== '');
 
-export default function SocialIcon({ className = '' }: SocialIconProps) {
+    if (icons.length === 0) return null;
+
     return (
         <div className={`flex items-center gap-3 ${className}`}>
-            {socialLinks.map((social, index) => (
+            {icons.map((social, index) => (
                 <a
                     key={index}
-                    href={social.href}
+                    href={social.href as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-slate-500 hover:text-blue-500 transition-colors"
+                    className="text-slate-400 hover:text-blue-500 transition-colors"
                     aria-label={social.label}
                 >
                     <social.icon size={16} />

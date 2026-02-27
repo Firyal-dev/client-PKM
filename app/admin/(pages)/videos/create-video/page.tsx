@@ -70,8 +70,6 @@ export default function CreateVideoPage() {
                                 <Switch
                                     checked={isEmbed}
                                     onCheckedChange={setIsEmbed}
-                                    name="is_embed"
-                                    value={isEmbed ? "true" : "false"}
                                 />
                                 <input type="hidden" name="is_embed" value={isEmbed ? "true" : "false"} />
                             </div>
@@ -100,7 +98,7 @@ export default function CreateVideoPage() {
 
                                 {isEmbed ? (
                                     <Field className="space-y-2 pt-4">
-                                        <FieldLabel htmlFor="embed_url">URL Video (YouTube/Vimeo)</FieldLabel>
+                                        <FieldLabel htmlFor="embed_url">URL Video (YouTube)</FieldLabel>
                                         <Input
                                             id="embed_url"
                                             name="embed_url"
@@ -108,9 +106,6 @@ export default function CreateVideoPage() {
                                             required={isEmbed}
                                             className="h-12 bg-slate-50/50"
                                         />
-                                        <p className="text-xs text-muted-foreground">
-                                            Masukkan URL embed video (misalnya dari YouTube atau Vimeo)
-                                        </p>
                                     </Field>
                                 ) : (
                                     <Field className="space-y-2 pt-4">

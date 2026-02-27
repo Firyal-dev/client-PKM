@@ -7,8 +7,10 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getExpandedRowModel,
+    getFilteredRowModel,
     ExpandedState,
     useReactTable,
+    ColumnFiltersState,
 } from "@tanstack/react-table"
 
 import {
@@ -24,11 +26,19 @@ import { Button } from "@/components/ui/button"
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    columnFilters?: ColumnFiltersState
+    onColumnFiltersChange?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
+    globalFilter?: string
+    onGlobalFilterChange?: (value: string) => void
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    columnFilters,
+    onColumnFiltersChange,
+    globalFilter,
+    onGlobalFilterChange,
 }: DataTableProps<TData, TValue>) {
     const [expanded, setExpanded] = React.useState<ExpandedState>({})
 
@@ -37,10 +47,15 @@ export function DataTable<TData, TValue>({
         columns,
         state: {
             expanded,
+            columnFilters,
+            globalFilter,
         },
         onExpandedChange: setExpanded,
+        onColumnFiltersChange: onColumnFiltersChange,
+        onGlobalFilterChange: onGlobalFilterChange,
         getSubRows: (row) => (row as any).children,
         getExpandedRowModel: getExpandedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
     })

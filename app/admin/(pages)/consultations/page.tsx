@@ -1,37 +1,16 @@
 import { PageHeader } from "@/components/admin/page-header"
+import { PaginationControl } from "@/components/pagination-control"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { MessageCircleQuestion } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { getAdminConsultationList } from "@/services/consultation/consultation-service"
 import { ConsultationList } from "./consultation-list"
-import { ConsultationProp } from "@/types/consultation-prop"
 
-// Data Dummy
-const dummyConsultations: ConsultationProp[] = [
-    {
-        id: "1",
-        username: "Budi Santoso",
-        phone_number: "081234567890",
-        message: "Saya ingin bertanya mengenai jadwal praktek dokter gigi di hari Sabtu apakah ada?",
-        answer: "Halo Pak Budi, untuk hari Sabtu klinik gigi kami buka dari jam 08.00 sampai 12.00 WIB.",
-        is_publish: true,
-        created_at: new Date('2024-02-01T08:00:00Z')
-    },
-    {
-        id: "2",
-        username: "Siti Aminah",
-        phone_number: "085712345678",
-        message: "Apakah bisa melakukan pendaftaran online untuk poli anak?",
-        is_publish: false,
-        created_at: new Date('2024-02-05T10:30:00Z')
-    },
-    {
-        id: "3",
-        username: "Andi Wijaya",
-        message: "Tes konsultasi tanpa nomor telepon.",
-        answer: "Diterima, terima kasih.",
-        is_publish: true,
-        created_at: new Date('2024-02-06T14:20:00Z')
-    }
-]
+export default async function ConsultationPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+    const params = await searchParams
+    const currentPage = Number(params.page) || 1
+    const { data, totalPages } = await getAdminConsultationList(currentPage, 10)
 
-export default async function ConsultationPage() {
     return (
         <div className="px-5 pb-10">
             <PageHeader
@@ -39,9 +18,34 @@ export default async function ConsultationPage() {
                 description="Kelola tanya jawab dan konsultasi dari pengguna"
             />
 
-            <div className="mt-6">
-                <ConsultationList consultations={dummyConsultations} />
+            <div className={cn(
+                "rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
+                data.length === 0 && "justify-center"
+            )}>
+                {data.length === 0 ? (
+                    <Empty className="flex flex-col items-center text-center">
+                        <EmptyHeader className="flex flex-col items-center">
+                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
+                                <MessageCircleQuestion className="w-10 h-10 text-primary/40" />
+                            </EmptyMedia>
+                            <EmptyTitle className="text-xl font-bold">
+                                Tidak ada konsultasi
+                            </EmptyTitle>
+                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
+                                Belum ada pertanyaan konsultasi yang masuk.
+                            </EmptyDescription>
+                        </EmptyHeader>
+                    </Empty>
+                ) : (
+                    <ConsultationList consultations={data} />
+                )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="mt-8">
+                    <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+                </div>
+            )}
         </div>
     )
 }

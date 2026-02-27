@@ -14,12 +14,19 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Separator } from "@/components/ui/separator"
 import { sidebarData } from "@/constants/sidebar-data"
 import { logoutAction } from "@/services/auth/logout-service"
-import { useActionState } from "react"
+import { useActionState, useTransition } from "react"
 import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 
 export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } & React.ComponentProps<typeof Sidebar>) {
-  const [state, logout, isLoading] = useActionState(logoutAction, null)
+  const [state, logout, isPending] = useActionState(logoutAction, null)
+  const [isTransitionPending, startTransition] = useTransition()
+
+  const handleLogout = () => {
+    startTransition(() => {
+      logout()
+    })
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -41,7 +48,7 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
       </SidebarContent>
       <SidebarFooter>
         <div className="flex gap-2">
-          <ConfirmDialog trigger={<Button variant="destructive" className="flex-1 cursor-pointer">{isLoading ? "Memuat..." : "Logout"}</Button>} title="Yakin keluar?" description="Sesi akan berakhir." onConfirm={() => logout()} confirmText="Keluar" />
+          <ConfirmDialog trigger={<Button variant="destructive" className="flex-1 cursor-pointer">{isPending || isTransitionPending ? "Memuat..." : "Logout"}</Button>} title="Yakin keluar?" description="Sesi akan berakhir." onConfirm={handleLogout} confirmText="Keluar" />
           <ModeToggle />
         </div>
       </SidebarFooter>

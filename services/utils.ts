@@ -60,4 +60,6 @@ export const CACHE_TAGS = {
     STATIC_PAGE: 'static_pages',
     VIDEO: 'videos',
     SERVICES: 'services',
+    CONSULTATION: 'consultation',
+    WEB_INFO: 'web_info',
 } as const

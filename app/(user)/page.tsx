@@ -35,7 +35,7 @@ export default async function Home() {
             <Sambutan />
 
             {/* Bagian Pelayanan Dinamis (Hanya kategori Pelayanan) */}
-            <Pelayanan data={pelayanan} />
+            {/* <Pelayanan data={pelayanan} /> */}
 
             {/* Bagian Agenda Kegiatan */}
             <Agenda data={agendas.data} />

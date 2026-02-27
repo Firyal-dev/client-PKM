@@ -3,23 +3,25 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, User, Phone, Eye, EyeOff, MessageCircleCode } from "lucide-react"
+import { MessageSquare, User, Phone, Eye, EyeOff, Trash2 } from "lucide-react"
 import { ConsultationProp } from "@/types/consultation-prop"
 import { format, isValid } from "date-fns"
 import { id } from "date-fns/locale"
 import { toast } from "sonner"
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { updateConsultationAction, deleteConsultationAction } from "@/services/consultation/consultation-service"
+import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 
 export function ConsultationList({ consultations }: { consultations: ConsultationProp[] }) {
     return (
-        <div className="rounded-md border bg-card">
+        <div className="rounded-md border bg-card overflow-hidden">
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead>User / Kontak</TableHead>
+                        <TableHead>Subjek</TableHead>
                         <TableHead className="max-w-[300px]">Pertanyaan</TableHead>
-                        <TableHead className="max-w-[300px]">Jawaban</TableHead>
                         <TableHead>Tanggal</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Aksi</TableHead>
@@ -39,11 +41,27 @@ function ConsultationRow({ item }: { item: ConsultationProp }) {
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
 
-    const handleTogglePublish = (id: string, currentStatus: boolean) => {
-        startTransition(() => {
-            // Mocking action because no endpoint yet
-            toast.success(`(Dummy) Konsultasi berhasil ${!currentStatus ? 'ditampilkan' : 'disembunyikan'}`)
-            router.refresh()
+    const handleTogglePublish = () => {
+        startTransition(async () => {
+            const result = await updateConsultationAction(item.id, { is_publish: !item.is_publish })
+            if (result.success) {
+                toast.success(`Konsultasi berhasil ${!item.is_publish ? 'ditampilkan' : 'disembunyikan'}`)
+                router.refresh()
+            } else {
+                toast.error(result.error || 'Gagal mengubah status')
+            }
+        })
+    }
+
+    const handleDelete = () => {
+        startTransition(async () => {
+            const result = await deleteConsultationAction(item.id)
+            if (result.success) {
+                toast.success('Konsultasi berhasil dihapus')
+                router.refresh()
+            } else {
+                toast.error(result.error || 'Gagal menghapus konsultasi')
+            }
         })
     }
 
@@ -69,6 +87,9 @@ function ConsultationRow({ item }: { item: ConsultationProp }) {
                     )}
                 </div>
             </TableCell>
+            <TableCell>
+                <span className="text-sm font-medium">{item.subject}</span>
+            </TableCell>
             <TableCell className="max-w-[300px]">
                 <div className="flex items-start gap-2">
                     <MessageSquare className="w-4 h-4 mt-1 text-primary/60 shrink-0" />
@@ -76,18 +97,6 @@ function ConsultationRow({ item }: { item: ConsultationProp }) {
                         {item.message}
                     </p>
                 </div>
-            </TableCell>
-            <TableCell className="max-w-[300px]">
-                {item.answer ? (
-                    <div className="flex items-start gap-2">
-                        <MessageCircleCode className="w-4 h-4 mt-1 text-green-600 shrink-0" />
-                        <p className="text-sm italic text-muted-foreground leading-relaxed line-clamp-3">
-                            {item.answer}
-                        </p>
-                    </div>
-                ) : (
-                    <span className="text-xs text-orange-500 italic">Belum dijawab</span>
-                )}
             </TableCell>
             <TableCell>
                 <span className="text-sm text-muted-foreground">
@@ -110,10 +119,26 @@ function ConsultationRow({ item }: { item: ConsultationProp }) {
                         title={item.is_publish ? "Sembunyikan" : "Tampilkan"}
                         className={`h-8 w-8 ${item.is_publish ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
                         disabled={isPending}
-                        onClick={() => handleTogglePublish(item.id, item.is_publish)}
+                        onClick={handleTogglePublish}
                     >
                         {item.is_publish ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
+                    <ConfirmDialog
+                        trigger={
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Hapus"
+                                className="h-8 w-8 text-red-600 hover:bg-red-50"
+                                disabled={isPending}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        }
+                        title="Hapus Konsultasi"
+                        description="Apakah Anda yakin ingin menghapus konsultasi ini? Tindakan ini tidak dapat dibatalkan."
+                        onConfirm={handleDelete}
+                    />
                 </div>
             </TableCell>
         </TableRow>

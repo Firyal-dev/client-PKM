@@ -9,10 +9,10 @@ export interface Video {
     id: string
     video_title: string
     video_desc?: string
-    data: string
+    embed: string
     is_embed: boolean
     is_deleted?: boolean
-    created_at?: string
+    upload_date?: string
     updated_at?: string
 }
 

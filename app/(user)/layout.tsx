@@ -2,7 +2,9 @@ import Navbar from "@/components/user/partials/navbar"
 import Footer from "@/components/user/partials/footer"
 import { FloatingMenu } from "@/components/user/partials/floating-menu"
 import { FloatingReview } from "@/components/user/partials/floating-review"
+import { FloatingConsultation } from "@/components/user/partials/floating-consultation"
 import { createReviewAction } from "@/services/review/review-service"
+import { createConsultationAction } from "@/services/consultation/consultation-service"
 import Script from "next/script"
 
 export default async function UserLayout({
@@ -24,6 +26,7 @@ export default async function UserLayout({
             <Footer />
 
             <FloatingMenu>
+                <FloatingConsultation onSubmit={createConsultationAction} />
                 <FloatingReview onSubmit={createReviewAction} />
             </FloatingMenu>
             <Script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js" defer></Script>
