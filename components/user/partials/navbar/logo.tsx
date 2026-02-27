@@ -15,7 +15,7 @@ export default function Logo({ className = '', webTitle, logoUrl }: LogoProps) {
     return (
         <Link href="/" className={`flex items-center gap-3 ${className}`}>
             <Image
-                src="/kotabogor.webp"
+                src="/puskesmasLogo.png"
                 alt="Logo Kota Bogor"
                 width={28}
                 height={28}

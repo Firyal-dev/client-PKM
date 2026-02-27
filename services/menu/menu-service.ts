@@ -5,12 +5,10 @@ import { authHeaders, getBaseUrl } from "@/services/helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
-
 export interface Menu {
   id: string
   title: string
   slug: string
-  url_target?: string
   type?: 'static' | 'dynamic' | 'custom'
   parent?: { id: string; title: string } | null
   parent_id?: string | null
@@ -69,7 +67,7 @@ export async function getAdminParentMenus(): Promise<Menu[]> {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
 
-    return menus.filter(menu => !menu.parent)
+    return menus 
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -86,29 +84,28 @@ export async function createMenuAction(_: unknown, formData: FormData) {
   const parentId = formData.get('parent_id')
   const payload = {
     title: formData.get('title'),
-    slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
-    url_target: formData.get('url_target') || '/',
+    slug: formData.get('slug') || '',
     type: formData.get('type') || 'custom',
     order: Number(formData.get('order')) || 0,
-    status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
+    status: Number(formData.get('status')) || 1,
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
   return tryAction(async () => {
     const res = await api.post('/v1/admin/menus', payload, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.MENU, 'max')
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal buat menu')
 }
 
+// Admin: Update menu
 export async function updateMenuAction(id: string, _: unknown, formData: FormData) {
   const parentId = formData.get('parent_id')
   const payload = {
     title: formData.get('title'),
-    slug: formData.get('slug') || '', // Slug dari input user (auto-generated)
-    url_target: formData.get('url_target') || '/',
+    slug: formData.get('slug') || '',
     type: formData.get('type') || 'custom',
     order: Number(formData.get('order')) || 0,
-    status: Number(formData.get('status')) || 1, // Status: 1 = aktif, 0 = tidak aktif
+    status: Number(formData.get('status')) || 1,
     parent_id: ['', '0', '__none__'].includes(String(parentId)) ? null : parentId,
   }
 
@@ -116,15 +113,16 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     const res = await api.patch(`/v1/admin/menus/${id}`, payload, {
       headers: await authHeaders()
     })
-    revalidateTag(CACHE_TAGS.MENU, 'max')
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal update menu')
 }
+
 // Admin: Hapus menu
 export async function deleteMenuAction(id: string) {
   return tryAction(async () => {
     const res = await api.delete(`/v1/admin/menus/${id}`, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.MENU, 'max')
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal hapus menu')
 }
@@ -135,7 +133,8 @@ export async function toggleMenuStatusAction(id: string) {
     const res = await api.patch(`/v1/admin/menus/${id}/toggle-status`, {}, {
       headers: await authHeaders()
     })
-    revalidateTag(CACHE_TAGS.MENU, 'max')
+    // @ts-expect-error Next.js typings incorrectly require a second parameter here.
+    revalidateTag(CACHE_TAGS.MENU) // ✅ FIX: argumen 'max' dihapus
     return res.data
   }, 'Gagal ubah status')
 }

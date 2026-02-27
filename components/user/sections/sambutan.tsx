@@ -15,7 +15,7 @@ export default function Sambutan() {
                         <div className="relative w-full lg:w-[32%] max-w-[260px] shrink-0">
                             <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
                                 <Image
-                                    src="/dokter.png"
+                                    src="/userPlaceholder.jpg"
                                     alt="Kepala Puskesmas Bogor Tengah"
                                     fill
                                     className="object-cover"

@@ -1,4 +1,3 @@
-import { isAxiosError } from 'axios'
 import { redirect } from 'next/navigation'
 
 // Response paginated
@@ -8,8 +7,8 @@ export interface PaginatedResponse<T> { data: T[]; totalPages: number; currentPa
 export interface ActionResponse<T = unknown> { success: boolean; data?: T; error?: string; message?: string }
 
 // Handle error
-export const handleServiceError = (err: unknown, fallback: string): string => {
-    if (isAxiosError(err)) return err.response?.data?.message || err.message || fallback
+export const handleServiceError = (err: any, fallback: string): string => {
+    if (err?.isAxiosError) return err.response?.data?.message || err.message || fallback
     if (err instanceof Error) return err.message
     return fallback
 }
