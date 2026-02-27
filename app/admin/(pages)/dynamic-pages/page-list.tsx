@@ -75,12 +75,12 @@ export function PageList({ pages }: { pages: Page[] }) {
       cell: ({ row }) => {
         const page = row.original
         return (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 bg-primary/10 rounded-lg shrink-0">
               <FileText className="w-5 h-5 text-primary" />
             </div>
-            <div>
-              <h3 className="font-medium line-clamp-1">{page.title}</h3>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium line-clamp-1 w-full" title={page.title}>{page.title}</h3>
             </div>
           </div>
         )
@@ -116,9 +116,9 @@ export function PageList({ pages }: { pages: Page[] }) {
         const page = row.original
         if (page.type === 'pdf') {
           return (
-            <span className="text-sm text-muted-foreground flex items-center gap-2">
-              <File className="w-4 h-4" />
-              {page.file || 'Tidak ada file'}
+            <span className="text-sm text-muted-foreground flex items-center gap-2 max-w-[250px]" title={page.file || 'Tidak ada file'}>
+              <File className="w-4 h-4 shrink-0" />
+              <span className="truncate">{page.file || 'Tidak ada file'}</span>
             </span>
           )
         }
@@ -129,7 +129,7 @@ export function PageList({ pages }: { pages: Page[] }) {
           ? plainText.substring(0, maxLength).trim() + '...'
           : plainText
         return (
-          <span className="text-sm text-muted-foreground block max-w-[200px] truncate" title={plainText}>
+          <span className="text-sm text-muted-foreground block max-w-[250px] truncate" title={plainText}>
             {truncated || '-'}
           </span>
         )

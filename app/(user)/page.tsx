@@ -10,7 +10,7 @@ import Galeri from "@/components/user/sections/galeri";
 import { getPublicBanners } from "@/services/banner/banner-service";
 import { getPublicAgenda } from "@/services/agenda/agenda-service";
 import { getPublicGallery } from "@/services/gallery/gallery-service";
-import { getPublicPelayanan } from "@/services/page/page-service";
+import { getPublicBerita, getPublicPelayanan } from "@/services/page/page-service";
 
 export const metadata: Metadata = {
     title: "Puskesmas Kecamatan Sehat",
@@ -19,11 +19,12 @@ export const metadata: Metadata = {
 
 export default async function Home() {
     // Ambil data banner, agenda, galeri, dan pelayanan secara paralel
-    const [banners, agendas, galeri, pelayanan] = await Promise.all([
+    const [banners, agendas, galeri, pelayanan, berita] = await Promise.all([
         getPublicBanners(),
         getPublicAgenda(1, 3),
         getPublicGallery(1, 10),
-        getPublicPelayanan()
+        getPublicPelayanan(),
+        getPublicBerita()
     ]);
 
     return (
@@ -35,13 +36,16 @@ export default async function Home() {
             <Sambutan />
 
             {/* Bagian Pelayanan Dinamis (Hanya kategori Pelayanan) */}
-            {/* <Pelayanan data={pelayanan} /> */}
+            <Pelayanan data={pelayanan} />
 
             {/* Bagian Agenda Kegiatan */}
             <Agenda data={agendas.data} />
 
             {/* Bagian Galeri Foto */}
             <Galeri data={galeri.data} />
+
+            {/* Bagian Berita */}
+            <Pelayanan data={berita} />
         </main>
     );
 }

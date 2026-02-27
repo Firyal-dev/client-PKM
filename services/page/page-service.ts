@@ -76,6 +76,30 @@ export async function getPublicPageById(id: string): Promise<Page> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
+// Publik: Ambil halaman pelayanan
+export async function getPublicPelayanan(): Promise<Page[]> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
+      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
+    })
+    if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
+}
+
+// Publik: Ambil halaman berita
+export async function getPublicBerita(): Promise<Page[]> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/berita`, {
+      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
+    })
+    if (!res.ok) throw new Error(`Gagal ambil data berita: ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data berita')) }
+}
+
 // Admin: Ambil semua halaman (paginated)
 export async function getAdminPages(page = 1, limit = 10) {
   try {
@@ -138,16 +162,4 @@ export async function togglePageStatusAction(id: string) {
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')
-}
-
-// Publik: Ambil halaman pelayanan
-export async function getPublicPelayanan(): Promise<Page[]> {
-  try {
-    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
-      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
-    })
-    if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
-    const data = await res.json()
-    return Array.isArray(data) ? data : []
-  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
 }
