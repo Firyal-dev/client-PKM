@@ -19,7 +19,7 @@ export default async function Navbar() {
 
     return (
         <NavbarWrapper>
-            <div className="mx-2 md:mx-6 lg:mx-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-gray-100 dark:border-slate-700 overflow-hidden transition-all duration-500 rounded-b-2xl md:rounded-b-3xl shadow-sm">
+            <div className="mx-2 md:mx-6 lg:mx-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-gray-100 dark:border-slate-700  transition-all duration-500 rounded-b-2xl md:rounded-b-3xl shadow-sm">
                 {/* Top Bar - Kontak & Social - Hide saat di-scroll atau data kosong */}
                 {(hasContact || hasSocial) && (
                     <div className="transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-[.is-scrolled]:max-h-0 group-[.is-scrolled]:opacity-0 group-[.is-scrolled]:mb-0 max-h-20 opacity-100">

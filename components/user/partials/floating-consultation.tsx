@@ -18,14 +18,14 @@ import { Label } from "@/components/ui/label"
 import { useFloatingMenu } from "./floating-menu"
 import { Consultation } from "@/services/consultation/consultation-service"
 
-export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at'>) => Promise<any> }) {
+export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>) => Promise<any> }) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // Action function untuk handle submit
     async function submitConsultation(prevState: any, formData: FormData) {
         const username = formData.get("username") as string
-        const phone_number = formData.get("phone_number") as string
+        const email = formData.get("email") as string
         const subject = formData.get("subject") as string
         const message = formData.get("message") as string
 
@@ -34,9 +34,16 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
             return { error: "Nama kosong" }
         }
 
-        if (!phone_number?.trim()) {
-            toast.error("Mohon isi nomor telepon Anda.")
-            return { error: "Nomor telepon kosong" }
+        if (!email?.trim()) {
+            toast.error("Mohon isi alamat email Anda.")
+            return { error: "Email kosong" }
+        }
+
+        // Validasi format email sederhana
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            toast.error("Format email tidak valid.")
+            return { error: "Format email salah" }
         }
 
         if (!subject?.trim()) {
@@ -52,7 +59,7 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
         try {
             const payload = {
                 username,
-                phone_number,
+                email,
                 subject,
                 message,
             }
@@ -63,7 +70,7 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
                 throw new Error(response.error)
             }
 
-            toast.success("Konsultasi Anda telah terkirim! Tim kami akan segera merespons.")
+            toast.success("Konsultasi Anda telah terkirim! Tim kami akan segera merespons melalui email Anda.")
             setIsDialogOpen(false)
             return { success: true }
         } catch (error: any) {
@@ -101,7 +108,7 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
                     <DialogHeader>
                         <DialogTitle>Konsultasi</DialogTitle>
                         <DialogDescription>
-                            Ajukan pertanyaan atau konsultasi kesehatan kepada tim Puskesmas.
+                            Ajukan pertanyaan atau konsultasi kesehatan kepada tim Puskesmas. Balasan akan dikirim ke email Anda.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -117,12 +124,12 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="phone_number">Nomor Telepon <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                             <Input
-                                id="phone_number"
-                                name="phone_number"
-                                placeholder="Contoh: 08123456789"
-                                type="tel"
+                                id="email"
+                                name="email"
+                                placeholder="Contoh: nama@email.com"
+                                type="email"
                                 required
                             />
                         </div>
