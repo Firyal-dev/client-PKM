@@ -1,9 +1,10 @@
 export interface ConsultationProp {
     id: number;
     username: string;
-    phone_number?: string;
+    email?: string;
     subject: string;
     message: string;
+    answer?: string;
     is_answer: boolean;
     is_publish: boolean;
     created_at: string;

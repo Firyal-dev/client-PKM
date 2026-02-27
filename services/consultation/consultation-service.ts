@@ -1,16 +1,16 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
-import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
-import { revalidateTag } from 'next/cache'
+import { authHeaders, buildParams } from '@/services/helpers'
+import { tryAction, handleServiceError } from '@/services/utils'
 
 export interface Consultation {
     id: number
     username: string
-    phone_number?: string
+    email?: string
     subject: string
     message: string
+    answer?: string
     is_answer: boolean
     is_publish: boolean
     created_at: string
@@ -18,7 +18,7 @@ export interface Consultation {
 }
 
 // Publik: Buat konsultasi
-export async function createConsultationAction(data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at'>) {
+export async function createConsultationAction(data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>) {
     return tryAction(async () => {
         await api.post('/v1/consultation', data)
         return { message: 'Konsultasi terkirim!' }
@@ -30,10 +30,17 @@ export async function getAdminConsultationList(page = 1, limit = 10, search?: st
     try {
         const params = buildParams(page, limit, search ? { search } : undefined)
         const res = await api.get(`/v1/admin/consultation?${params}`, { headers: await authHeaders() })
-        // Backend returns { data, total, page, last_page }
         const docs = res.data.data || []
         return { data: docs, totalPages: res.data.last_page || 1, currentPage: res.data.page || page }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil konsultasi')) }
+}
+
+// Admin: Balas konsultasi (kirim email + simpan ke DB)
+export async function replyConsultationAction(id: number, answer: string) {
+    return tryAction(async () => {
+        await api.post(`/v1/admin/consultation/${id}/reply`, { answer }, { headers: await authHeaders() })
+        return { message: 'Balasan berhasil dikirim!' }
+    }, 'Gagal mengirim balasan')
 }
 
 // Admin: Update konsultasi
