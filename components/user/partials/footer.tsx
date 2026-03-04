@@ -39,8 +39,8 @@ export default async function Footer() {
                             )}
                         </div>
 
-                        {/* Alamat Ringkas di bawah Map */}
-                        <div className="flex items-start gap-3 px-2">
+                        <div className
+                        ="flex items-start gap-3 px-2">
                             <div className="text-xs space-y-1">
                                 <p className="text-slate-400 italic">&quot;{webInfo?.location || 'Alamat belum diatur'}&quot;</p>
                             </div>

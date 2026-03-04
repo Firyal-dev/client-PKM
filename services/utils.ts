@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 
+import { clearAuthToken } from '@/services/auth-token'
+
 // Response paginated
 export interface PaginatedResponse<T> { data: T[]; totalPages: number; currentPage: number; totalDocs?: number }
 
@@ -8,6 +10,10 @@ export interface ActionResponse<T = unknown> { success: boolean; data?: T; error
 
 // Handle error
 export const handleServiceError = (err: any, fallback: string): string => {
+    if (err?.isAxiosError && err.response?.status === 401) {
+        throw new Error('UNAUTHORIZED_401');
+    }
+    
     if (err?.isAxiosError) return err.response?.data?.message || err.message || fallback
     if (err instanceof Error) return err.message
     return fallback
@@ -37,7 +43,10 @@ export async function tryActionWithAuth<T>(action: () => Promise<T>, fallback: s
         const result = await action()
         return { success: true, data: result }
     } catch (err) {
-        if (err instanceof Error && err.message === 'UNAUTHORIZED') redirect(redirectPath)
+        if (err instanceof Error && (err.message === 'UNAUTHORIZED' || err.message === 'UNAUTHORIZED_401')) {
+            await clearAuthToken();
+            redirect(redirectPath);
+        }
         return { success: false, error: handleServiceError(err, fallback) }
     }
 }

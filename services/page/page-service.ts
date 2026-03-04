@@ -12,6 +12,7 @@ export interface Page {
   menu?: { id: string; title: string }
   title: string
   dynamic_content: string
+  content?: string // Alias for dynamic_content used in some components
   image?: string
   file?: string
   type: 'pdf' | 'halaman' | 'kartu'
@@ -138,6 +139,24 @@ export async function togglePageStatusAction(id: string) {
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')
+}
+
+// Check if menu already has any pages linked, return all info with types
+export async function checkMenuPageLink(menuId: string): Promise<{
+  hasPages: boolean;
+  pageCount: number;
+  existingType: string;
+  pages: { id: string; title: string; type: string }[];
+  menu_id: string;
+  menu_title: string;
+} | null> {
+  try {
+    const res = await api.get(`/v1/admin/pages/check-menu?menu_id=${menuId}`, { headers: await authHeaders() })
+    return res.data
+  } catch (e) {
+    // If not found or error, return null
+    return null
+  }
 }
 
 // Publik: Ambil halaman pelayanan

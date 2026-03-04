@@ -11,6 +11,7 @@ type ConfirmDialogProps = {
     title: string
     description: string
     onConfirm: () => void
+    onCancel?: () => void
     isLoading?: boolean
     confirmText?: string
     cancelText?: string
@@ -18,13 +19,20 @@ type ConfirmDialogProps = {
 }
 
 export function ConfirmDialog({
-    trigger, open, onOpenChange, title, description, onConfirm,
+    trigger, open, onOpenChange, title, description, onConfirm, onCancel,
     isLoading = false, confirmText = "Ya, Lanjutkan", cancelText = "Batal", variant = "destructive"
 }: ConfirmDialogProps) {
     const isDestructive = variant === "destructive"
 
+    const handleOpenChange = (isOpen: boolean) => {
+        if (!isOpen && onCancel) {
+            onCancel()
+        }
+        onOpenChange?.(isOpen)
+    }
+
     return (
-        <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialog open={open} onOpenChange={handleOpenChange}>
             {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
             <AlertDialogContent className={cn("max-w-[340px] sm:max-w-[400px] rounded-2xl sm:rounded-3xl border bg-background p-4 sm:p-6 shadow-2xl")}>
                 <AlertDialogHeader className="flex flex-row items-start gap-3 sm:gap-4 space-y-0">

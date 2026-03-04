@@ -10,6 +10,7 @@ export interface Menu {
   title: string
   slug: string
   type?: 'static' | 'dynamic' | 'custom'
+  url_target?: string
   parent?: { id: string; title: string } | null
   parent_id?: string | null
   order: number
@@ -67,7 +68,7 @@ export async function getAdminParentMenus(): Promise<Menu[]> {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
 
-    return menus 
+    return menus
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -92,6 +93,7 @@ export async function createMenuAction(_: unknown, formData: FormData) {
   }
   return tryAction(async () => {
     const res = await api.post('/v1/admin/menus', payload, { headers: await authHeaders() })
+    // @ts-expect-error revalidateTag accepts 1-2 args
     revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal buat menu')
@@ -113,6 +115,7 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
     const res = await api.patch(`/v1/admin/menus/${id}`, payload, {
       headers: await authHeaders()
     })
+    // @ts-expect-error revalidateTag accepts 1-2 args
     revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal update menu')
@@ -122,6 +125,7 @@ export async function updateMenuAction(id: string, _: unknown, formData: FormDat
 export async function deleteMenuAction(id: string) {
   return tryAction(async () => {
     const res = await api.delete(`/v1/admin/menus/${id}`, { headers: await authHeaders() })
+    // @ts-expect-error revalidateTag accepts 1-2 args
     revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal hapus menu')
