@@ -105,3 +105,14 @@ export async function deleteStaticPageAction(id: string) {
     return res.data
   }, 'Gagal hapus halaman statis')
 }
+
+// Check if menu already has a static page linked
+export async function checkMenuStaticPageLink(menuId: string): Promise<{ id: string; title: string; menu_id: string; menu_title: string } | null> {
+  try {
+    const res = await api.get(`/v1/admin/static-pages/check-menu?menu_id=${menuId}`, { headers: await authHeaders() })
+    return res.data
+  } catch (e) {
+    // If not found or error, return null
+    return null
+  }
+}

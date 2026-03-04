@@ -9,10 +9,21 @@ const api = axios.create({
 // Error handler global
 api.interceptors.response.use(
     res => res,
-    err => {
-        if (typeof window !== 'undefined') {
-            const msg = err.response?.data?.message || "Terjadi kesalahan"
-            toast.error(msg)
+    async err => { 
+        if (typeof window !== 'undefined') { 
+            const status = err.response?.status;
+            const msg = err.response?.data?.message || "Terjadi kesalahan";
+            
+            if (status === 401) {
+                if (!window.sessionStorage.getItem('loggedOut')) {
+                    toast.error("Sesi berakhir karena akun ini login di tempat lain.");
+                    window.sessionStorage.setItem('loggedOut', 'true');
+                    
+                    window.location.href = '/admin/login'; 
+                }
+            } else {
+                toast.error(msg);
+            }
         }
         return Promise.reject(err)
     }

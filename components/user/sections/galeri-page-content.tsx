@@ -12,7 +12,6 @@ import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
 import type { Album } from "@/types/album-prop"
 import type { Video } from "@/services/video/video-service"
-import { cn } from "@/lib/utils"
 
 interface GalleryPageContentProps {
     initialPhotos: Gallery[]

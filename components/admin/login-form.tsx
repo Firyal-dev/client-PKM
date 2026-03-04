@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input"
 import { loginAction } from "@/services/auth/login-service"
 import Image from 'next/image'
 // Perubahan 1: Pastikan ChangeEvent diimport jika belum (biasanya otomatis di TS)
-import { useActionState, useRef, useState, ChangeEvent } from 'react'
+import { useActionState, useRef, useState, ChangeEvent, useEffect } from 'react'
 import ReCAPTCHA from "react-google-recaptcha"
+import { clearAuthToken } from "@/services/auth-token"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [state, action, pending] = useActionState(loginAction, null);
@@ -18,6 +19,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const [username, setUsername] = useState("");
 
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  useEffect(() => {
+    clearAuthToken();
+  }, []);
 
   const handleRecaptchaChange = (value: string | null) => {
     setToken(value);
@@ -59,7 +64,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   onChange={handleUsernameChange} // Panggil fungsi pembersih saat mengetik
                 />
                 {/* Opsional: Tambahkan hint kecil */}
-                 <p className="text-xs text-muted-foreground mt-1">Hanya huruf dan angka, tanpa spasi.</p>
+                <p className="text-xs text-muted-foreground mt-1">Hanya huruf dan angka, tanpa spasi.</p>
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>

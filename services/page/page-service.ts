@@ -12,6 +12,7 @@ export interface Page {
   menu?: { id: string; title: string }
   title: string
   dynamic_content: string
+  content?: string // Alias for dynamic_content used in some components
   image?: string
   file?: string
   type: 'pdf' | 'halaman' | 'kartu'
@@ -162,4 +163,38 @@ export async function togglePageStatusAction(id: string) {
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')
+<<<<<<< HEAD
 }
+=======
+}
+
+// Check if menu already has any pages linked, return all info with types
+export async function checkMenuPageLink(menuId: string): Promise<{
+  hasPages: boolean;
+  pageCount: number;
+  existingType: string;
+  pages: { id: string; title: string; type: string }[];
+  menu_id: string;
+  menu_title: string;
+} | null> {
+  try {
+    const res = await api.get(`/v1/admin/pages/check-menu?menu_id=${menuId}`, { headers: await authHeaders() })
+    return res.data
+  } catch (e) {
+    // If not found or error, return null
+    return null
+  }
+}
+
+// Publik: Ambil halaman pelayanan
+export async function getPublicPelayanan(): Promise<Page[]> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
+      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
+    })
+    if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
+}
+>>>>>>> 6bf1c17d828766b29eeb2c5073732f02ffd8a7fa

@@ -89,7 +89,7 @@ export function PageLayoutArtikel({ page, menuTitle, breadcrumbItems, relatedPag
                 prose-p:text-slate-600 prose-p:leading-relaxed
                 prose-img:rounded-2xl prose-strong:text-slate-900
                 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content || "") }}
             />
 
             {/* File Download Section - Tampilkan jika ada file */}
