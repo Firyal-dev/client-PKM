@@ -59,9 +59,9 @@ function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-col flex-1 p-5">
+            <div className="flex flex-col flex-1 p-4">
                 <p className="text-xs text-slate-400 mb-2">{publishedAt}</p>
-                <h3 className="font-bold text-slate-800 text-base leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                <h3 className="font-bold text-slate-800 text-sm leading-snug mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2">
                     {page.title}
                 </h3>
                 {excerpt && (
@@ -69,7 +69,7 @@ function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
                         {excerpt}
                     </p>
                 )}
-                <div className="mt-4 flex items-center text-blue-600 text-sm font-medium">
+                <div className="mt-3 flex items-center text-blue-600 text-xs font-medium">
                     Selengkapnya
                     <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -101,7 +101,7 @@ export function PageHalamanList({ pages, menu, totalPages, currentPage, total }:
             <div className="max-w-6xl mx-auto px-4 py-10">
                 {pages.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {pages.map((page) => (
                                 <PageCard key={page.id} page={page} menuSlug={menu.slug} />
                             ))}

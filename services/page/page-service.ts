@@ -163,9 +163,6 @@ export async function togglePageStatusAction(id: string) {
     revalidateTag(CACHE_TAGS.PAGE, 'max')
     return res.data
   }, 'Gagal ubah status')
-<<<<<<< HEAD
-}
-=======
 }
 
 // Check if menu already has any pages linked, return all info with types
@@ -185,16 +182,3 @@ export async function checkMenuPageLink(menuId: string): Promise<{
     return null
   }
 }
-
-// Publik: Ambil halaman pelayanan
-export async function getPublicPelayanan(): Promise<Page[]> {
-  try {
-    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
-      next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
-    })
-    if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
-    const data = await res.json()
-    return Array.isArray(data) ? data : []
-  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
-}
->>>>>>> 6bf1c17d828766b29eeb2c5073732f02ffd8a7fa

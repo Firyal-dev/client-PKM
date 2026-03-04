@@ -56,11 +56,11 @@ export default function AlbumDetailPageContent({
                         className="py-20"
                     />
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                         {photos.map((photo) => (
                             <div
                                 key={photo.id}
-                                className="group relative aspect-[4/3] rounded-3xl overflow-hidden bg-white shadow-sm border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2"
+                                className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1"
                             >
                                 <Image
                                     src={getMediaUrl(photo.image) || "/userPlaceholder.jpg"}
@@ -72,7 +72,7 @@ export default function AlbumDetailPageContent({
                                 />
 
                                 {/* Overlay Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
                                     <h3 className="text-white font-bold text-base line-clamp-1">
                                         {photo.image_title}
                                     </h3>

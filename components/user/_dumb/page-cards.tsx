@@ -69,7 +69,7 @@ export function PageLayoutCards({ page, menuTitle, breadcrumbItems, relatedPages
 
           {/* GRID 4 KOLOM HORIZONTAL (Kartu Layanan) */}
           {paginatedPages.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {paginatedPages.map((related) => {
                 // Cek apakah ada konten bermakna untuk "Lihat Selengkapnya"
                 const hasContent = related.content && related.content.replace(/<[^>]*>/g, '').trim().length > 0;
@@ -80,10 +80,10 @@ export function PageLayoutCards({ page, menuTitle, breadcrumbItems, relatedPages
                     href={`/${related.slug}`}
                     className="group"
                   >
-                    <Card className="h-full border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col group-hover:-translate-y-3 bg-white">
+                    <Card className="h-full border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group-hover:-translate-y-1 bg-white">
                       {/* Media Header */}
                       {related.image ? (
-                        <div className="relative h-48 overflow-hidden">
+                        <div className="relative h-36 overflow-hidden">
                           <Image
                             src={getMediaUrl(related.image) || ""}
                             alt={related.title}
@@ -93,19 +93,19 @@ export function PageLayoutCards({ page, menuTitle, breadcrumbItems, relatedPages
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                         </div>
                       ) : (
-                        <div className="h-48 bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center border-b border-slate-50 transition-colors group-hover:from-blue-50 group-hover:to-indigo-50">
+                        <div className="h-36 bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center border-b border-slate-50 transition-colors group-hover:from-blue-50 group-hover:to-indigo-50">
                           <FileText className="w-12 h-12 text-slate-200 group-hover:text-blue-200 transition-colors" />
                         </div>
                       )}
 
-                      <CardContent className="p-7 flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-slate-800 line-clamp-2 leading-[1.3] group-hover:text-blue-600 transition-colors tracking-tight mb-4">
+                      <CardContent className="p-3 flex-1 flex flex-col">
+                        <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors tracking-tight mb-2">
                           {related.title}
                         </h3>
 
                         {/* CTA - Hanya muncul jika ada konten */}
                         {hasContent && (
-                          <div className="mt-auto pt-4 flex items-center gap-2 text-blue-600 text-sm font-bold group-hover:gap-3 transition-all">
+                          <div className="mt-auto pt-2 flex items-center gap-1.5 text-blue-600 text-xs font-bold group-hover:gap-2 transition-all">
                             <span>Lihat Selengkapnya</span>
                             <ArrowRight className="w-4 h-4" />
                           </div>

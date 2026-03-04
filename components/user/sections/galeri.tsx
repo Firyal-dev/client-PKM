@@ -12,7 +12,7 @@ export default function Gallery({ data }: { data: Gallery[] }) {
     const hasData = Array.isArray(data) && data.length > 0
 
     return (
-        <section className="py-16 md:py-24 bg-slate-50" id="galeri">
+        <section className="py-12 md:py-16 bg-slate-50" id="galeri">
             <div className="container mx-auto px-6 md:px-12 lg:px-16">
 
                 <HeaderSection />
@@ -37,10 +37,10 @@ export default function Gallery({ data }: { data: Gallery[] }) {
                 )}
 
                 {data?.length > 10 && (
-                    <div className="mt-10 flex justify-center">
+                    <div className="mt-6 flex justify-center">
                         <Link
                             href="/galeri"
-                            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold border border-slate-300 text-slate-700 rounded-xl hover:border-blue-600 hover:text-blue-600 hover:bg-white transition-colors"
+                            className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold border border-slate-300 text-slate-700 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-white transition-colors"
                         >
                             <LayoutGrid className="w-4 h-4" />
                             Lihat Galeri Foto
@@ -56,12 +56,12 @@ export default function Gallery({ data }: { data: Gallery[] }) {
 
 function HeaderSection() {
     return (
-        <div className="flex flex-col items-center text-center mb-10 space-y-2">
+        <div className="flex flex-col items-center text-center mb-6 space-y-1.5">
             <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-wider">
                 Dokumentasi
             </span>
 
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
                 Galeri Kegiatan
             </h2>
 

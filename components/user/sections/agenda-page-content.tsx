@@ -2,14 +2,13 @@
 
 import { useState, useMemo } from "react"
 import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-user"
 import Breadcrumb from "@/components/user/partials/breadcrumb"
-import { MapPin, CalendarDays, ArrowRight, Clock, Info } from "lucide-react"
+import { MapPin, CalendarDays, Clock, Info, ChevronRight } from "lucide-react"
 import { format, isSameDay } from "date-fns"
 import { id } from "date-fns/locale"
 import type { Agenda } from "@/types/agenda-prop"
-import Link from "next/link"
 
 interface AgendaPageContentProps {
     initialAgendas: Agenda[]
@@ -20,18 +19,15 @@ export default function AgendaPageContent({ initialAgendas }: AgendaPageContentP
 
     const breadcrumbItems = [{ label: "Agenda" }]
 
-    // Filter agenda berdasarkan tanggal yang dipilih
     const filteredAgendas = useMemo(() => {
         if (!selectedDate) return []
-        return initialAgendas.filter(item =>
-            isSameDay(new Date(item.date), selectedDate)
-        )
+        return initialAgendas.filter(item => isSameDay(new Date(item.date), selectedDate))
     }, [initialAgendas, selectedDate])
 
-    // Highlight tanggal yang ada kegiatannya di kalender
-    const eventDays = useMemo(() => {
-        return initialAgendas.map(item => new Date(item.date))
-    }, [initialAgendas])
+    const eventDays = useMemo(() => initialAgendas.map(item => new Date(item.date)), [initialAgendas])
+
+    const totalEvents = initialAgendas.length
+    const upcomingCount = initialAgendas.filter(a => new Date(a.date) >= new Date()).length
 
     return (
         <div className="min-h-screen bg-slate-50/50">
@@ -39,37 +35,57 @@ export default function AgendaPageContent({ initialAgendas }: AgendaPageContentP
             <div className="bg-gradient-to-br from-blue-700 to-blue-500 text-white">
                 <div className="container mx-auto px-4 py-12 md:py-16">
                     <Breadcrumb items={breadcrumbItems} />
-                    <div className="mt-6 space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-blue-100 text-[10px] font-bold uppercase tracking-wider border border-white/20">
-                            <CalendarDays className="w-3.5 h-3.5" />
-                            Jadwal & Agenda
+                    <div className="mt-6 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-blue-100 text-[10px] font-bold uppercase tracking-wider border border-white/20">
+                                <CalendarDays className="w-3.5 h-3.5" />
+                                Jadwal &amp; Agenda
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                                Agenda Kegiatan
+                            </h1>
+                            <p className="text-blue-100 max-w-2xl text-lg opacity-90 leading-relaxed">
+                                Pantau jadwal pelayanan kami, penyuluhan kesehatan, dan berbagai kegiatan operasional Puskesmas secara transparan.
+                            </p>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-                            Agenda Kegiatan Puskesmas
-                        </h1>
-                        <p className="text-blue-100 max-w-2xl text-lg opacity-90 leading-relaxed">
-                            Pantau jadwal pelayanan kami, penyuluhan kesehatan, dan berbagai kegiatan operasional
-                            Puskesmas lainnya secara transparan.
-                        </p>
+
+                        {/* Stats chips */}
+                        <div className="flex gap-3 shrink-0">
+                            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 text-center">
+                                <p className="text-2xl font-extrabold">{totalEvents}</p>
+                                <p className="text-xs text-blue-100 mt-0.5">Total Agenda</p>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 text-center">
+                                <p className="text-2xl font-extrabold">{upcomingCount}</p>
+                                <p className="text-xs text-blue-100 mt-0.5">Akan Datang</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                    {/* Left Side: Calendar Card */}
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                    {/* Calendar Column */}
                     <div className="lg:col-span-5 xl:col-span-4">
-                        <Card className="border-none shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden sticky top-32 bg-white">
-                            <CardHeader className="bg-slate-900 text-white p-6 md:p-8">
-                                <CardTitle className="text-xl font-bold flex items-center justify-between">
-                                    Pilih Tanggal
-                                    <CalendarDays className="w-6 h-6 text-blue-400" />
-                                </CardTitle>
-                                <CardDescription className="text-slate-300">
-                                    Cari kegiatan berdasarkan tanggal
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-4 md:p-6">
+                        <Card className="border-none shadow-md rounded-3xl overflow-hidden sticky top-28 bg-white">
+                            <div className="bg-blue-600 px-5 py-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-bold text-blue-100 uppercase tracking-widest">Pilih Tanggal</p>
+                                    <p className="text-white font-semibold text-sm mt-0.5">
+                                        {selectedDate
+                                            ? format(selectedDate, "EEEE, d MMMM yyyy", { locale: id })
+                                            : "Belum ada tanggal dipilih"}
+                                    </p>
+                                </div>
+                                <div className="p-2.5 bg-white/15 rounded-xl">
+                                    <CalendarDays className="w-5 h-5 text-white" />
+                                </div>
+                            </div>
+
+                            <CardContent className="p-3">
                                 <Calendar
                                     mode="single"
                                     selected={selectedDate}
@@ -80,71 +96,61 @@ export default function AgendaPageContent({ initialAgendas }: AgendaPageContentP
                                     modifiersStyles={{
                                         event: {
                                             fontWeight: "bold",
-                                            color: "var(--blue-600)",
+                                            color: "#2563eb",
                                             textDecoration: "underline",
                                             textDecorationColor: "#3b82f6",
-                                            textUnderlineOffset: "4px"
+                                            textUnderlineOffset: "4px",
                                         }
                                     }}
                                 />
-
-                                <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-none">Terpilih</p>
-                                        <p className="text-sm font-bold text-slate-900">
-                                            {selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: id }) : "-"}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-none">Kegiatan</p>
-                                        <p className="text-sm font-bold text-blue-600 flex items-center gap-1.5">
-                                            {filteredAgendas.length} Jadwal
-                                        </p>
-                                    </div>
-                                </div>
                             </CardContent>
+
+                            {/* Footer info */}
+                            <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+                                <div className="bg-slate-50 rounded-lg p-2.5">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Kegiatan Hari Ini</p>
+                                    <p className="text-lg font-extrabold text-blue-600 mt-0.5">{filteredAgendas.length}</p>
+                                </div>
+                                <div className="bg-slate-50 rounded-xl p-3">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Tandai Kalender</p>
+                                    <p className="text-[11px] font-semibold text-slate-600 mt-0.5 leading-tight">Tanggal bergaris = ada kegiatan</p>
+                                </div>
+                            </div>
                         </Card>
                     </div>
 
-                    {/* Right Side: Agenda List */}
-                    <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+                    {/* Events Column */}
+                    <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+                        {/* Section Header */}
                         <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                List Acara
-                                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                            </h2>
-                            {selectedDate && (
-                                <span className="text-sm text-slate-400 font-medium italic">
-                                    Menampilkan agenda pada {format(selectedDate, "eee, d MMM yyyy", { locale: id })}
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">Daftar Kegiatan</h2>
+                                {selectedDate && (
+                                    <p className="text-sm text-slate-400 mt-0.5">
+                                        {format(selectedDate, "EEEE, d MMMM yyyy", { locale: id })}
+                                    </p>
+                                )}
+                            </div>
+                            {filteredAgendas.length > 0 && (
+                                <span className="text-xs font-bold bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100">
+                                    {filteredAgendas.length} kegiatan
                                 </span>
                             )}
                         </div>
 
                         {filteredAgendas.length > 0 ? (
                             <div className="space-y-4">
-                                {filteredAgendas.map((item) => (
-                                    <AgendaDetailItem key={item.id} item={item} />
+                                {filteredAgendas.map((item, idx) => (
+                                    <AgendaCard key={item.id} item={item} index={idx} />
                                 ))}
                             </div>
                         ) : (
                             <EmptyState
-                                title="Tidak Ada Jadwal"
-                                description={`Tidak ada agenda kegiatan yang terjadwal pada tanggal ${selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: id }) : ""}. Silakan pilih tanggal lain yang di tandai.`}
+                                title="Tidak Ada Kegiatan"
+                                description={`Tidak ada agenda yang terjadwal pada ${selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: id }) : "tanggal ini"}. Pilih tanggal yang bertanda garis bawah di kalender.`}
                                 icon={Info}
-                                className="bg-slate-50 border-2 border-dashed border-slate-200 py-20 rounded-3xl"
+                                className="bg-white border border-dashed border-slate-200 py-20 rounded-3xl"
                             />
-                        )}
-
-                        {!selectedDate && (
-                            <div className="mt-10 p-8 rounded-3xl bg-blue-50 border border-blue-100 text-blue-700 flex flex-col md:flex-row items-center gap-6">
-                                <div className="p-4 rounded-2xl bg-white shadow-sm shrink-0">
-                                    <CalendarDays className="w-8 h-8 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-lg">Pilih tanggal di kalender</h4>
-                                    <p className="text-blue-600/70 text-sm">Pilih salah satu tanggal di samping untuk melihat jadwal kegiatan pada hari tersebut secara mendetail.</p>
-                                </div>
-                            </div>
                         )}
                     </div>
                 </div>
@@ -153,49 +159,48 @@ export default function AgendaPageContent({ initialAgendas }: AgendaPageContentP
     )
 }
 
-function AgendaDetailItem({ item }: { item: Agenda }) {
+function AgendaCard({ item, index }: { item: Agenda; index: number }) {
     return (
-        <Card className="group relative border-none shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 rounded-2xl bg-white overflow-hidden border-l-4 border-l-blue-500">
-            <CardContent className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center">
-                {/* Time Indicator */}
-                <div className="md:w-32 flex md:flex-col items-center md:items-start gap-3 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-6">
-                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0">
-                        <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Pukul</p>
-                        <p className="text-lg md:text-xl font-extrabold text-blue-600 tracking-tight">
-                            {item.time}
-                        </p>
-                    </div>
+        <Card className="group border-none shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl bg-white overflow-hidden">
+            <CardContent className="p-0 flex">
+                {/* Left accent bar + time */}
+                <div className="w-20 sm:w-24 shrink-0 bg-blue-50 flex flex-col items-center justify-center py-4 gap-1 border-r border-blue-100">
+                    <Clock className="w-3.5 h-3.5 text-blue-400" />
+                    <p className="text-sm font-extrabold text-blue-600 tabular-nums leading-none">{item.time}</p>
+                    <p className="text-[10px] text-blue-400 font-semibold">WIB</p>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 space-y-3">
-                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
-                        {item.activity_name}
-                    </h3>
-
-                    <div className="flex flex-wrap gap-y-2 gap-x-6">
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <MapPin className="w-4 h-4 text-slate-400" />
-                            <span className="font-medium">{item.location}</span>
+                {/* Main content */}
+                <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-4">
+                    <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Kegiatan #{index + 1}
+                            </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <Info className="w-4 h-4 text-slate-400" />
-                            <span className="font-medium italic">Sifat: {item.effective_date || "Terbuka untuk Umum"}</span>
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                            {item.activity_name}
+                        </h3>
+                        <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+                            <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <span>{item.location}</span>
+                            </div>
+                            {item.effective_date && (
+                                <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                                    <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    <span className="italic">{item.effective_date}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-slate-50 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-200">
+                            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
                         </div>
                     </div>
                 </div>
-
-                {/* Action */}
-                <Link
-                    href={`/agenda/${item.id}`}
-                    className="shrink-0 w-full md:w-auto px-6 py-3 rounded-xl bg-slate-50 hover:bg-blue-600 text-slate-900 hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2 group/btn"
-                >
-                    Detail
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                </Link>
             </CardContent>
         </Card>
     )
