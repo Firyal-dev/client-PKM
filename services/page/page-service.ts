@@ -90,9 +90,13 @@ export async function getPublicPelayanan(): Promise<Page[]> {
 }
 
 // Publik: Ambil halaman berita
-export async function getPublicBerita(): Promise<Page[]> {
+export async function getPublicBerita(page?: number, limit?: number): Promise<Page[]> {
   try {
-    const res = await fetch(`${getBaseUrl()}/v1/pages/berita`, {
+    const params = new URLSearchParams()
+    if (page !== undefined) params.set('page', String(page))
+    if (limit !== undefined) params.set('limit', String(limit))
+    const query = params.toString() ? `?${params.toString()}` : ''
+    const res = await fetch(`${getBaseUrl()}/v1/pages/berita${query}`, {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data berita: ${res.status}`)

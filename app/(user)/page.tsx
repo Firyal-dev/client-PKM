@@ -5,6 +5,7 @@ import Sambutan from "@/components/user/sections/sambutan";
 import Pelayanan from "@/components/user/sections/pelayanan";
 import Agenda from "@/components/user/sections/agenda";
 import Galeri from "@/components/user/sections/galeri";
+import Berita from "@/components/user/sections/berita";
 
 // services
 import { getPublicBanners } from "@/services/banner/banner-service";
@@ -24,7 +25,7 @@ export default async function Home() {
         getPublicAgenda(1, 3),
         getPublicGallery(1, 10),
         getPublicPelayanan(),
-        getPublicBerita()
+        getPublicBerita(1, 6)
     ]);
 
     return (
@@ -45,7 +46,7 @@ export default async function Home() {
             <Galeri data={galeri.data} />
 
             {/* Bagian Berita */}
-            <Pelayanan data={berita} />
+            <Berita data={berita} />
         </main>
     );
 }

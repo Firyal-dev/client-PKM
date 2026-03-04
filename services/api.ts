@@ -8,12 +8,12 @@ const api = axios.create({
 
 // Error handler global
 api.interceptors.response.use(
-    res => res,
-    async err => { 
-        if (typeof window !== 'undefined') { 
+    (res: any) => res,
+    async (err: any) => {
+        if (typeof window !== 'undefined') {
             const status = err.response?.status;
             const msg = err.response?.data?.message || "Terjadi kesalahan";
-            
+
             if (status === 401) {
                 if (!window.sessionStorage.getItem('loggedOut')) {
                     toast.error("Sesi berakhir karena akun ini login di tempat lain.");
