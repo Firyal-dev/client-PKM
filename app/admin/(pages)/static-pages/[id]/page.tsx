@@ -4,6 +4,7 @@ import { getAdminMenusByType } from "@/services/menu/menu-service"
 import { PageHeader } from "@/components/admin/page-header"
 import { StaticPageForm } from "../static-page-form"
 import { updateStaticPageAction } from "@/services/static-page/static-page-service"
+import { SetBreadcrumb } from "@/components/admin/breadcrumb-context"
 
 export default async function EditStaticPagePage({
   params,
@@ -23,8 +24,9 @@ export default async function EditStaticPagePage({
 
   return (
     <div className="space-y-6">
+      <SetBreadcrumb title={staticPage.title} />
       <PageHeader
-        title="Edit Halaman Statis"
+        title={`Edit Halaman Statis: ${staticPage.title}`}
         description="Edit halaman statis website"
       />
 

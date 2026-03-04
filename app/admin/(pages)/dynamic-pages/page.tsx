@@ -4,11 +4,12 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAdminPages } from "@/services/page/page-service"
+import { PaginationControl } from "@/components/pagination-control"
 
 export default async function PagesPage({ searchParams }: { searchParams: { page: string } }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const { data, totalPages } = await getAdminPages(currentPage)
+    const { data, totalPages, total } = await getAdminPages(currentPage, 10)
 
     return (
         <div className="px-5 pb-10">
@@ -38,9 +39,15 @@ export default async function PagesPage({ searchParams }: { searchParams: { page
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <PageList pages={data} />
+                    <PageList pages={data} total={total} />
                 )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="mt-8">
+                    <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+                </div>
+            )}
         </div>
     )
 }

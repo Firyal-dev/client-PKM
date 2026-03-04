@@ -15,11 +15,10 @@ export default function Logo({ className = '', webTitle, logoUrl }: LogoProps) {
     return (
         <Link href="/" className={`flex items-center gap-3 ${className}`}>
             <Image
-                src="/puskesmasLogo.png"
+                src="/kotabogor.webp"
                 alt="Logo Kota Bogor"
                 width={28}
                 height={28}
-                className="dark:invert"
             />
             <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
                 <Image

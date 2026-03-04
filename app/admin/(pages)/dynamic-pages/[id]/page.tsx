@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation"
 import { PageForm } from "../page-form"
 import { PageHeader } from "@/components/admin/page-header"
 import { Button } from "@/components/ui/button"
@@ -5,16 +6,20 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { getAdminPageById, updatePageAction } from "@/services/page/page-service"
 import { getAdminMenusByType } from "@/services/menu/menu-service"
+import { SetBreadcrumb } from "@/components/admin/breadcrumb-context"
 
 export default async function EditPagePage({ params }: { params: { id: string } }) {
     const { id } = await params
     const page = await getAdminPageById(id)
+    if (!page) return notFound()
+
     const menus = await getAdminMenusByType('dynamic')
 
     return (
         <div className="px-5 pb-10">
+            <SetBreadcrumb title={page.title} />
             <PageHeader
-                title="Edit Halaman"
+                title={`Edit Halaman: ${page.title}`}
                 description="Edit halaman konten"
             >
                 <Link href="/admin/dynamic-pages">

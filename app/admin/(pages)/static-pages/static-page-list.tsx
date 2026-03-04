@@ -217,7 +217,7 @@ export function StaticPageList({ staticPages, pagination }: StaticPageListProps)
                 </div>
 
                 <div className="text-xs text-muted-foreground font-medium bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
-                    Total: <span className="text-foreground font-bold">{staticPages.length}</span> Halaman
+                    Total: <span className="text-foreground font-bold">{pagination?.total || staticPages.length}</span> Halaman
                 </div>
             </div>
 

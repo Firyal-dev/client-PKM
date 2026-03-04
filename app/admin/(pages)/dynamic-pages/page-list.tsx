@@ -35,7 +35,7 @@ const getTypeBadge = (type: string) => {
   return typeMap[type] || type
 }
 
-export function PageList({ pages }: { pages: Page[] }) {
+export function PageList({ pages, total }: { pages: Page[]; total: number }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState("")
 
@@ -252,7 +252,7 @@ export function PageList({ pages }: { pages: Page[] }) {
         </div>
 
         <div className="text-xs text-muted-foreground font-medium bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
-          Total: <span className="text-foreground font-bold">{pages.length}</span> Halaman
+          Total: <span className="text-foreground font-bold">{total}</span> Halaman
         </div>
       </div>
 

@@ -1,7 +1,8 @@
 "use client"
-import { useActionState, useState } from "react"
+import { useActionState, useState, useRef } from "react"
 import { MessageSquareWarning } from "lucide-react"
 import { toast } from "sonner"
+import ReCAPTCHA from "react-google-recaptcha"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,9 +31,16 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [category, setCategory] = useState<ReviewCategory>(ReviewCategory.PELAYANAN)
+    const recaptchaRef = useRef<ReCAPTCHA>(null)
+    const [captchaValue, setCaptchaValue] = useState<string | null>(null)
 
     // Action function untuk handle submit
     async function submitReview(prevState: any, formData: FormData) {
+        if (!captchaValue) {
+            toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
+            return { error: "reCAPTCHA belum dicentang" }
+        }
+
         const username = formData.get("username") as string || "Anonim"
         const message = formData.get("message") as string
         const categoryValue = formData.get("category") as string
@@ -48,7 +56,9 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
                 username,
                 category: categoryValue,
                 message,
-                is_publish: false
+                is_publish: false,
+                // Kita sertakan token captcha di sini jika backend membutuhkannya
+                recaptchaToken: captchaValue
             } as any // Cast to any to bypass strict Reviews type requirement for _id
 
             const response = await onSubmit(payload)
@@ -60,6 +70,8 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
             toast.success("Terima kasih atas masukan Anda!")
             setIsDialogOpen(false)
             setCategory(ReviewCategory.PELAYANAN) // Reset category
+            setCaptchaValue(null)
+            recaptchaRef.current?.reset()
             return { success: true }
         } catch (error: any) {
             console.error(error)
@@ -141,6 +153,14 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
                                 placeholder="Tuliskan kritik dan saran Anda secara detail..."
                                 className="resize-none min-h-[120px]"
                                 required
+                            />
+                        </div>
+
+                        <div className="flex justify-center">
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                                onChange={(value) => setCaptchaValue(value)}
                             />
                         </div>
 

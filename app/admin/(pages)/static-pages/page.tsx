@@ -4,6 +4,7 @@ import { StaticPageList } from "./static-page-list"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PaginationControl } from "@/components/pagination-control"
 
 export default async function StaticPagesPage({
     searchParams,
@@ -53,6 +54,12 @@ export default async function StaticPagesPage({
                     />
                 )}
             </div>
+
+            {lastPage > 1 && (
+                <div className="mt-8">
+                    <PaginationControl totalPages={lastPage} currentPage={page} />
+                </div>
+            )}
         </div>
     )
 }

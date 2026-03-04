@@ -16,21 +16,15 @@ async function getMenuData(slug: string) {
   }
 }
 
-export default async function SlugPage({ params }: { params: { slug: string } }) {
+export default async function SlugPage({ params, searchParams }: { params: { slug: string }; searchParams: { page?: string } }) {
   const { slug } = await params
+  const { page } = await searchParams
+  const currentPage = parseInt(page || '1')
 
   const data = await getMenuData(slug)
   if (!data) return notFound()
 
   const { menu } = data
-
-  // ─── MENU TYPE: CUSTOM ─────────────────────────────────────────────────────
-  if (menu.type === 'custom') {
-    if (menu.url_target && menu.url_target !== '/') {
-      redirect(menu.url_target)
-    }
-    return notFound()
-  }
 
   // ─── MENU TYPE: STATIC ─────────────────────────────────────────────────────
   if (menu.type === 'static') {
@@ -44,20 +38,20 @@ export default async function SlugPage({ params }: { params: { slug: string } })
 
   // ─── MENU TYPE: DYNAMIC ────────────────────────────────────────────────────
   try {
-    // Ambil semua pages aktif untuk menu ini
-    const pages = await getPublicPagesByMenuId(menu.id)
+    // Ambil semua pages aktif untuk menu ini dengan pagination
+    const { data: pages, lastPage, total } = await getPublicPagesByMenuId(menu.id, currentPage, 10)
     if (pages.length === 0) return notFound()
 
     const firstPage = pages[0]
 
     // Dokumen PDF → list semua dokumen + toggle preview
     if (firstPage.type === 'pdf') {
-      return <PageDokumenList pages={pages} menu={menu} />
+      return <PageDokumenList pages={pages} menu={menu} totalPages={lastPage} currentPage={currentPage} total={total} />
     }
 
     // Kartu (Berita / Artikel) → grid kartu, klik buka halaman detail
     if (firstPage.type === 'kartu') {
-      return <PageHalamanList pages={pages} menu={menu} />
+      return <PageHalamanList pages={pages} menu={menu} totalPages={lastPage} currentPage={currentPage} total={total} />
     }
 
     // Halaman konten biasa ('halaman') → tampilkan artikel tunggal

@@ -151,6 +151,16 @@ export default function ListMenu({ menus }: ListMenuProps) {
                     Beranda
                 </NavLink>
             </li>
+            <li>
+                <NavLink href="/galeri" active={pathname === '/galeri'}>
+                    Galeri
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/agenda" active={pathname === '/agenda'}>
+                    Agenda
+                </NavLink>
+            </li>
 
             {mainMenus.map((menu) => (
                 <MenuItem

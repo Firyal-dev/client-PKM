@@ -22,14 +22,6 @@ export default function Sambutan() {
                                     priority
                                 />
                             </div>
-
-                            {/* Kutipan */}
-                            <div className="absolute -bottom-4 left-4 right-4 bg-blue-600 text-white p-3 rounded-xl shadow-md">
-                                <Quote className="w-4 h-4 mb-1 opacity-60" />
-                                <p className="text-xs font-semibold italic leading-snug">
-                                    Melayani dengan Hati, Menuju Masyarakat Sehat
-                                </p>
-                            </div>
                         </div>
 
                         {/* Teks Sambutan */}

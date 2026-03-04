@@ -23,7 +23,12 @@ export function buildParams(page = 1, limit = 10, extras?: Record<string, string
 }
 
 // Helper: Parse response paginated
-export function parseResponse<T>(res: { data: { docs?: T[]; data?: T[]; totalPages?: number; page?: number } }, page = 1) {
+export function parseResponse<T>(res: { data: { docs?: T[]; data?: T[]; totalPages?: number; lastPage?: number; total?: number; totalDocs?: number; page?: number } }, page = 1) {
     const docs = res.data.docs || res.data.data || []
-    return { data: docs, totalPages: res.data.totalPages || 1, currentPage: res.data.page || page }
+    return {
+        data: docs,
+        totalPages: res.data.totalPages || res.data.lastPage || 1,
+        currentPage: res.data.page || page,
+        total: res.data.total || res.data.totalDocs || docs.length
+    }
 }

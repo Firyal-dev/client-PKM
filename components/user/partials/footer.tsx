@@ -127,7 +127,11 @@ export default async function Footer() {
                             </div>
                         </div>
                     </div>
+                </div>
 
+                {/* Footer Bottom */}
+                <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 uppercase tracking-widest px-1">
+                    <p>© {new Date().getFullYear()} PEMERINTAH KOTA BOGOR</p>
                 </div>
             </div>
         </footer>

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const { data, totalPages } = await getAdminAlbumList(currentPage, 9)
+    const { data, totalPages } = await getAdminAlbumList(currentPage, 10)
 
     return (
         <div className="px-5 pb-10">

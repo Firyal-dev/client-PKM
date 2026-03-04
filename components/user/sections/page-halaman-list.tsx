@@ -4,10 +4,14 @@ import Breadcrumb from "@/components/user/partials/breadcrumb"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
+import { PaginationControl } from "@/components/pagination-control"
 
 interface PageHalamanListProps {
     pages: Page[]
     menu: Menu
+    totalPages: number
+    currentPage: number
+    total: number
 }
 
 function stripHtml(html: string): string {
@@ -76,7 +80,7 @@ function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
     )
 }
 
-export function PageHalamanList({ pages, menu }: PageHalamanListProps) {
+export function PageHalamanList({ pages, menu, totalPages, currentPage, total }: PageHalamanListProps) {
     const breadcrumbItems = [{ label: menu.title }]
 
     return (
@@ -89,18 +93,29 @@ export function PageHalamanList({ pages, menu }: PageHalamanListProps) {
                         {menu.title}
                     </h1>
                     <p className="mt-2 text-blue-100 text-sm">
-                        {pages.length} artikel tersedia
+                        Total {total} artikel tersedia
                     </p>
                 </div>
             </div>
 
             <div className="max-w-6xl mx-auto px-4 py-10">
                 {pages.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {pages.map((page) => (
-                            <PageCard key={page.id} page={page} menuSlug={menu.slug} />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {pages.map((page) => (
+                                <PageCard key={page.id} page={page} menuSlug={menu.slug} />
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="mt-12">
+                                <PaginationControl
+                                    totalPages={totalPages}
+                                    currentPage={currentPage}
+                                />
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-16 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

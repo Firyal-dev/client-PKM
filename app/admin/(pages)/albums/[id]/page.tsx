@@ -9,6 +9,7 @@ import { ImageOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { SetBreadcrumb } from "@/components/admin/breadcrumb-context"
 
 export default async function AlbumDetailPage({
     params,
@@ -33,6 +34,7 @@ export default async function AlbumDetailPage({
 
         return (
             <div className="px-5 pb-10">
+                <SetBreadcrumb title={album.album_title} />
                 <PageHeader
                     title={album.album_title}
                     description="Daftar foto dalam album ini"

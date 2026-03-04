@@ -54,10 +54,10 @@ export async function getPublicPageByMenuId(menuId: string): Promise<Page> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
-// Publik: Ambil SEMUA halaman aktif by menu ID (untuk list dokumen)
-export async function getPublicPagesByMenuId(menuId: string): Promise<Page[]> {
+// Publik: Ambil halaman aktif by menu ID dengan pagination
+export async function getPublicPagesByMenuId(menuId: string, page = 1, limit = 10): Promise<{ data: Page[]; lastPage: number; total: number }> {
   try {
-    const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}/all`, {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}/all?${buildParams(page, limit)}`, {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')

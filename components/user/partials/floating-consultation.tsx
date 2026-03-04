@@ -1,7 +1,8 @@
 "use client"
-import { useActionState, useState } from "react"
+import { useActionState, useState, useRef } from "react"
 import { MessageCircleQuestion } from "lucide-react"
 import { toast } from "sonner"
+import ReCAPTCHA from "react-google-recaptcha"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,9 +22,16 @@ import { Consultation } from "@/services/consultation/consultation-service"
 export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>) => Promise<any> }) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const recaptchaRef = useRef<ReCAPTCHA>(null)
+    const [captchaValue, setCaptchaValue] = useState<string | null>(null)
 
     // Action function untuk handle submit
     async function submitConsultation(prevState: any, formData: FormData) {
+        if (!captchaValue) {
+            toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
+            return { error: "reCAPTCHA belum dicentang" }
+        }
+
         const username = formData.get("username") as string
         const email = formData.get("email") as string
         const subject = formData.get("subject") as string
@@ -62,7 +70,9 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
                 email,
                 subject,
                 message,
-            }
+                // Kita sertakan token captcha di sini jika backend membutuhkannya
+                recaptchaToken: captchaValue
+            } as any
 
             const response = await onSubmit(payload)
 
@@ -72,6 +82,8 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
 
             toast.success("Konsultasi Anda telah terkirim! Tim kami akan segera merespons melalui email Anda.")
             setIsDialogOpen(false)
+            setCaptchaValue(null)
+            recaptchaRef.current?.reset()
             return { success: true }
         } catch (error: any) {
             console.error(error)
@@ -152,6 +164,14 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
                                 placeholder="Tuliskan pertanyaan atau konsultasi Anda secara detail..."
                                 className="resize-none min-h-[120px]"
                                 required
+                            />
+                        </div>
+
+                        <div className="flex justify-center">
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                                onChange={(value) => setCaptchaValue(value)}
                             />
                         </div>
 

@@ -2,7 +2,8 @@
 
 import api from "@/services/api"
 import { authHeaders, buildParams, parseResponse } from "@/services/helpers"
-import { tryAction, handleServiceError, CACHE_TAGS } from "@/services/utils"
+import { tryAction, handleServiceError, CACHE_TAGS, SSG_REVALIDATE_TIME } from "@/services/utils"
+import { getBaseUrl } from "@/services/helpers"
 import { revalidateTag } from "next/cache"
 
 export interface Video {
@@ -14,6 +15,18 @@ export interface Video {
     is_deleted?: boolean
     upload_date?: string
     updated_at?: string
+}
+
+// Publik: Ambil videos (paginated)
+export async function getPublicVideos(page = 1, limit = 10) {
+    try {
+        const res = await fetch(`${getBaseUrl()}/v1/video?${buildParams(page, limit)}`, {
+            next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.VIDEO] }
+        })
+        if (!res.ok) throw new Error('Gagal ambil video')
+        const data = await res.json()
+        return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil video')) }
 }
 
 // Admin: Ambil videos (paginated)
