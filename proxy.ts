@@ -6,14 +6,16 @@ export function proxy(request: NextRequest) {
     const pathname = url.pathname;
 
     const hostname = request.headers.get('host') || '';
-    
+
     const hostWithoutPort = hostname.split(':')[0];
-    
-    let tenantSlug = 'default'; 
-    
+
+    let tenantSlug = 'default';
+
     if (hostWithoutPort !== 'localhost' && !hostWithoutPort.startsWith('127.0.0.1')) {
         tenantSlug = hostWithoutPort.split('.')[0];
     }
+
+    console.log(`[Proxy] Host: ${hostname} | Tenant Slug: ${tenantSlug}`);
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-tenant-slug', tenantSlug);
@@ -25,7 +27,7 @@ export function proxy(request: NextRequest) {
     if (isAdminPage && !isLoginPage && !token) {
         return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    
+
     if (isLoginPage && token) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
