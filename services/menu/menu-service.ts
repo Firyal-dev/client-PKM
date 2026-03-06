@@ -1,7 +1,8 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, getBaseUrl } from "@/services/helpers"
+import { getBaseUrl } from "@/services/helpers"
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
@@ -24,6 +25,7 @@ export interface Menu {
 export async function getPublicMenus(): Promise<Menu[]> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/menus`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.MENU] }
     })
     if (!res.ok) throw new Error('Gagal ambil menu')
@@ -35,6 +37,7 @@ export async function getPublicMenus(): Promise<Menu[]> {
 export async function getPublicMenuBySlug(slug: string): Promise<Menu> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/menus/${slug}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.MENU] }
     })
     if (!res.ok) throw new Error('Gagal ambil menu')

@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl } from '@/services/helpers'
+import { getBaseUrl } from '@/services/helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { PuskesmasInfo } from '@/types/web-info'
 import { revalidateTag } from 'next/cache'
@@ -10,6 +11,7 @@ import { revalidateTag } from 'next/cache'
 export async function getPublicPuskesmasInfo(): Promise<PuskesmasInfo | null> {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/public/puskesmas-info`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.WEB_INFO] }
         })
         if (!res.ok) return null

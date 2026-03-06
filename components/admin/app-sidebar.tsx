@@ -17,8 +17,9 @@ import { logoutAction } from "@/services/auth/logout-service"
 import { useActionState, useTransition } from "react"
 import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
+import { TenantSwitcher } from "@/components/admin/tenant-switcher"
 
-export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ profile, tenants = [], ...props }: { profile: AdminProfileProp, tenants?: any[] } & React.ComponentProps<typeof Sidebar>) {
   const [state, logout, isPending] = useActionState(logoutAction, null)
   const [isTransitionPending, startTransition] = useTransition()
 
@@ -35,6 +36,9 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
           <SidebarMenuItem>
             <UpdateProfile profile={profile} />
           </SidebarMenuItem>
+          {profile.role === 'SUPER_ADMIN' && (
+            <TenantSwitcher tenants={tenants} activeTenantId={profile.active_tenant} />
+          )}
         </SidebarMenu>
       </SidebarHeader>
       <Separator />

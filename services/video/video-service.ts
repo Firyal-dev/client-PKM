@@ -1,9 +1,9 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, buildParams, parseResponse } from "@/services/helpers"
+import { buildParams, parseResponse, getBaseUrl } from "@/services/helpers"
+import { authHeaders, getTenantHeader } from "@/services/server-helpers"
 import { tryAction, handleServiceError, CACHE_TAGS, SSG_REVALIDATE_TIME } from "@/services/utils"
-import { getBaseUrl } from "@/services/helpers"
 import { revalidateTag } from "next/cache"
 
 export interface Video {
@@ -21,6 +21,7 @@ export interface Video {
 export async function getPublicVideos(page = 1, limit = 10) {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/video?${buildParams(page, limit)}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.VIDEO] }
         })
         if (!res.ok) throw new Error('Gagal ambil video')

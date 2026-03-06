@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, buildParams } from '@/services/helpers'
+import { buildParams } from '@/services/helpers'
+import { authHeaders } from '@/services/server-helpers'
 import { tryAction, handleServiceError } from '@/services/utils'
 
 export interface Consultation {

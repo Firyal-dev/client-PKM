@@ -1,7 +1,8 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from "@/services/helpers"
+import { getBaseUrl, buildParams, parseResponse } from "@/services/helpers"
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { Berita } from "@/types/berita-prop"
 import { revalidateTag } from "next/cache"
@@ -10,6 +11,7 @@ import { revalidateTag } from "next/cache"
 export async function getPublicNews(page = 1, limit = 12) {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/news?${buildParams(page, limit)}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.NEWS] }
         })
         if (!res.ok) throw new Error('Gagal ambil berita')
@@ -22,6 +24,7 @@ export async function getPublicNews(page = 1, limit = 12) {
 export async function getPublicNewsById(id: string): Promise<Berita> {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/news/${id}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.NEWS] }
         })
         if (!res.ok) throw new Error('Gagal ambil berita')

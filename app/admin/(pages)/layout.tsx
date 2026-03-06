@@ -10,6 +10,7 @@ import { getAdminProfile } from "@/services/admin/admin-service"
 import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { BreadcrumbProvider } from "@/components/admin/breadcrumb-context"
+import { getTenants } from "@/services/admin/tenant-service"
 
 export const metadata: Metadata = {
     title: "Puskesmas",
@@ -27,10 +28,15 @@ export default async function AdminLayout({
         redirect("/admin/login");
     }
 
+    let tenants = [];
+    if (profile.role === 'SUPER_ADMIN') {
+        tenants = await getTenants();
+    }
+
     return (
         <SidebarProvider>
             <BreadcrumbProvider>
-                <AppSidebar profile={profile} />
+                <AppSidebar profile={profile} tenants={tenants} />
                 <SidebarInset>
                     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
                         <div className="flex items-center gap-2 px-4">

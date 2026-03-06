@@ -12,12 +12,13 @@ import {
     Hospital,
     ClipboardList,
     Newspaper,
-    Cross
+    Cross,
+    Building2
 } from "lucide-react"
 
 export const sidebarData = {
     navMain: [
-        {
+        {   
             title: "Dashboard",
             url: "/admin/dashboard",
             icon: LayoutDashboard,
@@ -104,6 +105,11 @@ export const sidebarData = {
             name: "Informasi Puskesmas",
             url: "/admin/puskesmas-info",
             icon: Hospital,
+        },
+        {
+            name: "Puskesmas",
+            url: "/admin/puskesmas",
+            icon: Building2,
         },
     ]
 }

@@ -1,13 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import api from '@/services/api';
 
 export default function VisitorTracker() {
+    const pathname = usePathname();
+
     useEffect(() => {
+        if (pathname?.startsWith('/admin')) return;
+
         const trackVisitor = async () => {
             const hasVisited = sessionStorage.getItem('has_visited_today');
-
             if (hasVisited) return;
 
             try {
@@ -16,13 +20,12 @@ export default function VisitorTracker() {
                     sessionStorage.setItem('has_visited_today', 'true');
                 }
             } catch {
-                // Silently fail - visitor tracking is non-critical
+                // Silently fail 
             }
-
-        };
+        };  
 
         trackVisitor();
-    }, []);
+    }, [pathname]); // <-- Tambahin pathname di dependency array
 
     return null;
 }
