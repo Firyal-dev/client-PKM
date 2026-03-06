@@ -142,7 +142,7 @@ export function PageLayoutArtikel({ page, menuTitle, breadcrumbItems, relatedPag
                 {paginatedPages.map((related) => (
                   <Link
                     key={related.id}
-                    href={`/${related.slug}`}
+                    href={`/pages/${related.id}`}
                     className="group"
                   >
                     <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col">

@@ -77,7 +77,7 @@ export function PageLayoutCards({ page, menuTitle, breadcrumbItems, relatedPages
                 return (
                   <Link
                     key={related.id}
-                    href={`/${related.slug}`}
+                    href={`/pages/${related.id}`}
                     className="group"
                   >
                     <Card className="h-full border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group-hover:-translate-y-1 bg-white">

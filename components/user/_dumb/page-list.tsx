@@ -126,7 +126,7 @@ export function PageLayoutList({ page, menuTitle, breadcrumbItems, relatedPages 
 
                 <div
                   className="prose prose-slate prose-lg max-w-none text-slate-600 mb-12 bg-white p-8 md:p-12 rounded-[2rem] border border-slate-100 shadow-sm"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content || page.dynamic_content || "") }}
                 />
 
                 {/* File Download Section - Dinamis dengan Nama File Asli */}
@@ -169,7 +169,7 @@ export function PageLayoutList({ page, menuTitle, breadcrumbItems, relatedPages 
                     {paginatedPages.map((related) => (
                       <Link
                         key={related.id}
-                        href={`/${related.slug}`}
+                        href={`/pages/${related.id}`}
                         className="group block"
                       >
                         <article className="flex flex-col md:flex-row gap-6 p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300">

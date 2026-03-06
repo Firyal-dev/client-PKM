@@ -31,6 +31,10 @@ export async function getAdminPuskesmasInfo(): Promise<PuskesmasInfo> {
 // Admin: Update info puskesmas
 export async function updatePuskesmasInfoAction(_: unknown, formData: FormData) {
     return await tryAction(async () => {
+        // Handle logo file
+        const logo = formData.get('logo') as File
+        if (!logo || logo.size === 0) formData.delete('logo')
+
         // Build social_links JSON
         const social_links = {
             facebook: formData.get('fb'),
@@ -46,11 +50,8 @@ export async function updatePuskesmasInfoAction(_: unknown, formData: FormData) 
         formData.delete('yt')
         formData.set('social_links', JSON.stringify(social_links))
 
-        await api.put('/v1/admin/puskesmas-info', formData, {
-            headers: {
-                ...(await authHeaders()),
-                'Content-Type': 'multipart/form-data'
-            }
+        await api.patch('/v1/admin/puskesmas-info', formData, {
+            headers: await authHeaders()
         })
         revalidateTag(CACHE_TAGS.WEB_INFO, 'max')
         return { message: 'Informasi Puskesmas berhasil diperbarui!' }

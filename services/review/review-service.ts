@@ -38,7 +38,7 @@ export async function getAdminReviewList(page = 1, limit = 10) {
 // Admin: Toggle publish
 export async function toggleReviewPublishAction(id: string, isPublish: boolean) {
     return tryAction(async () => {
-        await api.put(`/v1/admin/reviews/${id}`, { is_publish: isPublish }, { headers: await authHeaders() })
+        await api.patch(`/v1/admin/reviews/${id}`, { is_publish: isPublish }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.REVIEW, 'max')
         return { message: `Ulasan ${isPublish ? 'ditampilkan' : 'disembunyikan'}!` }
     }, 'Gagal ubah status')

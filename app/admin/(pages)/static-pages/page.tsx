@@ -12,8 +12,6 @@ export default async function StaticPagesPage({
     searchParams: { page?: string; search?: string }
 }) {
     const page = Number(searchParams.page) || 1
-    const search = searchParams.search
-
     const { data: staticPages, total, lastPage } = await getAdminStaticPages(page, 10)
 
     return (
@@ -26,37 +24,33 @@ export default async function StaticPagesPage({
             />
 
             <div className={cn(
-                "rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
-                staticPages.length === 0 && "justify-center"
+                "rounded-xl bg-muted/30 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
+                staticPages.length === 0 && "items-center justify-center"
             )}>
                 {staticPages.length === 0 ? (
-                    <Empty className="flex flex-col items-center text-center">
-                        <EmptyHeader className="flex flex-col items-center">
-                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
-                                <FileText className="w-10 h-10 text-primary/40" />
+                    <Empty className="flex flex-col items-center text-center py-16">
+                        <EmptyHeader className="flex flex-col items-center gap-3">
+                            <EmptyMedia variant="icon" className="bg-background border border-border p-4 rounded-xl shadow-sm">
+                                <FileText className="w-8 h-8 text-muted-foreground/50" />
                             </EmptyMedia>
-                            <EmptyTitle className="text-xl font-bold">
-                                Tidak ada halaman statis
-                            </EmptyTitle>
-                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
-                                Belum ada halaman statis yang dibuat.
-                            </EmptyDescription>
+                            <div>
+                                <EmptyTitle className="text-base font-semibold">Belum ada halaman statis</EmptyTitle>
+                                <EmptyDescription className="text-sm text-muted-foreground mt-1">
+                                    Tambahkan halaman pertama untuk mulai mengelola konten statis.
+                                </EmptyDescription>
+                            </div>
                         </EmptyHeader>
                     </Empty>
                 ) : (
                     <StaticPageList
                         staticPages={staticPages}
-                        pagination={{
-                            page,
-                            total,
-                            lastPage,
-                        }}
+                        pagination={{ page, total, lastPage }}
                     />
                 )}
             </div>
 
             {lastPage > 1 && (
-                <div className="mt-8">
+                <div className="mt-6">
                     <PaginationControl totalPages={lastPage} currentPage={page} />
                 </div>
             )}

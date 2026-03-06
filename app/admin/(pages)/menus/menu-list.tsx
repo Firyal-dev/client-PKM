@@ -1,271 +1,287 @@
 'use client'
 
+import { useState, useMemo } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
-  MoreVertical,
-  Pencil,
-  Trash2,
-  ChevronRight,
-  ChevronDown,
-  Info,
-  CornerDownRight,
-  Link as LinkIcon,
-  Network
+  MoreVertical, Pencil, Trash2, ChevronRight, ChevronDown,
+  Layers, FileText, Folder, Eye, EyeOff,
 } from "lucide-react"
 import { toast } from "sonner"
-import { ColumnDef } from "@tanstack/react-table"
-import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
-import {
-  deleteMenuAction,
-  toggleMenuStatusAction,
-  Menu
-} from "@/services/menu/menu-service"
-import { DataTable } from "@/components/ui/data-table"
+import { SearchFilter } from "@/components/admin/SearchFilter"
+import { deleteMenuAction, toggleMenuStatusAction, Menu } from "@/services/menu/menu-service"
+import { cn } from "@/lib/utils"
 
-export function MenuList({ menus }: { menus: Menu[] }) {
+const getMenuIcon = (type?: string) => {
+  switch (type) {
+    case "dynamic": return { icon: Layers, color: "text-violet-500" }
+    case "grup": return { icon: Folder, color: "text-amber-500" }
+    default: return { icon: FileText, color: "text-sky-500" }
+  }
+}
+
+const getTypeLabel = (type?: string) => {
+  switch (type) {
+    case "static": return "Statis"
+    case "dynamic": return "Dinamis"
+    case "grup": return "Grup"
+    default: return "Kustom"
+  }
+}
+
+const typeBadgeStyle: Record<string, string> = {
+  static: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400",
+  dynamic: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400",
+  grup: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
+}
+
+export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  const parentMenus = useMemo(() => menus.filter((m) => !m.parent_id), [menus])
+  const currentTypeFilter = searchParams.get("type") || ""
+  const hasActiveFilter = !!(currentTypeFilter || globalFilter)
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   const handleDelete = async (id: string) => {
-    try {
-      const result = await deleteMenuAction(id)
-      if (result.success) {
-        toast.success("Menu berhasil dihapus")
-        router.refresh()
-      } else {
-        toast.error(result.error || "Gagal menghapus menu")
-      }
-    } catch {
-      toast.error("Gagal menghapus menu")
-    }
+    const result = await deleteMenuAction(id)
+    result.success
+      ? (toast.success("Menu berhasil dihapus"), router.refresh())
+      : toast.error(result.error || "Gagal menghapus menu")
   }
 
   const handleToggleStatus = async (id: string) => {
-    try {
-      const result = await toggleMenuStatusAction(id)
-      if (result.success) {
-        toast.success("Status menu berhasil diubah")
-        router.refresh()
-      } else {
-        toast.error(result.error || "Gagal mengubah status")
-      }
-    } catch {
-      toast.error("Gagal mengubah status")
-    }
+    const result = await toggleMenuStatusAction(id)
+    result.success
+      ? (toast.success("Status menu berhasil diubah"), router.refresh())
+      : toast.error(result.error || "Gagal mengubah status")
   }
 
-  const getTypeLabel = (type?: string) => {
-    switch (type) {
-      case "static":
-        return "Statis"
-      case "dynamic":
-        return "Dinamis"
-      default:
-        return "Kustom"
-    }
+  const handleSearch = (value: string) => {
+    setGlobalFilter(value)
+    const params = new URLSearchParams(searchParams.toString())
+    value ? params.set("search", value) : params.delete("search")
+    params.set("page", "1")
+    router.push(`/admin/menus?${params.toString()}`)
   }
 
-  const columns: ColumnDef<Menu>[] = [
-    {
-      accessorKey: "title",
-      header: "Menu",
-      cell: ({ row }) => {
-        const menu = row.original
-        const isSubmenu = row.depth > 0
-        const paddingLeft = isSubmenu ? `${row.depth * 1.25}rem` : "0"
+  const handleTypeFilter = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    value && value !== "all" ? params.set("type", value) : params.delete("type")
+    params.set("page", "1")
+    router.push(`/admin/menus?${params.toString()}`)
+  }
 
-        return (
-          <div
-            className="flex items-start gap-2 py-1"
-            style={{ paddingLeft }}
-          >
-            {isSubmenu && (
-              <CornerDownRight className="w-4 h-4 text-slate-300 dark:text-slate-600 mt-1 shrink-0" />
-            )}
-
-            {row.getCanExpand() ? (
-              <button
-                onClick={row.getToggleExpandedHandler()}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0"
-              >
-                {row.getIsExpanded() ? (
-                  <ChevronDown className="w-4 h-4 text-slate-500" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
-                )}
-              </button>
-            ) : (
-              <div className="w-6 shrink-0" />
-            )}
-
-            <div className="flex flex-col gap-1">
-              <span
-                className={`text-sm font-semibold tracking-tight ${
-                  isSubmenu
-                    ? "text-slate-600 dark:text-slate-300"
-                    : "text-slate-900 dark:text-white"
-                }`}
-              >
-                {menu.title}
-              </span>
-
-              <div className="flex items-center gap-1 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800 w-fit">
-                <LinkIcon className="w-3 h-3" />
-                /{menu.slug}
-              </div>
-            </div>
-          </div>
-        )
-      },
-    },
-    {
-      id: "parentInfo",
-      header: "Induk",
-      cell: ({ row }) => {
-        const menu = row.original
-
-        if (!menu.parent) {
-          return (
-            <Badge
-              variant="outline"
-              className="bg-transparent text-slate-500 border-slate-300 dark:border-slate-700 text-[11px]"
-            >
-              Root
-            </Badge>
-          )
-        }
-
-        return (
-          <div className="flex items-center gap-1.5">
-            <Network className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {menu.parent.title}
-            </span>
-          </div>
-        )
-      }
-    },
-    {
-      accessorKey: "type",
-      header: "Tipe",
-      cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className="text-xs text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700"
-        >
-          {getTypeLabel(row.original.type)}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "order",
-      header: "Urutan",
-      cell: ({ row }) => (
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          {row.original.order}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status
-
-        return (
-          <Badge
-            className={`text-xs font-medium px-2 py-0.5 rounded-md ${
-              status === 1
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900"
-                : "bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800"
-            }`}
-          >
-            {status === 1 ? "Aktif" : "Nonaktif"}
-          </Badge>
-        )
-      },
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        const menu = row.original
-
-        return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <MoreVertical className="h-4 w-4 text-slate-500" />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem asChild>
-                  <Link href={`/admin/menus/${menu.id}`}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => handleToggleStatus(menu.id)}
-                >
-                  {menu.status === 1 ? "Nonaktifkan" : "Aktifkan"}
-                </DropdownMenuItem>
-
-                <ConfirmDialog
-                  title="Hapus Menu"
-                  description={`Yakin hapus "${menu.title}"?`}
-                  onConfirm={() => handleDelete(menu.id)}
-                  trigger={
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Hapus
-                    </DropdownMenuItem>
-                  }
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )
-      },
-    },
-  ]
+  const handleReset = () => {
+    setGlobalFilter("")
+    router.push("/admin/menus")
+  }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm">
-        <Info className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
-        <div className="space-y-1 text-slate-600 dark:text-slate-300">
-          <p className="font-semibold text-slate-900 dark:text-white">
-            Panduan Navigasi
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-xs">
-            <li>Kolom <strong>Induk</strong> menunjukkan menu parent.</li>
-            <li>Gunakan <strong>Urutan</strong> untuk mengatur posisi.</li>
-          </ul>
+      {/* Filter row */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <SearchFilter
+          searchValue={globalFilter}
+          onSearchChange={handleSearch}
+          filters={[
+            {
+              value: currentTypeFilter,
+              onChange: handleTypeFilter,
+              options: [
+                { value: "all", label: "Semua Tipe" },
+                { value: "static", label: "Statis" },
+                { value: "dynamic", label: "Dinamis" },
+                { value: "grup", label: "Grup" },
+              ],
+              placeholder: "Semua Tipe"
+            }
+          ]}
+          onReset={handleReset}
+          hasActiveFilter={hasActiveFilter}
+          searchPlaceholder="Cari menu..."
+        />
+        <div className="text-xs text-muted-foreground bg-muted/50 border border-border/50 px-3 py-1.5 rounded-full font-medium">
+          {parentMenus.length} menu
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
-        <DataTable columns={columns} data={menus} />
+      {/* Table */}
+      <div className="rounded-xl border border-border/60 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Menu</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipe</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Urutan</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+              <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {parentMenus.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-12 text-sm text-muted-foreground">
+                  Tidak ada menu yang cocok dengan filter.
+                </TableCell>
+              </TableRow>
+            ) : (
+              parentMenus.map((menu) => (
+                <>
+                  <MenuRow
+                    key={menu.id}
+                    menu={menu}
+                    depth={0}
+                    isExpanded={expandedIds.has(menu.id)}
+                    onToggleExpand={() => toggleExpand(menu.id)}
+                    onDelete={handleDelete}
+                    onToggleStatus={handleToggleStatus}
+                  />
+                  {expandedIds.has(menu.id) && menu.children?.map((child) => (
+                    <MenuRow
+                      key={child.id}
+                      menu={child}
+                      depth={1}
+                      isExpanded={false}
+                      onToggleExpand={() => { }}
+                      onDelete={handleDelete}
+                      onToggleStatus={handleToggleStatus}
+                    />
+                  ))}
+                </>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
+  )
+}
+
+function MenuRow({
+  menu, depth, isExpanded, onToggleExpand, onDelete, onToggleStatus
+}: {
+  menu: Menu
+  depth: number
+  isExpanded: boolean
+  onToggleExpand: () => void
+  onDelete: (id: string) => void
+  onToggleStatus: (id: string) => void
+}) {
+  const hasChildren = menu.children && menu.children.length > 0
+  const { icon: IconComponent, color } = getMenuIcon(menu.type)
+  const isActive = menu.status === 1
+
+  return (
+    <TableRow className={cn("group", depth > 0 && "bg-muted/20")}>
+      <TableCell>
+        <div className={cn("flex items-center gap-2.5", depth > 0 && "pl-6 border-l border-border/50 ml-2")}>
+          {hasChildren ? (
+            <button
+              onClick={onToggleExpand}
+              className="p-0.5 rounded-md hover:bg-muted transition-colors text-muted-foreground shrink-0"
+            >
+              {isExpanded
+                ? <ChevronDown className="w-3.5 h-3.5" />
+                : <ChevronRight className="w-3.5 h-3.5" />}
+            </button>
+          ) : (
+            <div className="w-5 shrink-0" />
+          )}
+          <IconComponent className={cn("w-4 h-4 shrink-0", color)} />
+          <div className="flex flex-col min-w-0">
+            <span className={cn(
+              "text-sm leading-snug truncate",
+              depth > 0 ? "text-muted-foreground" : "font-semibold text-foreground"
+            )}>
+              {menu.title}
+            </span>
+            <span className="text-[11px] text-muted-foreground font-mono truncate">
+              /{menu.slug}
+              {hasChildren && (
+                <span className="not-italic font-sans ml-1 text-muted-foreground/50">· {menu.children?.length} submenu</span>
+              )}
+            </span>
+          </div>
+        </div>
+      </TableCell>
+
+      <TableCell>
+        <span className={cn(
+          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+          typeBadgeStyle[menu.type ?? ""] ?? "bg-muted text-muted-foreground"
+        )}>
+          {getTypeLabel(menu.type)}
+        </span>
+      </TableCell>
+
+      <TableCell>
+        <span className="text-sm tabular-nums text-muted-foreground">{menu.order}</span>
+      </TableCell>
+
+      <TableCell>
+        <span className={cn(
+          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+          isActive
+            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            : "bg-muted text-muted-foreground"
+        )}>
+          {isActive ? "Aktif" : "Nonaktif"}
+        </span>
+      </TableCell>
+
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 rounded-xl">
+            <DropdownMenuItem asChild className="gap-2 cursor-pointer rounded-lg">
+              <Link href={`/admin/menus/${menu.id}`}>
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onToggleStatus(menu.id)} className="gap-2 cursor-pointer rounded-lg">
+              {isActive
+                ? <><EyeOff className="h-3.5 w-3.5" /> Nonaktifkan</>
+                : <><Eye className="h-3.5 w-3.5" /> Aktifkan</>
+              }
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <ConfirmDialog
+              title="Hapus Menu?"
+              description={`"${menu.title}" akan dihapus secara permanen.`}
+              onConfirm={() => onDelete(menu.id)}
+              trigger={
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Hapus
+                </DropdownMenuItem>
+              }
+            />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   )
 }

@@ -21,7 +21,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -30,6 +29,7 @@ interface DataTableProps<TData, TValue> {
     onColumnFiltersChange?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
     globalFilter?: string
     onGlobalFilterChange?: (value: string) => void
+    hidePagination?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -39,6 +39,7 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange,
     globalFilter,
     onGlobalFilterChange,
+    hidePagination = false,
 }: DataTableProps<TData, TValue>) {
     const [expanded, setExpanded] = React.useState<ExpandedState>({})
 
@@ -54,10 +55,10 @@ export function DataTable<TData, TValue>({
         onColumnFiltersChange: onColumnFiltersChange,
         onGlobalFilterChange: onGlobalFilterChange,
         getSubRows: (row) => (row as any).children,
+        getCoreRowModel: getCoreRowModel(),
         getExpandedRowModel: getExpandedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        ...(hidePagination ? {} : { getPaginationRowModel: getPaginationRowModel() }),
     })
 
     return (
@@ -105,24 +106,6 @@ export function DataTable<TData, TValue>({
                         )}
                     </TableBody>
                 </Table>
-            </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    Sebelumnya
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    Selanjutnya
-                </Button>
             </div>
         </div>
     )

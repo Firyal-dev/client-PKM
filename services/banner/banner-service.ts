@@ -48,8 +48,11 @@ export async function createBannerAction(_: unknown, formData: FormData) {
 
 // Admin: Update banner
 export async function updateBannerAction(id: string, _: unknown, formData: FormData) {
+    const image = formData.get('image') as File
+    if (!image || image.size === 0) formData.delete('image')
+
     const result = await tryAction(async () => {
-        await api.put(`/v1/admin/banner/${id}`, formData, { headers: await authHeaders() })
+        await api.patch(`/v1/admin/banner/${id}`, formData, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.BANNER, 'max')
     }, 'Gagal update banner')
 
@@ -69,7 +72,7 @@ export async function deleteBannerAction(id: string) {
 // Admin: Toggle publish
 export async function toggleBannerPublishAction(id: string, isPublish: boolean) {
     return tryAction(async () => {
-        await api.put(`/v1/admin/banner/${id}`, { is_publish: isPublish }, { headers: await authHeaders() })
+        await api.patch(`/v1/admin/banner/${id}`, { is_publish: isPublish }, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.BANNER, 'max')
         return { message: `Banner ${isPublish ? 'ditampilkan' : 'disembunyikan'}!` }
     }, 'Gagal ubah status')

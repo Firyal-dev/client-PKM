@@ -7,7 +7,7 @@ export default async function CreateStaticPagePage() {
     const menus = await getAdminMenusByType('static')
 
     return (
-        <div className="space-y-6">
+        <div className="px-5 space-y-6">
             <PageHeader
                 title="Buat Halaman Statis"
                 description="Buat halaman statis baru untuk website"

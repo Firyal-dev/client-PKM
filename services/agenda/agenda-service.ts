@@ -70,7 +70,7 @@ export async function updateAgendaAction(id: string, _: unknown, formData: FormD
         location: formData.get("location"),
     }
     return tryAction(async () => {
-        const res = await api.put(`/v1/admin/agenda/${id}`, payload, { headers: await authHeaders() })
+        const res = await api.patch(`/v1/admin/agenda/${id}`, payload, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.AGENDA, 'max')
         return { message: 'Agenda berhasil diperbarui!', data: res.data }
     }, 'Gagal update agenda')

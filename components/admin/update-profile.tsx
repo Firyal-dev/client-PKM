@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useActionState, useEffect, useRef, useState } from "react"
+import { useActionState, useEffect, useRef, useState, ChangeEvent } from "react"
 import Image from 'next/image'
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
@@ -18,6 +18,7 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
     const [state, formAction, isPending] = useActionState(updateProfileAction, null)
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
+    const [name, setName] = useState(profile.name || "")
     const hasHandledRef = useRef(false)
 
     const handleOpenChange = (isOpen: boolean) => {
@@ -25,6 +26,13 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
             hasHandledRef.current = false
         }
         setOpen(isOpen)
+    }
+
+    const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value
+        // Filter: hanya huruf dan angka
+        const cleanedValue = inputValue.replace(/[^a-zA-Z0-9]/g, '')
+        setName(cleanedValue)
     }
 
     const photoSrc = getMediaUrl(profile?.photo, '/profiles') || "/userPlaceholder.jpg"
@@ -79,7 +87,15 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="admin-name">Nama</Label>
-                            <Input id="admin-name" defaultValue={profile.name} name="name" required />
+                            <Input
+                                id="admin-name"
+                                name="name"
+                                required
+                                value={name}
+                                onChange={handleNameChange}
+                                placeholder="huruf dan angka saja"
+                            />
+                            <p className="text-xs text-muted-foreground">Hanya huruf dan angka, tanpa spasi.</p>
                         </div>
                     </div>
                     <SheetFooter className="pt-10">

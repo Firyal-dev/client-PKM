@@ -11,7 +11,7 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
     if (!photo || photo.size === 0) formData.delete('photo')
 
     return tryAction(async () => {
-        const res = await api.put('/v1/admin/profile', formData, { headers: await authHeaders() })
+        const res = await api.patch('/v1/admin/profile', formData, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.PROFILE, 'max')
         return { message: 'Profil berhasil diupdate!', data: res.data }
     }, 'Gagal update profile')

@@ -46,7 +46,7 @@ export async function replyConsultationAction(id: number, answer: string) {
 // Admin: Update konsultasi
 export async function updateConsultationAction(id: number, data: Partial<Consultation>) {
     return tryAction(async () => {
-        await api.put(`/v1/admin/consultation/${id}`, data, { headers: await authHeaders() })
+        await api.patch(`/v1/admin/consultation/${id}`, data, { headers: await authHeaders() })
         return { message: 'Konsultasi diperbarui!' }
     }, 'Gagal memperbarui konsultasi')
 }

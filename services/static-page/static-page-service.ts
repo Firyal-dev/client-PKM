@@ -79,7 +79,8 @@ export async function createStaticPageAction(_: unknown, formData: FormData) {
 
   return tryAction(async () => {
     const res = await api.post('/v1/admin/static-pages', formData, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.STATIC_PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.STATIC_PAGE)
     return res.data
   }, 'Gagal buat halaman statis')
 }
@@ -92,7 +93,8 @@ export async function updateStaticPageAction(id: string, _: unknown, formData: F
 
   return tryAction(async () => {
     const res = await api.patch(`/v1/admin/static-pages/${id}`, formData, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.STATIC_PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.STATIC_PAGE)
     return res.data
   }, 'Gagal update halaman statis')
 }
@@ -101,7 +103,8 @@ export async function updateStaticPageAction(id: string, _: unknown, formData: F
 export async function deleteStaticPageAction(id: string) {
   return tryAction(async () => {
     const res = await api.delete(`/v1/admin/static-pages/${id}`, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.STATIC_PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.STATIC_PAGE)
     return res.data
   }, 'Gagal hapus halaman statis')
 }
