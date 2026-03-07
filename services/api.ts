@@ -6,17 +6,33 @@ const api = axios.create({
     withCredentials: true,
 })
 
-// Request interceptor: Inject Tenant ID for Public & Admin requests
+// Request interceptor: Inject Tenant ID from subdomain routing or cookies
 api.interceptors.request.use((config: any) => {
-    // Only inject if not already present (to favor manual overrides)
-    if (!config.headers['x-tenant-id']) {
-        const tenantId = process.env.NEXT_PUBLIC_PUSKESMAS_ID;
-        if (tenantId) {
+    // 1. First try to get from cookie (set after login)
+    let tenantId = getTenantIdFromCookie();
+
+    // 2. If not in cookie, check if there's a global tenant context
+    if (!tenantId && typeof window !== 'undefined') {
+        tenantId = (window as any).__TENANT_ID__;
+    }
+
+    // 3. Inject tenant ID header for backend tenant resolution
+    if (tenantId && !config.headers['x-tenant-id']) {
+        // Validate UUID format before sending
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tenantId)) {
             config.headers['x-tenant-id'] = tenantId;
         }
     }
+
     return config;
 })
+
+// Helper to get tenant ID from cookies
+function getTenantIdFromCookie(): string | null {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(/tenant_id=([^;]+)/);
+    return match ? match[1] : null;
+}
 
 // Error handler global
 api.interceptors.response.use(

@@ -1,7 +1,7 @@
 'use server'
 
 import api from '@/services/api'
-import { getAuthToken, setAuthToken } from '@/services/auth-token'
+import { getAuthToken, setAuthToken, setTenantId, clearAuthToken } from '@/services/auth-token'
 import { revalidatePath } from 'next/cache'
 
 export async function getTenants() {
@@ -25,6 +25,17 @@ export async function switchTenant(tenant_id: string | null) {
         );
 
         await setAuthToken(res.data.access_token);
+
+        // Update tenant ID cookie for API interceptor
+        const newTenantId = res.data.user.active_tenant;
+        if (newTenantId) {
+            await setTenantId(newTenantId);
+        } else {
+            // If switching to 'all' (global view), clear the tenant cookie
+            const { cookies } = await import('next/headers');
+            const cookieStore = await cookies();
+            cookieStore.delete('tenant_id');
+        }
 
         // Hancurkan semua cache di layout admin biar data di-fetch ulang pakai token baru!
         revalidatePath('/admin', 'layout');

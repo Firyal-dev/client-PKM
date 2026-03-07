@@ -36,4 +36,23 @@ export async function setAuthToken(token: string): Promise<void> {
 export async function clearAuthToken(): Promise<void> {
     const store = await cookies()
     store.delete('token')
+    store.delete('tenant_id')
+}
+
+// Set tenant ID cookie (for API interceptor)
+export async function setTenantId(tenantId: string): Promise<void> {
+    const store = await cookies()
+    store.set('tenant_id', tenantId, {
+        httpOnly: false, // Need to read from client-side
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 8, // 8 jam
+        path: '/'
+    })
+}
+
+// Ambil tenant ID
+export async function getTenantId(): Promise<string | null> {
+    const store = await cookies()
+    return store.get('tenant_id')?.value ?? null
 }
