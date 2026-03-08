@@ -97,7 +97,8 @@ export async function getAdminMenus({ page = 1, limit = 10, search, type }: GetA
 export async function getAdminMenusLegacy(): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
-    return res.data || []
+    const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
+    return menus
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 

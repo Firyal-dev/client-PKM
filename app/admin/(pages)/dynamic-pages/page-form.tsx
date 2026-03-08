@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect, useRef } from "react"
+import { useState, useActionState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -78,6 +78,18 @@ export function PageForm({ action, initialData, menus }: PageFormProps) {
   const [showTypeMismatchWarning, setShowTypeMismatchWarning] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
 
+  // Flatten menus to include both parent and child menus, filter by dynamic type
+  const allMenus = useMemo(() => {
+    const result: Menu[] = [...menus]
+    menus.forEach(menu => {
+      if (menu.children && menu.children.length > 0) {
+        result.push(...menu.children)
+      }
+    })
+    // Filter to only show dynamic type menus
+    return result.filter(menu => menu.type === 'dynamic')
+  }, [menus])
+
   const checkLink = async (menuId: string, type: string) => {
     if (!menuId || menuId === initialData?.menu_id) {
       setExistingPage(null)
@@ -146,7 +158,7 @@ export function PageForm({ action, initialData, menus }: PageFormProps) {
             <SelectValue placeholder="Pilih menu..." />
           </SelectTrigger>
           <SelectContent>
-            {menus.map((menu) => (
+            {allMenus.map((menu) => (
               <SelectItem key={menu.id} value={menu.id}>
                 {menu.title}
               </SelectItem>
@@ -175,8 +187,8 @@ export function PageForm({ action, initialData, menus }: PageFormProps) {
                 type="button"
                 onClick={() => handlePageTypeChange(value)}
                 className={`flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all ${isSelected
-                    ? `${bg} ${border} border`
-                    : "border-border bg-muted/20 hover:bg-muted/40"
+                  ? `${bg} ${border} border`
+                  : "border-border bg-muted/20 hover:bg-muted/40"
                   }`}
               >
                 <Icon className={`w-4 h-4 ${isSelected ? color : "text-muted-foreground"}`} />
@@ -216,8 +228,8 @@ export function PageForm({ action, initialData, menus }: PageFormProps) {
                 type="button"
                 onClick={() => setShowImageField(!showImageField)}
                 className={`text-xs px-2 py-1 rounded-md border transition-colors ${showImageField
-                    ? "border-border bg-muted/50 text-muted-foreground"
-                    : "border-border bg-muted/20 text-muted-foreground hover:bg-muted/40"
+                  ? "border-border bg-muted/50 text-muted-foreground"
+                  : "border-border bg-muted/20 text-muted-foreground hover:bg-muted/40"
                   }`}
               >
                 {showImageField ? "Sembunyikan" : "Tambah Foto"}

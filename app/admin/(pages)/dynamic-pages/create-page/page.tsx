@@ -4,10 +4,10 @@ import { createPageAction } from "@/services/page/page-service"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
-import { getAdminMenusByType } from "@/services/menu/menu-service"
+import { getAdminMenusLegacy } from "@/services/menu/menu-service"
 
 export default async function CreatePagePage() {
-    const menus = await getAdminMenusByType('dynamic')
+    const menus = await getAdminMenusLegacy()
 
     return (
         <div className="px-5 pb-10">

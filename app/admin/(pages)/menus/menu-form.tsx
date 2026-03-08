@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select"
 import { ActionResponse } from "@/services/utils"
 import { Menu, checkMenuSlugExists } from "@/services/menu/menu-service"
+import { checkMenuPageLink } from "@/services/page/page-service"
+import { checkMenuStaticPageLink } from "@/services/static-page/static-page-service"
 import { SegmentedControl } from "@/components/ui/segmented-control"
 
 type MenuFormProps = {
@@ -111,6 +113,30 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
     success: false,
     error: "",
   })
+  const [hasDynamicContent, setHasDynamicContent] = useState(false)
+  const [hasStaticContent, setHasStaticContent] = useState(false)
+  const [isCheckingContent, setIsCheckingContent] = useState(false)
+
+  // Check if menu already has content when editing
+  useEffect(() => {
+    const checkContent = async () => {
+      if (!initialData?.id) return
+      setIsCheckingContent(true)
+      try {
+        const [dynamicResult, staticResult] = await Promise.all([
+          checkMenuPageLink(initialData.id),
+          checkMenuStaticPageLink(initialData.id)
+        ])
+        setHasDynamicContent(dynamicResult?.hasPages || false)
+        setHasStaticContent(!!staticResult)
+      } catch {
+        // Ignore errors
+      } finally {
+        setIsCheckingContent(false)
+      }
+    }
+    checkContent()
+  }, [initialData?.id])
 
   useEffect(() => {
     const checkSlug = async () => {
@@ -133,10 +159,21 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
   useEffect(() => {
     const orderNum = parseInt(orderValue, 10)
     if (isNaN(orderNum) || orderNum < 1) { setIsOrderDuplicate(false); return }
-    const menusAtSameLevel = parentMenus.filter(menu => {
-      if (menuLevel === "ROOT") return !menu.parent_id
-      return menu.parent_id === selectedParentId
-    })
+
+    // Get all menus at the same level including children
+    let menusAtSameLevel: Menu[] = []
+
+    if (menuLevel === "ROOT") {
+      // For root level, get all parent menus (no parent_id)
+      menusAtSameLevel = parentMenus.filter(menu => !menu.parent_id)
+    } else {
+      // For sub level, find the selected parent and get its children
+      const selectedParent = parentMenus.find(m => m.id === selectedParentId)
+      if (selectedParent?.children) {
+        menusAtSameLevel = selectedParent.children
+      }
+    }
+
     const hasDuplicate = menusAtSameLevel.some(menu => {
       if (initialData?.id && menu.id === initialData.id) return false
       return menu.order === orderNum
@@ -217,8 +254,8 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
 
         {/* URL preview */}
         <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-xs transition-colors ${isSlugDuplicate
-            ? "bg-destructive/5 border-destructive/30 text-destructive"
-            : "bg-muted/40 border-border text-muted-foreground"
+          ? "bg-destructive/5 border-destructive/30 text-destructive"
+          : "bg-muted/40 border-border text-muted-foreground"
           }`}>
           <LinkIcon className="w-3.5 h-3.5 shrink-0" />
           <span>URL:</span>
@@ -235,10 +272,12 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
         <div className="grid grid-cols-3 gap-2">
           {menuTypeOptions.map(({ value, icon: Icon, label, desc, color, bg, border }) => {
             const isSelected = menuType === value
+            const isDisabled = isCheckingContent || (!!initialData?.id && (hasDynamicContent || hasStaticContent))
             return (
               <button
                 key={value}
                 type="button"
+                disabled={isDisabled}
                 onClick={() => {
                   setMenuType(value as 'static' | 'dynamic' | 'grup')
                   if (value === 'grup') {
@@ -246,7 +285,9 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
                     setSelectedParentId('')
                   }
                 }}
-                className={`relative flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all ${isSelected
+                className={`relative flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all ${isDisabled
+                  ? "opacity-50 cursor-not-allowed bg-muted/10"
+                  : isSelected
                     ? `${bg} ${border} border`
                     : "border-border bg-muted/20 hover:bg-muted/40"
                   }`}
@@ -263,6 +304,12 @@ export function MenuForm({ action, initialData, parentMenus }: MenuFormProps) {
           })}
         </div>
         <input type="hidden" name="type" value={menuType} readOnly />
+        {(hasDynamicContent || hasStaticContent) && (
+          <p className="text-xs text-amber-500 flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3 shrink-0" />
+            Menu ini sudah terhubung ke halaman. Tipe menu tidak dapat diubah.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
