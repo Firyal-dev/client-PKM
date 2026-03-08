@@ -1,7 +1,8 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, buildParams, parseResponse } from "@/services/helpers"
+import { authHeaders } from "@/services/server-helpers"
+import { buildParams, parseResponse } from "@/services/helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import Link from 'next/link'
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 
-export function NavMedia({ navMedia }: { navMedia: { name: string; url: string; icon: LucideIcon }[] }) {
+export function NavMedia({ navMedia }: { navMedia: { title: string; items: { title: string; url: string; icon: LucideIcon }[] }[] }) {
   const pathname = usePathname()
 
   const isMatch = (url: string) => {
@@ -13,17 +13,22 @@ export function NavMedia({ navMedia }: { navMedia: { name: string; url: string; 
   }
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Media</SidebarGroupLabel>
-      <SidebarMenu>
-        {navMedia.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild isActive={isMatch(item.url)}>
-              <Link href={item.url}><item.icon /><span>{item.name}</span></Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
+    <>
+      {navMedia.map((group) => (
+        <SidebarGroup key={group.title} className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+          <SidebarMenu>
+            {group.items.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild isActive={isMatch(item.url)}>
+                  <Link href={item.url}><item.icon /><span>{item.title}</span></Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      ))}
+    </>
   )
 }
+

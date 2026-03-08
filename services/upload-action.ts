@@ -1,6 +1,6 @@
 'use server'
 
-import { authHeaders } from "@/services/helpers"
+import { authHeaders } from "@/services/server-helpers"
 import { tryAction } from "@/services/utils"
 
 export async function uploadImageAction(formData: FormData) {

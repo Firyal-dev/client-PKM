@@ -51,7 +51,7 @@ export async function getAdminPuskesmasById(id: string): Promise<Puskesmas | nul
 export async function createPuskesmasAction(_: unknown, formData: FormData) {
     const result = await tryAction(async () => {
         await api.post('/v1/puskesmas', formData, { headers: await authHeaders() })
-        revalidateTag(CACHE_TAGS.PUSKESMAS)
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal buat puskesmas')
 
     if (result.success) redirect('/admin/puskesmas')
@@ -62,7 +62,7 @@ export async function createPuskesmasAction(_: unknown, formData: FormData) {
 export async function updatePuskesmasAction(id: string, _: unknown, formData: FormData) {
     const result = await tryAction(async () => {
         await api.patch(`/v1/puskesmas/${id}`, formData, { headers: await authHeaders() })
-        revalidateTag(CACHE_TAGS.PUSKESMAS)
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal update puskesmas')
 
     if (result.success) redirect('/admin/puskesmas')
@@ -73,7 +73,7 @@ export async function updatePuskesmasAction(id: string, _: unknown, formData: Fo
 export async function deletePuskesmasAction(id: string) {
     return tryAction(async () => {
         await api.delete(`/v1/puskesmas/${id}`, { headers: await authHeaders() })
-        revalidateTag(CACHE_TAGS.PUSKESMAS)
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
         return { message: 'Puskesmas berhasil dihapus!' }
     }, 'Gagal hapus puskesmas')
 }

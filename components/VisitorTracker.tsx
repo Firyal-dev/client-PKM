@@ -41,16 +41,15 @@ export default function VisitorTracker() {
 
             try {
                 // Include tenant slug in request header for subdomain-based tracking
-                const response = await api.post('/v1/visitor/track', null, {
+                await api.post('/v1/visitor/track', null, {
                     headers: {
                         'x-tenant-slug': slug
                     }
                 });
-                if (response.status === 200 || response.status === 201) {
-                    sessionStorage.setItem('has_visited_today', 'true');
-                }
-            } catch (error: unknown) {
-                // Log error for debugging
+                // If we get here, the request was successful
+                sessionStorage.setItem('has_visited_today', 'true');
+            } catch (error) {
+                // Log error for debugging but don't interrupt user experience
                 console.error('Visitor tracking error:', error);
             }
         };

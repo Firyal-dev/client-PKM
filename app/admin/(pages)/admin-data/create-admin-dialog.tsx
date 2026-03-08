@@ -27,7 +27,8 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
     // Form state
     const [formName, setFormName] = useState("")
     const [formPassword, setFormPassword] = useState("")
-    const [formLevel, setFormLevel] = useState<"operator" | "super_admin">("operator")
+    const [formRole, setFormRole] = useState<"OPERATOR" | "SUPER_ADMIN">("OPERATOR")
+    const [formPuskesmasId, setFormPuskesmasId] = useState<string>("")
 
     const validateName = (name: string): boolean => {
         const nameRegex = /^[a-zA-Z0-9]+$/
@@ -73,7 +74,10 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
             const formData = new FormData()
             formData.append("name", formName)
             formData.append("password", formPassword)
-            formData.append("level", formLevel)
+            formData.append("role", formRole)
+            if (formRole === "OPERATOR" && formPuskesmasId) {
+                formData.append("puskesmas_id", formPuskesmasId)
+            }
 
             const result = await createAdmin(formData)
             if (result.success) {
@@ -92,7 +96,8 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
     const resetForm = () => {
         setFormName("")
         setFormPassword("")
-        setFormLevel("operator")
+        setFormRole("OPERATOR")
+        setFormPuskesmasId("")
         setNameError("")
         setPasswordError("")
     }
@@ -143,17 +148,17 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
                         {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="level">Level</Label>
+                        <Label htmlFor="role">Role</Label>
                         <Select
-                            value={formLevel}
-                            onValueChange={(value) => setFormLevel(value as "operator" | "super_admin")}
+                            value={formRole}
+                            onValueChange={(value) => setFormRole(value as "OPERATOR" | "SUPER_ADMIN")}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Pilih level" />
+                                <SelectValue placeholder="Pilih role" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="operator">Operator</SelectItem>
-                                <SelectItem value="super_admin">Super Admin</SelectItem>
+                                <SelectItem value="OPERATOR">Operator</SelectItem>
+                                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -188,7 +193,8 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
 
     const [formName, setFormName] = useState(admin?.name || "")
     const [formPassword, setFormPassword] = useState("")
-    const [formLevel, setFormLevel] = useState<"operator" | "super_admin">(admin?.level as "operator" | "super_admin" || "operator")
+    const [formRole, setFormRole] = useState<"OPERATOR" | "SUPER_ADMIN">(admin?.role as "OPERATOR" | "SUPER_ADMIN" || "OPERATOR")
+    const [formPuskesmasId, setFormPuskesmasId] = useState(admin?.puskesmas_id || "")
 
     const validateName = (name: string): boolean => {
         const nameRegex = /^[a-zA-Z0-9]+$/
@@ -231,12 +237,15 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
 
         setIsSubmitting(true)
         try {
-            const data: { name: string; level: "operator" | "super_admin"; password?: string } = {
+            const data: { name: string; role: "OPERATOR" | "SUPER_ADMIN"; password?: string; puskesmas_id?: string } = {
                 name: formName,
-                level: formLevel
+                role: formRole
             }
             if (formPassword) {
                 data.password = formPassword
+            }
+            if (formRole === "OPERATOR" && formPuskesmasId) {
+                data.puskesmas_id = formPuskesmasId
             }
 
             const { updateAdmin } = await import("@/services/admin/admin-data-service")
@@ -288,17 +297,17 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
                         {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="edit-level">Level</Label>
+                        <Label htmlFor="edit-role">Role</Label>
                         <Select
-                            value={formLevel}
-                            onValueChange={(value) => setFormLevel(value as "operator" | "super_admin")}
+                            value={formRole}
+                            onValueChange={(value) => setFormRole(value as "OPERATOR" | "SUPER_ADMIN")}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Pilih level" />
+                                <SelectValue placeholder="Pilih role" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="operator">Operator</SelectItem>
-                                <SelectItem value="super_admin">Super Admin</SelectItem>
+                                <SelectItem value="OPERATOR">Operator</SelectItem>
+                                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

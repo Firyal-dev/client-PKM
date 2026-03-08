@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -143,7 +143,7 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
               </TableRow>
             ) : (
               parentMenus.map((menu) => (
-                <>
+                <React.Fragment key={menu.id}>
                   <MenuRow
                     key={menu.id}
                     menu={menu}
@@ -164,7 +164,7 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
                       onToggleStatus={handleToggleStatus}
                     />
                   ))}
-                </>
+                </React.Fragment>
               ))
             )}
           </TableBody>

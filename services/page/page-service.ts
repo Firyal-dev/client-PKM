@@ -10,8 +10,9 @@ import { revalidateTag } from "next/cache"
 export interface Page {
   id: string
   menu_id: string
-  menu?: { id: string; title: string }
+  menu?: { id: string; title: string; slug?: string }
   title: string
+  slug?: string
   dynamic_content: string
   content?: string // Alias for dynamic_content used in some components
   image?: string

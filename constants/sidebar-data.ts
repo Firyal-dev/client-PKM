@@ -11,18 +11,17 @@ import {
     ClipboardClock,
     Hospital,
     ClipboardList,
-    Newspaper,
-    Cross,
     Building2
 } from "lucide-react"
 
 export const sidebarData = {
     navMain: [
-        {   
+        {
             title: "Dashboard",
             url: "/admin/dashboard",
             icon: LayoutDashboard,
         },
+
         {
             title: "Dinamis",
             icon: Settings2,
@@ -39,77 +38,107 @@ export const sidebarData = {
                     title: "Halaman Statis",
                     url: "/admin/static-pages",
                 }
-            ],
+            ]
         },
     ],
+
     navMedia: [
         {
-            name: "Galeri",
-            url: "/admin/gallery",
-            icon: BookImage,
-        },
-        {
-            name: "Album",
-            url: "/admin/albums",
-            icon: Album,
-        },
-        {
-            name: "Video",
-            url: "/admin/videos",
-            icon: Video,
-        },
-        {
-            name: "Banner",
-            url: "/admin/banners",
-            icon: PanelRightDashed,
+            title: "Media",
+            items: [
+                {
+                    title: "Galeri",
+                    url: "/admin/gallery",
+                    icon: BookImage,
+                },
+                {
+                    title: "Album",
+                    url: "/admin/albums",
+                    icon: Album,
+                },
+                {
+                    title: "Video",
+                    url: "/admin/videos",
+                    icon: Video,
+                },
+                {
+                    title: "Banner",
+                    url: "/admin/banners",
+                    icon: PanelRightDashed,
+                },
+            ]
         },
     ],
+
     navUserExperience: [
         {
-            name: "Kritik & Saran",
-            url: "/admin/reviews",
-            icon: UserStar,
+            title: "User Experience",
+            items: [
+                {
+                    title: "Kritik & Saran",
+                    url: "/admin/reviews",
+                    icon: UserStar,
+                },
+                {
+                    title: "Konsultasi",
+                    url: "/admin/consultations",
+                    icon: Headset,
+                }
+            ]
         },
-        {
-            name: "Konsultasi",
-            url: "/admin/consultations",
-            icon: Headset,
-        }
     ],
+
     navActivities: [
         {
-            name: "Agenda",
-            url: "/admin/agenda",
-            icon: ClipboardList,
-        },
-        {
-            name: "Pengunjung",
-            url: "/admin/visitors",
-            icon: Users,
+            title: "Aktivitas",
+            items: [
+                {
+                    title: "Agenda",
+                    url: "/admin/agenda",
+                    icon: ClipboardList,
+                },
+                {
+                    title: "Pengunjung",
+                    url: "/admin/visitors",
+                    icon: Users,
+                }
+            ]
         },
     ],
-    navAdminManage: [
-        {
-            name: "Data Admin",
-            url: "/admin/admin-data",
-            icon: Users,
-        },
-        {
-            name: "Log Aktivitas",
-            url: "/admin/activities-log",
-            icon: ClipboardClock,
-        }
-    ],
+
     navWebConfig: [
         {
-            name: "Informasi Puskesmas",
-            url: "/admin/puskesmas-info",
-            icon: Hospital,
+            title: "Konfigurasi Web",
+            items: [
+                {
+                    title: "Informasi Puskesmas",
+                    url: "/admin/puskesmas-info",
+                    icon: Hospital,
+                },
+                {
+                    title: "Puskesmas",
+                    url: "/admin/puskes",
+                    icon: Building2,
+                }
+            ]
         },
+    ],
+
+    navAdminManage: [
         {
-            name: "Puskesmas",
-            url: "/admin/puskes",
-            icon: Building2,
+            title: "Manajemen Admin",
+            items: [
+                {
+                    title: "Data Admin",
+                    url: "/admin/admin-data",
+                    icon: Users,
+                },
+                {
+                    title: "Log Aktivitas",
+                    url: "/admin/activities-log",
+                    icon: ClipboardClock,
+                }
+            ]
         },
-    ]
+    ],
 }

@@ -85,7 +85,12 @@ export async function getAdminMenus({ page = 1, limit = 10, search, type }: GetA
     if (search) params.set('search', search)
     if (type) params.set('type', type)
 
-    const res = await api.get(`/v1/admin/menus?${params.toString()}`, { headers: await authHeaders() })
+    const headers = await authHeaders()
+    console.log('[MenuService] getAdminMenus - Auth headers:', JSON.stringify(headers))
+
+    const res = await api.get(`/v1/admin/menus?${params.toString()}`, { headers })
+
+    console.log('[MenuService] getAdminMenus - Response total:', res.data?.total || res.data?.data?.length || 0)
 
     // Handle response structure (could be paginated or flat array)
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []

@@ -36,7 +36,7 @@ export default function AdminDataList({
 
     const [admins] = useState<Admin[]>(initialData)
     const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
-    const [levelFilter, setLevelFilter] = useState(searchParams.get("level") || "all")
+    const [roleFilter, setRoleFilter] = useState(searchParams.get("role") || "all")
     const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
     const [deleteAdminId, setDeleteAdminId] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -47,9 +47,9 @@ export default function AdminDataList({
             const search = globalFilter.toLowerCase()
             result = result.filter(a => a.name.toLowerCase().includes(search))
         }
-        if (levelFilter !== "all") result = result.filter(a => a.level === levelFilter)
+        if (roleFilter !== "all") result = result.filter(a => a.role === roleFilter)
         return result
-    }, [admins, globalFilter, levelFilter])
+    }, [admins, globalFilter, roleFilter])
 
     const handleSearch = (value: string) => {
         setGlobalFilter(value)
@@ -58,16 +58,16 @@ export default function AdminDataList({
         router.push(`/admin/admin-data?${params.toString()}`)
     }
 
-    const handleLevelFilter = (value: string) => {
-        setLevelFilter(value)
+    const handleRoleFilter = (value: string) => {
+        setRoleFilter(value)
         const params = new URLSearchParams(searchParams.toString())
-        value && value !== "all" ? params.set("level", value) : params.delete("level")
+        value && value !== "all" ? params.set("role", value) : params.delete("role")
         router.push(`/admin/admin-data?${params.toString()}`)
     }
 
     const handleReset = () => {
         setGlobalFilter("")
-        setLevelFilter("all")
+        setRoleFilter("all")
         router.push("/admin/admin-data")
     }
 
@@ -88,8 +88,8 @@ export default function AdminDataList({
         }
     }
 
-    const currentLevelFilter = searchParams.get("level") || "all"
-    const hasFilter = currentLevelFilter !== "all" || !!globalFilter
+    const currentRoleFilter = searchParams.get("role") || "all"
+    const hasFilter = currentRoleFilter !== "all" || !!globalFilter
 
     return (
         <div className="space-y-4">
@@ -105,17 +105,17 @@ export default function AdminDataList({
                             className="pl-8 h-9 rounded-xl text-sm"
                         />
                     </div>
-                    <Select value={currentLevelFilter} onValueChange={handleLevelFilter}>
+                    <Select value={currentRoleFilter} onValueChange={handleRoleFilter}>
                         <SelectTrigger className="w-[160px] h-9 rounded-xl border-border/60 text-sm">
                             <div className="flex items-center gap-2">
                                 <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-                                <SelectValue placeholder="Semua Level" />
+                                <SelectValue placeholder="Semua Role" />
                             </div>
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                            <SelectItem value="all">Semua Level</SelectItem>
-                            <SelectItem value="super_admin">Super Admin</SelectItem>
-                            <SelectItem value="operator">Operator</SelectItem>
+                            <SelectItem value="all">Semua Role</SelectItem>
+                            <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+                            <SelectItem value="OPERATOR">Operator</SelectItem>
                         </SelectContent>
                     </Select>
                     {hasFilter && (
@@ -169,7 +169,7 @@ export default function AdminDataList({
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        {admin.level === "super_admin" ? (
+                                        {admin.role === "SUPER_ADMIN" ? (
                                             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
                                                 <ShieldCheck className="w-3 h-3" /> Super Admin
                                             </span>
