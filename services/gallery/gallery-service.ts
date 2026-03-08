@@ -1,7 +1,7 @@
 'use server'
 
 import api from '@/services/api'
-import {  getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
 import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Gallery } from '@/types/gallery-prop'

@@ -2,7 +2,7 @@
 
 import api from '@/services/api'
 import { getAuthToken, setAuthToken, setTenantId, clearAuthToken } from '@/services/auth-token'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function getTenants() {
     try {
@@ -37,8 +37,27 @@ export async function switchTenant(tenant_id: string | null) {
             cookieStore.delete('tenant_id');
         }
 
-        // Hancurkan semua cache di layout admin biar data di-fetch ulang pakai token baru!
+        // Hancurkan semua cache
         revalidatePath('/admin', 'layout');
+        revalidatePath('/admin');
+
+        // Revalidate all common cache tags
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('profile');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('puskes');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('banner');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('agenda');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('menu');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('gallery');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('album');
+        // @ts-expect-error revalidateTag accepts 1-2 args
+        revalidateTag('news');
 
         return { success: true };
     } catch (error: any) {

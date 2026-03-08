@@ -18,6 +18,9 @@ import { useActionState, useTransition } from "react"
 import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
 import { TenantSwitcher } from "@/components/admin/tenant-switcher"
+import { Building2 } from "lucide-react"
+import Link from "next/link"
+import { SidebarMenuButton } from "@/components/ui/sidebar"
 
 export function AppSidebar({ profile, tenants = [], ...props }: { profile: AdminProfileProp, tenants?: any[] } & React.ComponentProps<typeof Sidebar>) {
   const [state, logout, isPending] = useActionState(logoutAction, null)
@@ -47,6 +50,19 @@ export function AppSidebar({ profile, tenants = [], ...props }: { profile: Admin
         <NavMedia navMedia={sidebarData.navMedia} />
         <NavActivities navActivities={sidebarData.navActivities} />
         <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
+
+        {/* Menu Puskesmas - hanya untuk SUPER_ADMIN */}
+        {profile.role === 'SUPER_ADMIN' && (
+          <div className="px-3 py-2">
+            <div className="flex flex-col gap-1">
+              <Link href="/admin/puskes" className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted">
+                <Building2 className="h-4 w-4" />
+                <span className="text-sm font-medium">Kelola Puskesmas</span>
+              </Link>
+            </div>
+          </div>
+        )}
+
         <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
         <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
       </SidebarContent>

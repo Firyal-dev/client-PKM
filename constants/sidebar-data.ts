@@ -108,7 +108,7 @@ export const sidebarData = {
         },
         {
             name: "Puskesmas",
-            url: "/admin/puskesmas",
+            url: "/admin/puskes",
             icon: Building2,
         },
     ]
