@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import Image from "next/image"
@@ -10,17 +9,64 @@ export function GalleryCard({ gallery, isSelected, onSelect }: GalleryCard) {
     const imageUrl = getMediaUrl(gallery.image) || "/placeholder.jpg"
 
     return (
-        <Card className="group overflow-hidden border-none shadow-none bg-transparent cursor-pointer" onClick={() => onSelect(gallery.id)}>
-            <CardContent className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-muted p-0">
-                <Image src={imageUrl} alt={gallery.image_title || "Foto Gallery"} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" unoptimized />
-                <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white font-bold text-lg truncate">{gallery.image_title}</p>
-                    <p className="text-white text-sm truncate">{gallery.description}</p>
+        <div
+            className="group relative cursor-pointer"
+            onClick={() => onSelect(gallery.id)}
+        >
+            {/* Image container */}
+            <div className={`relative aspect-square overflow-hidden rounded-2xl transition-all duration-300 ${isSelected
+                    ? "ring-2 ring-white ring-offset-2 ring-offset-background"
+                    : "ring-0"
+                }`}>
+                <Image
+                    src={imageUrl}
+                    alt={gallery.image_title || "Foto Galeri"}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    unoptimized
+                />
+
+                {/* Gradient overlay — selalu ada, makin tebal saat hover/selected */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent transition-opacity duration-300 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`} />
+
+                {/* Caption */}
+                <div className={`absolute bottom-0 left-0 right-0 p-3.5 translate-y-1 transition-all duration-300 ${isSelected ? "opacity-100 translate-y-0" : "opacity-0 group-hover:opacity-100 group-hover:translate-y-0"
+                    }`}>
+                    {gallery.image_title && (
+                        <p className="text-white text-sm font-semibold leading-snug truncate">
+                            {gallery.image_title}
+                        </p>
+                    )}
+                    {gallery.description && (
+                        <p className="text-white/70 text-xs truncate mt-0.5">
+                            {gallery.description}
+                        </p>
+                    )}
                 </div>
-                <div className="absolute right-3 top-3 z-20" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox className="h-6 w-6 rounded-full border-white bg-white/20 backdrop-blur-md" checked={isSelected} onCheckedChange={() => onSelect(gallery.id)} />
+
+                {/* Selected tint */}
+                {isSelected && (
+                    <div className="absolute inset-0 bg-blue-500/15 transition-opacity duration-200" />
+                )}
+            </div>
+
+            {/* Checkbox */}
+            <div
+                className={`absolute top-2.5 right-2.5 z-20 transition-all duration-200 ${isSelected ? "opacity-100 scale-100" : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
+                    }`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${isSelected ? "bg-white" : "bg-black/30 backdrop-blur-sm border border-white/40"
+                    }`}>
+                    <Checkbox
+                        className="h-4 w-4 border-0 bg-transparent data-[state=checked]:bg-transparent data-[state=checked]:text-white"
+                        checked={isSelected}
+                        onCheckedChange={() => onSelect(gallery.id)}
+                    />
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

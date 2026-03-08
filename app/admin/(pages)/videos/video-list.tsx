@@ -1,128 +1,197 @@
 'use client'
 
-import { useState, useTransition } from "react"
-import { Trash2, Play, Film, ExternalLink } from "lucide-react"
+import { useState, useMemo, useTransition } from "react"
+import { Trash2, Film, ExternalLink, Loader2, Clock } from "lucide-react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 
 import { Video, deleteVideoAction } from "@/services/video/video-service"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { SearchFilter } from "@/components/admin/SearchFilter"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 
-import { getYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/video-utils"
+import '@vidstack/react/player/styles/base.css'
+import '@vidstack/react/player/styles/plyr/theme.css'
+import { MediaPlayer, MediaProvider } from '@vidstack/react'
+import { PlyrLayout, plyrLayoutIcons } from '@vidstack/react/player/layouts/plyr'
 
 export function VideoList({ videos }: { videos: Video[] }) {
     const [isPending, startTransition] = useTransition()
+    const [globalFilter, setGlobalFilter] = useState("")
+    const [typeFilter, setTypeFilter] = useState("all")
+
+    const filteredVideos = useMemo(() => {
+        let result = [...videos]
+
+        // Search filter
+        if (globalFilter) {
+            const search = globalFilter.toLowerCase()
+            result = result.filter(v =>
+                v.video_title?.toLowerCase().includes(search) ||
+                v.video_desc?.toLowerCase().includes(search)
+            )
+        }
+
+        // Type filter (embed/upload)
+        if (typeFilter !== "all") {
+            const isEmbed = typeFilter === "embed"
+            result = result.filter(v => v.is_embed === isEmbed)
+        }
+
+        return result
+    }, [videos, globalFilter, typeFilter])
+
+    const hasFilter = !!globalFilter || typeFilter !== "all"
+
+    const handleReset = () => {
+        setGlobalFilter("")
+        setTypeFilter("all")
+    }
 
     const handleDelete = (id: string) =>
         startTransition(async () => {
             const res = await deleteVideoAction(id)
-            if (res.success) {
-                toast.success("Video berhasil dihapus")
-            } else {
-                toast.error(res.error || "Gagal menghapus video")
-            }
+            res.success
+                ? toast.success("Video berhasil dihapus")
+                : toast.error(res.error || "Gagal menghapus video")
         })
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {videos.map((video) => (
-                <VideoCard
-                    key={video.id}
-                    video={video}
-                    onDelete={() => handleDelete(video.id)}
-                    isPending={isPending}
+        <div className="space-y-4">
+            {/* Filter row */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+                <SearchFilter
+                    searchValue={globalFilter}
+                    onSearchChange={setGlobalFilter}
+                    filters={[
+                        {
+                            value: typeFilter,
+                            onChange: setTypeFilter,
+                            options: [
+                                { value: "all", label: "Semua" },
+                                { value: "embed", label: "YouTube" },
+                                { value: "upload", label: "Upload" },
+                            ],
+                            placeholder: "Tipe"
+                        }
+                    ]}
+                    onReset={handleReset}
+                    hasActiveFilter={hasFilter}
+                    searchPlaceholder="Cari video..."
                 />
-            ))}
+                <div className="text-xs text-muted-foreground bg-muted/50 border border-border/50 px-3 py-1.5 rounded-full font-medium">
+                    {filteredVideos.length} video
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredVideos.length === 0 ? (
+                    <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                        <p className="text-sm text-muted-foreground">Tidak ada video yang cocok dengan filter.</p>
+                    </div>
+                ) : (
+                    filteredVideos.map((video) => (
+                        <VideoCard
+                            key={video.id}
+                            video={video}
+                            onDelete={() => handleDelete(video.id)}
+                            isPending={isPending}
+                        />
+                    )))}
+            </div>
         </div>
     )
 }
 
 function VideoCard({ video, onDelete, isPending }: { video: Video; onDelete: () => void; isPending: boolean }) {
     const [isDelOpen, setIsDelOpen] = useState(false)
-    const isEmbed = video.is_embed
-    const rawUrl = video.embed
-    const embedUrl = isEmbed ? getYouTubeEmbedUrl(rawUrl) : rawUrl
-    const thumbnail = isEmbed ? getYouTubeThumbnail(rawUrl) : null
+
+    // Convert embed path to full URL for local videos
+    const videoSrc = video.is_embed ? video.embed : getMediaUrl(video.embed, 'uploads/videos')
 
     return (
-        <Card className="group overflow-hidden border-none shadow-none bg-transparent">
-            <CardContent className="p-0">
-                {/* Visual Preview Container */}
-                <div className="relative aspect-video overflow-hidden rounded-[1.5rem] bg-slate-900 border border-border/50">
-                    {isEmbed ? (
-                        <iframe
-                            src={embedUrl}
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
-                    ) : (
-                        <video
-                            src={embedUrl}
-                            className="w-full h-full object-cover"
-                            controls
-                        />
+        <div className="group flex flex-col gap-2.5 rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+
+            {/* Player — no pointer-events blocking */}
+            <div className="relative aspect-video bg-black overflow-hidden">
+                {videoSrc ? (
+                    <MediaPlayer
+                        title={video.video_title}
+                        src={videoSrc}
+                        className="w-full h-full"
+                        playsInline
+                    >
+                        <MediaProvider />
+                        <PlyrLayout icons={plyrLayoutIcons} />
+                    </MediaPlayer>
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-900">
+                        <p className="text-slate-500 text-sm">Video tidak tersedia</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Info + actions */}
+            <div className="flex items-start justify-between gap-2 px-3 pb-3">
+                <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold truncate text-foreground" title={video.video_title}>
+                        {video.video_title}
+                    </h3>
+
+                    {video.video_desc && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                            {video.video_desc}
+                        </p>
                     )}
 
-                    {/* Hover Overlay (Gallery Style) */}
-                    <div className="absolute inset-0 bg-black/60 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] pointer-events-none">
-                        <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300 pointer-events-auto">
-                            <h3 className="text-white font-bold text-lg line-clamp-1 flex items-center gap-2">
-                                {isEmbed ? <ExternalLink className="w-4 h-4 text-primary" /> : <Film className="w-4 h-4 text-primary" />}
-                                {video.video_title}
-                            </h3>
-                            <p className="text-white/80 text-sm line-clamp-2 mt-1 italic">
-                                {video.video_desc || "Tidak ada deskripsi"}
-                            </p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                        <span className={cn(
+                            "inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider",
+                            video.is_embed ? "text-blue-500" : "text-muted-foreground"
+                        )}>
+                            {video.is_embed
+                                ? <><ExternalLink className="w-3 h-3" /> YouTube</>
+                                : <><Film className="w-3 h-3" /> Upload</>
+                            }
+                        </span>
 
-                            <div className="mt-4 flex items-center justify-between">
-                                <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest leading-none">
-                                    {video.upload_date
-                                        ? formatDistanceToNow(new Date(video.upload_date), { addSuffix: true, locale: localeId })
-                                        : '-'}
+                        {video.upload_date && (
+                            <>
+                                <span className="text-border">·</span>
+                                <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/60">
+                                    <Clock className="w-3 h-3" />
+                                    {formatDistanceToNow(new Date(video.upload_date), { addSuffix: true, locale: localeId })}
                                 </span>
-
-                                <ConfirmDialog
-                                    open={isDelOpen}
-                                    onOpenChange={setIsDelOpen}
-                                    title="Hapus Video?"
-                                    description="Video ini akan dihapus secara permanen."
-                                    confirmText="Hapus"
-                                    onConfirm={onDelete}
-                                    trigger={
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-9 w-9 rounded-xl bg-white/10 hover:bg-red-500 hover:text-white text-white/70 transition-all border border-white/10"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    }
-                                />
-                            </div>
-                        </div>
-
-                        {/* Center Play Icon for visual cues */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="h-12 w-12 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-primary/30 scale-75 group-hover:scale-100 transition-transform duration-500">
-                                <Play className="h-5 w-5 text-white fill-white" />
-                            </div>
-                        </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* Info below for clarity if not hovered (Optional, but let's keep it clean like Gallery) */}
-                <div className="mt-3 px-2 group-hover:opacity-0 transition-opacity duration-300">
-                    <h3 className="font-semibold text-sm line-clamp-1">{video.video_title}</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wider font-medium">
-                        {isEmbed ? "Embed Link" : "Local Video"}
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
+                <ConfirmDialog
+                    open={isDelOpen}
+                    onOpenChange={setIsDelOpen}
+                    title="Hapus Video?"
+                    description="Video ini akan dihapus secara permanen."
+                    confirmText="Hapus"
+                    onConfirm={onDelete}
+                    trigger={
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isPending}
+                            className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                            {isPending
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Trash2 className="h-3.5 w-3.5" />
+                            }
+                        </Button>
+                    }
+                />
+            </div>
+        </div>
     )
 }

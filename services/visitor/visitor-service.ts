@@ -68,8 +68,8 @@ export async function getPublicVisitorStats(): Promise<VisitorStats> {
             thisMonth: thisMonth || 0,
             thisYear: thisYear || 0,
         }
-    } catch (e) {
-        console.error('Gagal ambil statistik visitor:', e)
+    } catch {
+        // Silent fail - visitor stats is non-critical
         return { total: 0, today: 0, thisMonth: 0, thisYear: 0 }
     }
 }

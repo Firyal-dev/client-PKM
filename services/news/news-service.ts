@@ -66,7 +66,7 @@ export async function updateNewsAction(id: string, _: unknown, formData: FormDat
     if (!photo || photo.size === 0) formData.delete('image')
 
     return tryAction(async () => {
-        const res = await api.put(`/v1/admin/news/${id}`, formData, { headers: await authHeaders() })
+        const res = await api.patch(`/v1/admin/news/${id}`, formData, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.NEWS, 'max')
         return res.data
     }, 'Gagal update berita')

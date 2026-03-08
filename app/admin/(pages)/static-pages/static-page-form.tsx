@@ -16,6 +16,7 @@ import {
 import { StaticPage, checkMenuStaticPageLink } from "@/services/static-page/static-page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { AlertTriangle } from "lucide-react"
 import dynamic from 'next/dynamic'
 
 const RichEditor = dynamic(() => import('@/components/admin/rich-editor'), { ssr: false })
@@ -31,60 +32,43 @@ export function StaticPageForm({ action, initialData, menus }: StaticPageFormPro
     const [state, formAction, isPending] = useActionState(action, null)
     const formRef = useRef<HTMLFormElement>(null)
 
-    // State for menu linkage check
     const [selectedMenuId, setSelectedMenuId] = useState<string>(initialData?.menu_id || "")
     const [existingPage, setExistingPage] = useState<{ id: string; title: string; menu_title: string } | null>(null)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isChecking, setIsChecking] = useState(false)
 
-    // Handle menu selection change
     const handleMenuChange = async (menuId: string) => {
         setSelectedMenuId(menuId)
-
-        // Skip check if no menu selected or same menu as initial
         if (!menuId || menuId === initialData?.menu_id) {
             setExistingPage(null)
             return
         }
-
-        // Check if menu already has a static page linked
         setIsChecking(true)
         try {
             const result = await checkMenuStaticPageLink(menuId)
             if (result) {
-                // Found existing page - show confirmation dialog
                 setExistingPage(result)
                 setShowConfirmDialog(true)
             } else {
                 setExistingPage(null)
             }
-        } catch (error) {
-            console.error("Error checking menu link:", error)
+        } catch {
             setExistingPage(null)
         } finally {
             setIsChecking(false)
         }
     }
 
-    // Handle confirmation to replace existing page link
     const handleConfirmReplace = () => {
         setShowConfirmDialog(false)
-        // Set force_replace to true and submit
-        const forceReplaceInput = document.getElementById('force_replace_input') as HTMLInputElement
-        if (forceReplaceInput) {
-            forceReplaceInput.value = "true"
-        }
-        // Submit the form
-        if (formRef.current) {
-            formRef.current.requestSubmit()
-        }
+        const el = document.getElementById('force_replace_input') as HTMLInputElement
+        if (el) el.value = "true"
+        formRef.current?.requestSubmit()
     }
 
-    // Handle cancel - reset menu selection
     const handleCancelReplace = () => {
         setShowConfirmDialog(false)
         setExistingPage(null)
-        // Reset to initial value or empty
         setSelectedMenuId(initialData?.menu_id || "")
     }
 
@@ -100,77 +84,87 @@ export function StaticPageForm({ action, initialData, menus }: StaticPageFormPro
 
     return (
         <>
-            <form ref={formRef} action={formAction} className="space-y-4">
-                <div className="grid gap-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="menu_id">Menu</Label>
-                        <Select
-                            name="menu_id"
-                            value={selectedMenuId}
-                            onValueChange={handleMenuChange}
-                            disabled={isChecking}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Pilih menu..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {menus.map((menu) => (
-                                    <SelectItem key={menu.id} value={menu.id}>
-                                        {menu.title}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="menu_id_input" id="menu_id_input" defaultValue={initialData?.menu_id} />
-                        {existingPage && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                Perhatian: Menu ini sudah terhubung ke halaman: <strong>{existingPage.title}</strong>
-                            </p>
-                        )}
-                    </div>
+            <form ref={formRef} action={formAction} className="space-y-5">
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="title">Judul Halaman</Label>
-                        <Input
-                            id="title"
-                            name="title"
-                            placeholder="Masukkan judul halaman"
-                            defaultValue={initialData?.title}
-                            required
-                        />
-                    </div>
+                {/* ── Menu ── */}
+                <div className="space-y-2">
+                    <Label className="text-sm font-medium">Menu</Label>
+                    <Select
+                        name="menu_id"
+                        value={selectedMenuId}
+                        onValueChange={handleMenuChange}
+                        disabled={isChecking}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Pilih menu..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {menus.map((menu) => (
+                                <SelectItem key={menu.id} value={menu.id}>
+                                    {menu.title}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <input type="hidden" name="menu_id_input" id="menu_id_input" defaultValue={initialData?.menu_id} />
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="static_content">Konten</Label>
-                        <RichEditor
-                            name="static_content"
-                            id="static_content"
-                            defaultValue={initialData?.static_content || ""}
-                        />
-                    </div>
+                    {existingPage && (
+                        <p className="text-xs text-amber-500 flex items-center gap-1.5">
+                            <AlertTriangle className="w-3 h-3 shrink-0" />
+                            Menu ini sudah terhubung ke: <strong>{existingPage.title}</strong>
+                        </p>
+                    )}
                 </div>
 
-                {/* Hidden field for force_replace - will be set when user confirms */}
+                {/* ── Judul ── */}
+                <div className="space-y-2">
+                    <Label htmlFor="title" className="text-sm font-medium">Judul Halaman</Label>
+                    <Input
+                        id="title"
+                        name="title"
+                        placeholder="Masukkan judul halaman"
+                        defaultValue={initialData?.title}
+                        required
+                    />
+                </div>
+
+                {/* ── Konten ── */}
+                <div className="space-y-2">
+                    <Label className="text-sm font-medium">Konten</Label>
+                    <RichEditor
+                        name="static_content"
+                        id="static_content"
+                        defaultValue={initialData?.static_content || ""}
+                    />
+                </div>
+
                 <input type="hidden" name="force_replace" id="force_replace_input" value="false" />
 
-                <div className="flex gap-4">
-                    <Button type="submit" disabled={isPending || isChecking} className="w-full">
+                {/* ── Actions ── */}
+                <div className="flex gap-3 pt-2 border-t border-border">
+                    <Button
+                        type="submit"
+                        disabled={isPending || isChecking}
+                        className="flex-1 h-10 font-medium"
+                    >
                         {isPending ? "Menyimpan..." : initialData ? "Simpan Perubahan" : "Buat Halaman"}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => router.back()}
+                        className="h-10 px-5"
+                    >
                         Batal
                     </Button>
                 </div>
             </form>
 
-            {/* Confirmation Dialog for replacing existing menu link */}
             <ConfirmDialog
                 open={showConfirmDialog}
                 onOpenChange={setShowConfirmDialog}
                 title="Menu Sudah Terhubung"
-                description={`Menu "${existingPage?.menu_title}" sudah terhubung ke halaman statis "${existingPage?.title}". 
-
-Apakah Anda ingin mengganti halaman yang terhubung? Halaman sebelumnya akan tetap ada tetapi tautan ke menu ini akan dihapus.`}
+                description={`Menu "${existingPage?.menu_title}" sudah terhubung ke halaman "${existingPage?.title}". Ingin mengganti? Halaman sebelumnya tetap ada tapi tautannya akan dihapus.`}
                 onConfirm={handleConfirmReplace}
                 onCancel={handleCancelReplace}
                 confirmText="Ya, Ganti"

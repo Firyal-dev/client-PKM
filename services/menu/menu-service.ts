@@ -10,7 +10,7 @@ export interface Menu {
   id: string
   title: string
   slug: string
-  type?: 'static' | 'dynamic' | 'custom'
+  type?: 'static' | 'dynamic' | 'custom' | 'grup'
   url_target?: string
   parent?: { id: string; title: string } | null
   parent_id?: string | null
@@ -45,8 +45,59 @@ export async function getPublicMenuBySlug(slug: string): Promise<Menu> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
-// Admin: Ambil semua menu
-export async function getAdminMenus(): Promise<Menu[]> {
+// Cek apakah slug sudah ada (untuk validasi form)
+export async function checkMenuSlugExists(slug: string, excludeId?: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${getBaseUrl()}/v1/menus/${slug}`, {
+      next: { revalidate: 0 }
+    })
+
+    // Jika 404, berarti slug belum ada
+    if (res.status === 404) return false
+
+    // Jika berhasil dapat data, cek apakah itu menu yang sama yang sedang di-edit
+    if (res.ok) {
+      const menu = await res.json() as Menu
+      // Jika excludeId diberikan dan sama dengan menu.id, berarti boleh pakai slug ini
+      if (excludeId && menu.id === excludeId) return false
+      return true
+    }
+
+    return false
+  } catch {
+    return false
+  }
+}
+
+// Admin: Ambil semua menu dengan pagination dan filter
+interface GetAdminMenusParams {
+  page?: number
+  limit?: number
+  search?: string
+  type?: string
+}
+
+export async function getAdminMenus({ page = 1, limit = 10, search, type }: GetAdminMenusParams = {}): Promise<{ data: Menu[]; total: number; totalPages: number }> {
+  try {
+    const params = new URLSearchParams()
+    params.set('page', page.toString())
+    params.set('limit', limit.toString())
+    if (search) params.set('search', search)
+    if (type) params.set('type', type)
+
+    const res = await api.get(`/v1/admin/menus?${params.toString()}`, { headers: await authHeaders() })
+
+    // Handle response structure (could be paginated or flat array)
+    const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
+    const total = res.data?.total || menus.length
+    const totalPages = res.data?.totalPages || Math.ceil(total / limit)
+
+    return { data: menus, total, totalPages }
+  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
+}
+
+// Admin: Ambil semua menu (legacy - tanpa pagination)
+export async function getAdminMenusLegacy(): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     return res.data || []
@@ -54,7 +105,7 @@ export async function getAdminMenus(): Promise<Menu[]> {
 }
 
 // Admin: Ambil menu berdasarkan tipe
-export async function getAdminMenusByType(type: 'static' | 'dynamic'): Promise<Menu[]> {
+export async function getAdminMenusByType(type: 'static' | 'dynamic' | 'grup'): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
@@ -65,13 +116,13 @@ export async function getAdminMenusByType(type: 'static' | 'dynamic'): Promise<M
 // Alias untuk getAdminMenus (backward compat)
 export const getAdminMenusFlat = getAdminMenus
 
-// Admin: Menu utama saja (dropdown)
+// Admin: Ambil menu utama saja (untuk dropdown)
 export async function getAdminParentMenus(): Promise<Menu[]> {
   try {
     const res = await api.get('/v1/admin/menus', { headers: await authHeaders() })
     const menus: Menu[] = res.data?.docs || res.data?.data || res.data || []
 
-    return menus
+    return menus.filter(m => !m.parent_id)
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 
@@ -140,8 +191,8 @@ export async function toggleMenuStatusAction(id: string) {
     const res = await api.patch(`/v1/admin/menus/${id}/toggle-status`, {}, {
       headers: await authHeaders()
     })
-    // @ts-expect-error Next.js typings incorrectly require a second parameter here.
-    revalidateTag(CACHE_TAGS.MENU) // ✅ FIX: argumen 'max' dihapus
+    // @ts-expect-error revalidateTag with options
+    revalidateTag(CACHE_TAGS.MENU)
     return res.data
   }, 'Gagal ubah status')
 }

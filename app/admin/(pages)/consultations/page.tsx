@@ -5,11 +5,14 @@ import { MessageCircleQuestion } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAdminConsultationList } from "@/services/consultation/consultation-service"
 import { ConsultationList } from "./consultation-list"
+import { ConsultationProp } from "@/types/consultation-prop"
 
 export default async function ConsultationPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const { data, totalPages } = await getAdminConsultationList(currentPage, 10)
+
+    const unanswered = data.filter((d: ConsultationProp) => !d.is_answer).length
 
     return (
         <div className="px-5 pb-10">
@@ -18,21 +21,35 @@ export default async function ConsultationPage({ searchParams }: { searchParams:
                 description="Kelola tanya jawab dan konsultasi dari pengguna"
             />
 
+            {data.length > 0 && (
+                <div className="flex items-center gap-2 mt-5 mb-4">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 border border-border/60 rounded-full px-3 py-1.5">
+                        <MessageCircleQuestion className="h-3.5 w-3.5" />
+                        <span className="font-medium">{data.length} Konsultasi</span>
+                    </div>
+                    {unanswered > 0 && (
+                        <div className="flex items-center gap-1.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200/50 rounded-full px-3 py-1.5">
+                            {unanswered} belum dijawab
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className={cn(
-                "rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
-                data.length === 0 && "justify-center"
+                "rounded-2xl bg-muted/30 border border-border/60 mt-2 p-5 min-h-[500px] flex flex-col",
+                data.length === 0 && "justify-center items-center mt-6"
             )}>
                 {data.length === 0 ? (
-                    <Empty className="flex flex-col items-center text-center">
-                        <EmptyHeader className="flex flex-col items-center">
-                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
-                                <MessageCircleQuestion className="w-10 h-10 text-primary/40" />
+                    <Empty className="flex flex-col items-center text-center max-w-xs mx-auto">
+                        <EmptyHeader className="flex flex-col items-center gap-3">
+                            <EmptyMedia variant="icon" className="mb-2 bg-background border border-border/60 p-5 rounded-2xl shadow-sm">
+                                <MessageCircleQuestion className="w-10 h-10 text-primary/30" />
                             </EmptyMedia>
-                            <EmptyTitle className="text-xl font-bold">
-                                Tidak ada konsultasi
+                            <EmptyTitle className="text-lg font-bold">
+                                Belum ada konsultasi
                             </EmptyTitle>
-                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
-                                Belum ada pertanyaan konsultasi yang masuk.
+                            <EmptyDescription className="text-sm text-muted-foreground leading-relaxed">
+                                Pertanyaan dari pengguna akan muncul di sini.
                             </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
@@ -42,7 +59,7 @@ export default async function ConsultationPage({ searchParams }: { searchParams:
             </div>
 
             {totalPages > 1 && (
-                <div className="mt-8">
+                <div className="mt-8 flex justify-center">
                     <PaginationControl totalPages={totalPages} currentPage={currentPage} />
                 </div>
             )}

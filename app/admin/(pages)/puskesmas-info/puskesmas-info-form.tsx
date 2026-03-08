@@ -9,13 +9,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { updatePuskesmasInfoAction } from '@/services/puskesmas-info-service';
 import { PuskesmasInfo } from '@/types/web-info';
 import { toast } from 'sonner';
-import { Loader2, Save, Globe, Phone, MapPin, Share2, Image as ImageIcon, Mail } from 'lucide-react';
+import { Loader2, Save, Globe, Phone, MapPin, Share2, Image as ImageIcon, Mail, User } from 'lucide-react';
 import Image from 'next/image';
 import { getMediaUrl } from '@/lib/getMediaUrl';
+import dynamic from 'next/dynamic';
+
+const RichEditor = dynamic(() => import('@/components/admin/rich-editor'), { ssr: false });
 
 export default function PuskesmasInfoForm({ initialData }: { initialData: PuskesmasInfo }) {
     const [state, action, isPending] = useActionState(updatePuskesmasInfoAction, null);
     const [previewLogo, setPreviewLogo] = useState<string | null>(getMediaUrl(initialData.logo));
+    const [previewKepalaFoto, setPreviewKepalaFoto] = useState<string | null>(getMediaUrl(initialData.kepala_foto));
 
     useEffect(() => {
         if (state?.success) {
@@ -30,6 +34,14 @@ export default function PuskesmasInfoForm({ initialData }: { initialData: Puskes
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewLogo(url);
+        }
+    };
+
+    const handleKepalaFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setPreviewKepalaFoto(url);
         }
     };
 
@@ -95,6 +107,54 @@ export default function PuskesmasInfoForm({ initialData }: { initialData: Puskes
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Kepala Puskesmas */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <User className="w-5 h-5" />
+                                Kepala Puskesmas
+                            </CardTitle>
+                            <CardDescription>Informasi kepala puskesmas</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="kepala_puskesmas">Nama Kepala Puskesmas</Label>
+                                <Input
+                                    id="kepala_puskesmas"
+                                    name="kepala_puskesmas"
+                                    defaultValue={initialData.kepala_puskesmas}
+                                    placeholder="Contoh: dr. Ahmad Budiman, M.Kes"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Foto Kepala Puskesmas</Label>
+                                <label htmlFor="kepala_foto" className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 hover:bg-muted/50 transition-colors cursor-pointer relative w-full">
+                                    {previewKepalaFoto ? (
+                                        <div className="relative w-32 h-32 mb-4">
+                                            <Image src={previewKepalaFoto} alt="Kepala Puskesmas Preview" fill className="object-contain" unoptimized />
+                                        </div>
+                                    ) : (
+                                        <div className="w-32 h-32 bg-muted rounded flex items-center justify-center mb-4 text-muted-foreground">
+                                            <User className="w-12 h-12" />
+                                        </div>
+                                    )}
+                                    <Input
+                                        type="file"
+                                        id="kepala_foto"
+                                        name="kepala_foto"
+                                        className="hidden"
+                                        accept=".jpg,.jpeg,.png"
+                                        onChange={handleKepalaFotoChange}
+                                    />
+                                    <span className="text-sm text-primary hover:underline font-medium">
+                                        {previewKepalaFoto ? 'Ubah Foto' : 'Klik untuk Upload Foto'}
+                                    </span>
+                                    <p className="text-xs text-muted-foreground mt-2">Format: JPG, JPEG, PNG (Maks. 3MB)</p>
+                                </label>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="space-y-6">
@@ -152,6 +212,26 @@ export default function PuskesmasInfoForm({ initialData }: { initialData: Puskes
                             <div className="space-y-2">
                                 <Label htmlFor="youtube">Youtube URL</Label>
                                 <Input id="youtube" name="yt" defaultValue={initialData.social_links?.youtube} placeholder="https://youtube.com/..." />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Sambutan */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Share2 className="w-5 h-5" />
+                                Sambutan
+                            </CardTitle>
+                            <CardDescription>Konten sambut dari kepala puskesmas</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Konten Sambutan</Label>
+                                <RichEditor
+                                    name="Sambutan_konten"
+                                    defaultValue={initialData.Sambutan_konten || ''}
+                                />
                             </div>
                         </CardContent>
                     </Card>

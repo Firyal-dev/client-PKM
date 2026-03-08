@@ -18,15 +18,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFloatingMenu } from "./floating-menu"
 import { Consultation } from "@/services/consultation/consultation-service"
+import { ActionResponse } from "@/services/utils"
 
-export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>) => Promise<any> }) {
+type ConsultationPayload = Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>
+type FormState = { success?: boolean; error?: string; message?: string }
+
+interface FloatingConsultationProps {
+    onSubmit: (data: ConsultationPayload) => Promise<ActionResponse>;
+}
+
+export function FloatingConsultation({ onSubmit }: FloatingConsultationProps) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const recaptchaRef = useRef<ReCAPTCHA>(null)
     const [captchaValue, setCaptchaValue] = useState<string | null>(null)
 
     // Action function untuk handle submit
-    async function submitConsultation(prevState: any, formData: FormData) {
+    async function submitConsultation(prevState: FormState | null, formData: FormData): Promise<FormState> {
         if (!captchaValue) {
             toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
             return { error: "reCAPTCHA belum dicentang" }
@@ -85,10 +93,10 @@ export function FloatingConsultation({ onSubmit }: { onSubmit: (data: Omit<Consu
             setCaptchaValue(null)
             recaptchaRef.current?.reset()
             return { success: true }
-        } catch (error: any) {
-            console.error(error)
-            toast.error(error.message || "Gagal mengirim konsultasi.")
-            return { error: error.message || "Gagal submit" }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Gagal mengirim konsultasi."
+            toast.error(message)
+            return { error: message }
         }
     }
 

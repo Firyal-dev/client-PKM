@@ -139,7 +139,8 @@ export async function createPageAction(_: unknown, formData: FormData) {
 
   return tryAction(async () => {
     const res = await api.post('/v1/admin/pages', formData, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.PAGE)
     return res.data
   }, 'Gagal buat halaman')
 }
@@ -154,7 +155,8 @@ export async function updatePageAction(id: string, _: unknown, formData: FormDat
 
   return tryAction(async () => {
     const res = await api.patch(`/v1/admin/pages/${id}`, formData, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.PAGE)
     return res.data
   }, 'Gagal update halaman')
 }
@@ -163,7 +165,8 @@ export async function updatePageAction(id: string, _: unknown, formData: FormDat
 export async function deletePageAction(id: string) {
   return tryAction(async () => {
     const res = await api.delete(`/v1/admin/pages/${id}`, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.PAGE)
     return res.data
   }, 'Gagal hapus halaman')
 }
@@ -172,7 +175,8 @@ export async function deletePageAction(id: string) {
 export async function togglePageStatusAction(id: string) {
   return tryAction(async () => {
     const res = await api.patch(`/v1/admin/pages/${id}/toggle-status`, {}, { headers: await authHeaders() })
-    revalidateTag(CACHE_TAGS.PAGE, 'max')
+    // @ts-expect-error Next.js cache revalidation
+    revalidateTag(CACHE_TAGS.PAGE)
     return res.data
   }, 'Gagal ubah status')
 }

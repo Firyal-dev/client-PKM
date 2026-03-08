@@ -21,21 +21,21 @@ export default async function PagesPage({ searchParams }: { searchParams: { page
             />
 
             <div className={cn(
-                "rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
-                data.length === 0 && "justify-center"
+                "rounded-xl bg-muted/30 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
+                data.length === 0 && "items-center justify-center"
             )}>
                 {data.length === 0 ? (
-                    <Empty className="flex flex-col items-center text-center">
-                        <EmptyHeader className="flex flex-col items-center">
-                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
-                                <FileText className="w-10 h-10 text-primary/40" />
+                    <Empty className="flex flex-col items-center text-center py-16">
+                        <EmptyHeader className="flex flex-col items-center gap-3">
+                            <EmptyMedia variant="icon" className="bg-background border border-border p-4 rounded-xl shadow-sm">
+                                <FileText className="w-8 h-8 text-muted-foreground/50" />
                             </EmptyMedia>
-                            <EmptyTitle className="text-xl font-bold">
-                                Tidak ada halaman dinamis
-                            </EmptyTitle>
-                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
-                                Belum ada halaman dinamis yang dibuat.
-                            </EmptyDescription>
+                            <div>
+                                <EmptyTitle className="text-base font-semibold">Belum ada halaman</EmptyTitle>
+                                <EmptyDescription className="text-sm text-muted-foreground mt-1">
+                                    Tambahkan halaman pertama untuk mulai mengelola konten website.
+                                </EmptyDescription>
+                            </div>
                         </EmptyHeader>
                     </Empty>
                 ) : (
@@ -44,7 +44,7 @@ export default async function PagesPage({ searchParams }: { searchParams: { page
             </div>
 
             {totalPages > 1 && (
-                <div className="mt-8">
+                <div className="mt-6">
                     <PaginationControl totalPages={totalPages} currentPage={currentPage} />
                 </div>
             )}

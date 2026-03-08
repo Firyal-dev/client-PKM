@@ -692,8 +692,8 @@ function MapControls({
           onLocate?.(coords);
           setWaitingForLocation(false);
         },
-        (error) => {
-          console.error("Error getting location:", error);
+        () => {
+          // Silent fail - location permission denied
           setWaitingForLocation(false);
         }
       );

@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
-import { Image as ImageIcon, Upload, X, Loader2 } from "lucide-react"
+import { Image as ImageIcon, Upload, Loader2, Eye, EyeOff, ImagePlus } from "lucide-react"
 import Image from "next/image"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useImagePreview } from "@/hooks/use-photo-preview"
+import { cn } from "@/lib/utils"
 
 interface BannerFormProps {
     initialData?: Banner
@@ -39,69 +39,108 @@ export function BannerForm({ initialData, action }: BannerFormProps) {
     }, [state, initialData, router])
 
     return (
-        <form action={formAction} className="space-y-8">
+        <form action={formAction} className="space-y-6">
             <input type="hidden" name="is_publish" value={String(isPublish)} />
             {initialData?.id && <input type="hidden" name="id" value={initialData.id} />}
 
-            <Card className="overflow-hidden border-2 border-dashed border-muted-foreground/20 bg-muted/30">
-                <CardContent className="p-0">
-                    <div className="relative aspect-[21/9] w-full group">
-                        {displayImage ? (
-                            <>
-                                <Image src={displayImage} alt="Preview" fill unoptimized className="object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <label htmlFor="image" className="cursor-pointer bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-full flex items-center gap-2 border border-white/30 transition-all">
-                                        <Upload className="w-4 h-4" /> Ganti Gambar
-                                    </label>
-                                </div>
-                            </>
-                        ) : (
-                            <label htmlFor="image" className="flex flex-col items-center justify-center h-full cursor-pointer hover:bg-muted/50 transition-colors">
-                                <div className="p-4 rounded-full bg-primary/10 mb-4 group-hover:scale-110 transition-transform">
-                                    <ImageIcon className="w-10 h-10 text-primary" />
-                                </div>
-                                <span className="text-lg font-bold">Upload Gambar Banner</span>
-                                <span className="text-sm text-muted-foreground mt-1 text-center max-w-xs">
-                                    Disarankan ukuran 1920x820 pixel (Rasio 21:9) untuk hasil terbaik.
-                                </span>
+            {/* Image Upload */}
+            <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden border border-border/60 bg-muted/30 group">
+                {displayImage ? (
+                    <>
+                        <Image src={displayImage} alt="Preview" fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                            <label htmlFor="image" className="cursor-pointer flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-sm font-medium px-5 py-2.5 rounded-full border border-white/25 transition-all">
+                                <Upload className="w-4 h-4" />
+                                Ganti Gambar
                             </label>
-                        )}
-                        <input type="file" id="image" name="image" accept="image/*" className="hidden" onChange={handleFileChange} required={!initialData} />
-                    </div>
-                </CardContent>
-            </Card>
+                        </div>
+                    </>
+                ) : (
+                    <label htmlFor="image" className="flex flex-col items-center justify-center h-full cursor-pointer transition-colors hover:bg-muted/50">
+                        <div className="flex flex-col items-center gap-3 text-center px-4">
+                            <div className="p-4 rounded-2xl bg-primary/8 border border-primary/15 group-hover:scale-105 transition-transform duration-200">
+                                <ImagePlus className="w-8 h-8 text-primary/50" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-foreground/70 text-sm">Klik untuk upload gambar</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">Disarankan 1920×820px · Rasio 21:9</p>
+                            </div>
+                        </div>
+                    </label>
+                )}
+                <input type="file" id="image" name="image" accept="image/*" className="hidden" onChange={handleFileChange} required={!initialData} />
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Judul</Label>
-                        <Input id="title" name="title" placeholder="Masukkan judul banner..." className="focus-visible:ring-primary" defaultValue={initialData?.title} required />
-                        
-                        <Label htmlFor="description" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Deskripsi (Opsional)</Label>
-                        <Textarea id="description" name="description" placeholder="Masukkan pesan atau deskripsi singkat..." className="min-h-[120px] resize-none focus-visible:ring-primary" defaultValue={initialData?.description} />
+            {/* Fields + Sidebar */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+                {/* Left: Inputs */}
+                <div className="md:col-span-2 space-y-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Judul Banner
+                        </Label>
+                        <Input
+                            id="title"
+                            name="title"
+                            placeholder="Masukkan judul banner..."
+                            className="rounded-xl focus-visible:ring-primary/50"
+                            defaultValue={initialData?.title}
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Deskripsi <span className="normal-case font-normal text-muted-foreground/60">(opsional)</span>
+                        </Label>
+                        <Textarea
+                            id="description"
+                            name="description"
+                            placeholder="Masukkan pesan atau deskripsi singkat..."
+                            className="min-h-[110px] resize-none rounded-xl focus-visible:ring-primary/50"
+                            defaultValue={initialData?.description}
+                        />
                     </div>
                 </div>
 
-                <div className="space-y-6 bg-muted/30 p-6 rounded-2xl border border-border/50 h-fit">
-                    <div className="flex items-center justify-between">
+                {/* Right: Sidebar */}
+                <div className="space-y-4 bg-muted/30 border border-border/60 rounded-2xl p-4 h-fit">
+                    {/* Publish toggle */}
+                    <div className="flex items-start justify-between gap-3">
                         <div className="space-y-0.5">
-                            <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Status Banner</Label>
-                            <p className="text-xs text-muted-foreground">Tentukan apakah banner ini akan langsung tampil.</p>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
+                            <p className="text-xs text-muted-foreground/70 leading-relaxed">
+                                {isPublish ? "Banner akan langsung tampil." : "Banner disimpan sebagai draft."}
+                            </p>
                         </div>
-                        <Switch checked={isPublish} onCheckedChange={setIsPublish} />
+                        <div className="flex items-center gap-2 shrink-0 pt-0.5">
+                            <span className={cn(
+                                "text-xs font-medium transition-colors",
+                                isPublish ? "text-green-500" : "text-muted-foreground/50"
+                            )}>
+                                {isPublish ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                            </span>
+                            <Switch
+                                checked={isPublish}
+                                onCheckedChange={setIsPublish}
+                                className="data-[state=checked]:bg-green-500"
+                            />
+                        </div>
                     </div>
 
-                    <div className="pt-4 border-t border-border">
-                        {/* 4. Gunakan isPending di Tombol Submit */}
-                        <Button type="submit" disabled={isPending} className="w-full sm:w-auto px-10 font-bold">
+                    <div className="border-t border-border/50 pt-4">
+                        <Button
+                            type="submit"
+                            disabled={isPending}
+                            className="w-full font-semibold rounded-xl"
+                        >
                             {isPending ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Menyimpan...
                                 </>
-                            ) : (
-                                initialData ? "Simpan Perubahan" : "Terbitkan Banner"
-                            )}
+                            ) : initialData ? "Simpan Perubahan" : "Terbitkan Banner"}
                         </Button>
                     </div>
                 </div>

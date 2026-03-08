@@ -21,20 +21,20 @@ export default async function VideosPage({ searchParams }: { searchParams: { pag
             />
 
             <div className={cn(
-                "rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col",
-                data.length === 0 && "justify-center"
+                "rounded-2xl bg-muted/30 border border-border/60 mt-6 p-5 min-h-[500px] flex flex-col",
+                data.length === 0 && "justify-center items-center"
             )}>
                 {data.length === 0 ? (
-                    <Empty className="flex flex-col items-center text-center">
-                        <EmptyHeader className="flex flex-col items-center">
-                            <EmptyMedia variant="icon" className="mb-4 bg-background p-4 rounded-full shadow-sm">
-                                <Video className="w-10 h-10 text-primary/40" />
+                    <Empty className="flex flex-col items-center text-center max-w-xs mx-auto">
+                        <EmptyHeader className="flex flex-col items-center gap-3">
+                            <EmptyMedia variant="icon" className="mb-2 bg-background border border-border/60 p-5 rounded-2xl shadow-sm">
+                                <Video className="w-10 h-10 text-primary/30" />
                             </EmptyMedia>
-                            <EmptyTitle className="text-xl font-bold">
-                                Tidak ada video
+                            <EmptyTitle className="text-lg font-bold">
+                                Belum ada video
                             </EmptyTitle>
-                            <EmptyDescription className="max-w-[300px] mx-auto text-muted-foreground">
-                                Belum ada video yang diunggah.
+                            <EmptyDescription className="text-sm text-muted-foreground leading-relaxed">
+                                Tambahkan video pertama untuk ditampilkan di website.
                             </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
@@ -44,7 +44,7 @@ export default async function VideosPage({ searchParams }: { searchParams: { pag
             </div>
 
             {totalPages > 1 && (
-                <div className="mt-8">
+                <div className="mt-8 flex justify-center">
                     <PaginationControl totalPages={totalPages} currentPage={currentPage} />
                 </div>
             )}
