@@ -107,7 +107,13 @@ function HeaderSection() {
 }
 
 // Calendar
-function CalendarCard({ date, onSelect, count }: any) {
+interface CalendarCardProps {
+    date?: Date;
+    onSelect: (date: Date | undefined) => void;
+    count: number;
+}
+
+function CalendarCard({ date, onSelect, count }: CalendarCardProps) {
     return (
         <Card className="border-slate-100 shadow-sm rounded-xl sticky top-24">
             <CardContent className="p-3">

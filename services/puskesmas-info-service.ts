@@ -14,8 +14,8 @@ export async function getPublicPuskesmasInfo(): Promise<PuskesmasInfo | null> {
         })
         if (!res.ok) return null
         return await res.json()
-    } catch (e) {
-        console.error(handleServiceError(e, 'Gagal ambil info puskesmas'))
+    } catch {
+        // Silent fail - web info is non-critical
         return null
     }
 }
@@ -34,6 +34,10 @@ export async function updatePuskesmasInfoAction(_: unknown, formData: FormData) 
         // Handle logo file
         const logo = formData.get('logo') as File
         if (!logo || logo.size === 0) formData.delete('logo')
+
+        // Handle kepala_foto file
+        const kepala_foto = formData.get('kepala_foto') as File
+        if (!kepala_foto || kepala_foto.size === 0) formData.delete('kepala_foto')
 
         // Build social_links JSON
         const social_links = {

@@ -15,9 +15,17 @@ import { Calendar } from "@/components/ui/calendar"
 import { Agenda } from "@/types/agenda-prop"
 import { cn } from "@/lib/utils"
 
-const initialState = { success: false, error: undefined }
+type FormState = { success: boolean; error?: string; message?: string }
+type FormAction = (state: FormState, formData: FormData) => Promise<FormState>
 
-export function AgendaForm({ initialData, action }: { initialData?: Agenda; action: any }) {
+const initialState: FormState = { success: false, error: undefined }
+
+interface AgendaFormProps {
+    initialData?: Agenda;
+    action: FormAction;
+}
+
+export function AgendaForm({ initialData, action }: AgendaFormProps) {
     const [state, formAction, isPending] = useActionState(action, initialState)
     const router = useRouter()
 
@@ -196,7 +204,14 @@ export function AgendaForm({ initialData, action }: { initialData?: Agenda; acti
     )
 }
 
-function CustomDatePicker({ name, value, onChange, minDate }: any) {
+interface CustomDatePickerProps {
+    name: string;
+    value?: Date;
+    onChange: (date: Date | undefined) => void;
+    minDate?: Date;
+}
+
+function CustomDatePicker({ name, value, onChange, minDate }: CustomDatePickerProps) {
     return (
         <Popover>
             <input type="hidden" name={name} value={value ? format(value, "yyyy-MM-dd") : ""} />

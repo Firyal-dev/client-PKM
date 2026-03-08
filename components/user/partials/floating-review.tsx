@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { useFloatingMenu } from "./floating-menu"
 import { Reviews } from "@/types/review-prop"
+import { ActionResponse } from "@/services/utils"
 
 enum ReviewCategory {
     PELAYANAN = 'Pelayanan',
@@ -27,7 +28,14 @@ enum ReviewCategory {
     LAINNYA = 'Lainnya',
 }
 
-export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Promise<any> }) {
+type ReviewPayload = Omit<Reviews, '_id' | 'created_at' | 'updated_at'>
+type FormState = { success?: boolean; error?: string; message?: string }
+
+interface FloatingReviewProps {
+    onSubmit: (data: ReviewPayload) => Promise<ActionResponse>;
+}
+
+export function FloatingReview({ onSubmit }: FloatingReviewProps) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [category, setCategory] = useState<ReviewCategory>(ReviewCategory.PELAYANAN)
@@ -35,7 +43,7 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
     const [captchaValue, setCaptchaValue] = useState<string | null>(null)
 
     // Action function untuk handle submit
-    async function submitReview(prevState: any, formData: FormData) {
+    async function submitReview(prevState: FormState | null, formData: FormData): Promise<FormState> {
         if (!captchaValue) {
             toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
             return { error: "reCAPTCHA belum dicentang" }
@@ -73,10 +81,10 @@ export function FloatingReview({ onSubmit }: { onSubmit: (data: Reviews) => Prom
             setCaptchaValue(null)
             recaptchaRef.current?.reset()
             return { success: true }
-        } catch (error: any) {
-            console.error(error)
-            toast.error(error.message || "Gagal mengirim masukan.")
-            return { error: error.message || "Gagal submit" }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Gagal mengirim masukan."
+            toast.error(message)
+            return { error: message }
         }
     }
 

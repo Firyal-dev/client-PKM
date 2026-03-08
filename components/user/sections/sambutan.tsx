@@ -1,7 +1,15 @@
 import Image from "next/image"
 import { Quote } from "lucide-react"
+import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 
-export default function Sambutan() {
+export default async function Sambutan() {
+    const puskesmasInfo = await getPublicPuskesmasInfo()
+
+    const kepalaNama = puskesmasInfo?.kepala_puskesmas || 'Kepala Puskesmas'
+    const kepalaFoto = puskesmasInfo?.kepala_foto ? getMediaUrl(puskesmasInfo.kepala_foto) : null
+    const SambutanKonten = puskesmasInfo?.Sambutan_konten || ''
+
     return (
         <section
             className="py-16 md:py-24 bg-slate-50 border-t border-slate-100"
@@ -15,11 +23,12 @@ export default function Sambutan() {
                         <div className="relative w-full lg:w-[32%] max-w-[260px] shrink-0">
                             <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
                                 <Image
-                                    src="/userPlaceholder.jpg"
-                                    alt="Kepala Puskesmas Bogor Tengah"
+                                    src={kepalaFoto || "/userPlaceholder.jpg"}
+                                    alt={kepalaNama}
                                     fill
                                     className="object-cover"
                                     priority
+                                    unoptimized
                                 />
                             </div>
                         </div>
@@ -33,35 +42,20 @@ export default function Sambutan() {
 
                                 <h2 className="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">
                                     Selamat Datang di Website Resmi <br className="hidden md:block" />
-                                    Puskesmas Bogor Tengah
+                                    Puskesmas
                                 </h2>
                             </div>
 
-                            <div className="space-y-4 text-slate-600 text-sm md:text-base leading-relaxed">
-                                <p className="font-semibold text-slate-900">
-                                    Assalamu&apos;alaikum Wr. Wb.
-                                </p>
+                            <div
+                                className="space-y-4 text-slate-600 text-sm md:text-base leading-relaxed prose prose-slate max-w-none"
+                                dangerouslySetInnerHTML={{ __html: SambutanKonten }}
+                            />
 
-                                <p>
-                                    Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas
-                                    tersedianya website resmi Puskesmas Bogor Tengah sebagai media
-                                    informasi dan komunikasi kepada masyarakat.
+                            <div className="pt-2 text-sm">
+                                <p>Hormat kami,</p>
+                                <p className="font-bold text-slate-900">
+                                    {kepalaNama}
                                 </p>
-
-                                <p>
-                                    Kami berkomitmen untuk memberikan pelayanan kesehatan yang
-                                    profesional, transparan, dan mudah diakses oleh seluruh lapisan
-                                    masyarakat. Melalui website ini, kami berharap informasi
-                                    layanan, kegiatan, dan program kesehatan dapat diperoleh
-                                    dengan lebih cepat dan jelas.
-                                </p>
-
-                                <div className="pt-2 text-sm">
-                                    <p>Hormat kami,</p>
-                                    <p className="font-bold text-slate-900">
-                                        Kepala UPTD Puskesmas Bogor Tengah
-                                    </p>
-                                </div>
                             </div>
                         </div>
 

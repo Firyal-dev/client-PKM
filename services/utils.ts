@@ -9,14 +9,29 @@ export interface PaginatedResponse<T> { data: T[]; totalPages: number; currentPa
 export interface ActionResponse<T = unknown> { success: boolean; data?: T; error?: string; message?: string }
 
 // Handle error
-export const handleServiceError = (err: any, fallback: string): string => {
-    if (err?.isAxiosError && err.response?.status === 401) {
-        throw new Error('UNAUTHORIZED_401');
+interface AxiosErrorLike {
+    isAxiosError?: boolean;
+    response?: {
+        status?: number;
+        data?: {
+            message?: string;
+        };
+    };
+    message?: string;
+}
+
+export const handleServiceError = (err: unknown, fallback: string): string => {
+    if (err && typeof err === 'object') {
+        const axiosErr = err as AxiosErrorLike;
+        if (axiosErr.isAxiosError) {
+            if (axiosErr.response?.status === 401) {
+                throw new Error('UNAUTHORIZED_401');
+            }
+            return axiosErr.response?.data?.message || axiosErr.message || fallback;
+        }
     }
-    
-    if (err?.isAxiosError) return err.response?.data?.message || err.message || fallback
-    if (err instanceof Error) return err.message
-    return fallback
+    if (err instanceof Error) return err.message;
+    return fallback;
 }
 
 // Parse response paginated

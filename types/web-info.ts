@@ -14,6 +14,9 @@ export interface PuskesmasInfo {
     longtitude?: number;
     contact?: string;
     email?: string;
+    kepala_puskesmas?: string;
+    kepala_foto?: string;
+    Sambutan_konten?: string;
     created_at: string;
     updated_at: string;
 }

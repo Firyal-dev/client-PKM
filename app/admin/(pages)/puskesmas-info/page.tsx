@@ -1,6 +1,5 @@
 import { getAdminPuskesmasInfo } from '@/services/puskesmas-info-service';
 import PuskesmasInfoForm from './puskesmas-info-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function PuskesmasInfoPage() {
     const initialData = await getAdminPuskesmasInfo();

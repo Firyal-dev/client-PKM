@@ -38,15 +38,6 @@ export default async function MenusPage({
                     data.length === 0 && !search && !type && "items-center justify-center"
                 )}
             >
-                {/*
-                  If there are no menus *and* no active filters we show the
-                  “empty state” encouraging the user to create the first menu.
-                  When the list is empty because of a search/type filter we still
-                  render the <MenuList> component so the toolbar (including the
-                  search bar) remains visible – the list itself will show a row
-                  informing the user that nothing matched.  This mirrors the
-                  behaviour on other list pages such as static‑pages/dynamic‑pages.
-                */}
                 {data.length === 0 && !search && !type ? (
                     <Empty className="flex flex-col items-center text-center py-16">
                         <EmptyHeader className="flex flex-col items-center gap-3">
