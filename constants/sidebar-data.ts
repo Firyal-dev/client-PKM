@@ -114,11 +114,6 @@ export const sidebarData = {
                     title: "Informasi Puskesmas",
                     url: "/admin/puskesmas-info",
                     icon: Hospital,
-                },
-                {
-                    title: "Puskesmas",
-                    url: "/admin/puskes",
-                    icon: Building2,
                 }
             ]
         },
@@ -126,8 +121,13 @@ export const sidebarData = {
 
     navAdminManage: [
         {
-            title: "Manajemen Admin",
+            title: "Manajemen Core System",
             items: [
+                {
+                    title: "Data Puskesmas",
+                    url: "/admin/puskes",
+                    icon: Building2,
+                },
                 {
                     title: "Data Admin",
                     url: "/admin/admin-data",

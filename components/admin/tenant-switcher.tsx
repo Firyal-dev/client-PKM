@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown, Building2 } from "lucide-react"
+import { ChevronsUpDown, Building2, Search, X } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar"
 import { switchTenant } from "@/services/admin/tenant-service"
 import { useRouter } from "next/navigation"
+import { Input } from "@/components/ui/input"
 
 export function TenantSwitcher({
     tenants,
@@ -32,11 +33,20 @@ export function TenantSwitcher({
 }) {
     const { isMobile } = useSidebar()
     const router = useRouter()
+    const [searchQuery, setSearchQuery] = React.useState("")
+    const [isSearchFocused, setIsSearchFocused] = React.useState(false)
 
     // Find active tenant or fallback to "Semua Puskesmas" representing null
     const activeTenant = tenants.find(t => t.id === activeTenantId) || { id: 'all', name: 'Semua Puskesmas (Global)' }
 
     const [isPending, startTransition] = React.useTransition()
+
+    // Filter tenants based on search query
+    const filteredTenants = React.useMemo(() => {
+        if (!searchQuery.trim()) return tenants
+        const query = searchQuery.toLowerCase()
+        return tenants.filter(t => t.name.toLowerCase().includes(query))
+    }, [tenants, searchQuery])
 
     const handleSwitch = (tenantId: string) => {
         startTransition(async () => {
@@ -54,6 +64,17 @@ export function TenantSwitcher({
             const res = await switchTenant(tenantId);
             if (res.success) {
                 // Use hard reload to ensure all Server and Client components are fresh
+                window.location.reload();
+            } else {
+                alert(res.message);
+            }
+        });
+    }
+
+    const handleCancel = () => {
+        startTransition(async () => {
+            const res = await switchTenant(null);
+            if (res.success) {
                 window.location.reload();
             } else {
                 alert(res.message);
@@ -90,18 +111,63 @@ export function TenantSwitcher({
                         <DropdownMenuLabel className="text-muted-foreground text-xs">
                             Pilih Puskesmas
                         </DropdownMenuLabel>
-                        {tenants.map((team) => (
+
+                        {/* Search Input */}
+                        <div className="relative px-2 py-1.5">
+                            <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                            <Input
+                                placeholder="Cari puskesmas..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => setIsSearchFocused(true)}
+                                onBlur={() => setIsSearchFocused(false)}
+                                className="h-8 pl-8 pr-8 text-xs"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-7 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
+                            )}
+                        </div>
+
+                        <DropdownMenuSeparator />
+
+                        {/* Cancel/Reset Option - only show if there's an active selection */}
+                        {activeTenantId && (
                             <DropdownMenuItem
-                                key={team.id}
-                                onClick={() => handleSwitch(team.id)}
-                                className="gap-2 p-2"
+                                onClick={handleCancel}
+                                className="gap-2 p-2 text-muted-foreground hover:text-destructive"
+                                disabled={isPending}
                             >
-                                <div className="flex size-6 items-center justify-center rounded-md border">
-                                    <Building2 className="size-3.5 shrink-0" />
+                                <div className="flex size-6 items-center justify-center rounded-md border border-destructive/50">
+                                    <X className="size-3.5 shrink-0 text-destructive" />
                                 </div>
-                                {team.name}
+                                <span className="text-destructive">Batal Pilih (Reset)</span>
                             </DropdownMenuItem>
-                        ))}
+                        )}
+
+                        {filteredTenants.length === 0 ? (
+                            <DropdownMenuItem disabled className="text-muted-foreground">
+                                Tidak ada puskesmas ditemukan
+                            </DropdownMenuItem>
+                        ) : (
+                            filteredTenants.map((team) => (
+                                <DropdownMenuItem
+                                    key={team.id}
+                                    onClick={() => handleSwitch(team.id)}
+                                    className="gap-2 p-2"
+                                    disabled={isPending}
+                                >
+                                    <div className="flex size-6 items-center justify-center rounded-md border">
+                                        <Building2 className="size-3.5 shrink-0" />
+                                    </div>
+                                    {team.name}
+                                </DropdownMenuItem>
+                            ))
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>

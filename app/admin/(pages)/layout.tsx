@@ -11,11 +11,30 @@ import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 import { BreadcrumbProvider } from "@/components/admin/breadcrumb-context"
 import { getTenants } from "@/services/admin/tenant-service"
+import { headers } from "next/headers"
 
 export const metadata: Metadata = {
     title: "Puskesmas",
     description: "Sistem Informasi Manajemen Puskesmas",
 };
+
+// Halaman yang diizinkan untuk SUPER_ADMIN yang BELUM pilih puskesmas
+const ALLOWED_ROUTES_FOR_SUPERADMIN_WITHOUT_PUSKESMAS = [
+    '/admin/dashboard',
+    '/admin/admin-data',
+    '/admin/activities-log',
+    '/admin/admin-data/create',
+    '/admin/admin-data/edit',
+]
+
+function isSuperAdminAllowed(pathname: string, hasSelectedPuskesmas: boolean): boolean {
+    // Jika sudah pilih puskes, semua route diizinkan
+    if (hasSelectedPuskesmas) {
+        return true
+    }
+    // Jika belum pilih puskes, cek apakah route termasuk yang diizinkan
+    return ALLOWED_ROUTES_FOR_SUPERADMIN_WITHOUT_PUSKESMAS.some(route => pathname === route || pathname.startsWith(route + '/'))
+}
 
 export default async function AdminLayout({
     children,
@@ -26,6 +45,18 @@ export default async function AdminLayout({
 
     if (!profile) {
         redirect("/admin/login");
+    }
+
+    // Proteksi akses untuk SUPER_ADMIN
+    if (profile.role === 'SUPER_ADMIN') {
+        const headersList = await headers()
+        const pathname = headersList.get('x-pathname') || ''
+        const hasSelectedPuskesmas = !!profile.active_tenant
+
+        // Jika belum pilih puskes dan akses halaman lain, redirect ke dashboard
+        if (pathname && !isSuperAdminAllowed(pathname, hasSelectedPuskesmas)) {
+            redirect("/admin/dashboard");
+        }
     }
 
     let tenants = [];
