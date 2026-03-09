@@ -4,13 +4,14 @@ import React, { useState, useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
-  MoreVertical, Pencil, Trash2, ChevronRight, ChevronDown,
+  Pencil, Trash2, ChevronRight, ChevronDown,
   Layers, FileText, Folder, Eye, EyeOff,
 } from "lucide-react"
 import { toast } from "sonner"
+import { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTable } from "@/components/ui/data-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { SearchFilter } from "@/components/admin/SearchFilter"
@@ -45,19 +46,13 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
   const searchParams = useSearchParams()
 
   const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [selectedRows, setSelectedRows] = useState<Menu[]>([])
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
 
   const parentMenus = useMemo(() => menus.filter((m) => !m.parent_id), [menus])
   const currentTypeFilter = searchParams.get("type") || ""
   const hasActiveFilter = !!(currentTypeFilter || globalFilter)
-
-  const toggleExpand = (id: string) => {
-    setExpandedIds(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
 
   const handleDelete = async (id: string) => {
     const result = await deleteMenuAction(id)
@@ -93,6 +88,172 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
     router.push("/admin/menus")
   }
 
+  const getAllMenuIds = (menuList: Menu[]): string[] => {
+    let ids: string[] = []
+    menuList.forEach(menu => {
+      ids.push(menu.id)
+      if (menu.children && menu.children.length > 0) {
+        ids = ids.concat(getAllMenuIds(menu.children))
+      }
+    })
+    return ids
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.length === 0) return
+    setIsBulkDeleting(true)
+    try {
+      const allMenuIds = getAllMenuIds(selectedRows)
+      await Promise.all(allMenuIds.map(id => deleteMenuAction(id)))
+      toast.success(`${selectedRows.length} menu berhasil dihapus`)
+      setShowBulkDeleteDialog(false)
+      router.refresh()
+    } catch (error) {
+      toast.error("Gagal menghapus beberapa menu")
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
+  const columns: ColumnDef<Menu>[] = useMemo(() => [
+    {
+      id: "expander",
+      header: "",
+      cell: ({ row }) => {
+        const hasChildren = row.original.children && row.original.children.length > 0
+        return hasChildren ? (
+          <button
+            onClick={() => row.toggleExpanded()}
+            className="p-0.5 rounded-md hover:bg-muted transition-colors text-muted-foreground shrink-0"
+          >
+            {row.getIsExpanded()
+              ? <ChevronDown className="w-3.5 h-3.5" />
+              : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+        ) : (
+          <div className="w-5 shrink-0" />
+        )
+      },
+      size: 40,
+    },
+    {
+      id: "title",
+      header: "Menu",
+      cell: ({ row }) => {
+        const menu = row.original
+        const { icon: IconComponent, color } = getMenuIcon(menu.type)
+        const hasChildren = menu.children && menu.children.length > 0
+        const depth = row.depth || 0
+        
+        return (
+          <div className={cn("flex items-center gap-2.5", depth > 0 && "pl-6 border-l border-border/50 ml-2")}>
+            <IconComponent className={cn("w-4 h-4 shrink-0", color)} />
+            <div className="flex flex-col min-w-0">
+              <span className={cn(
+                "text-sm leading-snug truncate",
+                depth > 0 ? "text-muted-foreground" : "font-semibold text-foreground"
+              )}>
+                {menu.title}
+              </span>
+              <span className="text-[11px] text-muted-foreground font-mono truncate">
+                /{menu.slug}
+                {hasChildren && (
+                  <span className="not-italic font-sans ml-1 text-muted-foreground/50">· {menu.children?.length} submenu</span>
+                )}
+              </span>
+            </div>
+          </div>
+        )
+      },
+    },
+    {
+      id: "type",
+      header: "Tipe",
+      cell: ({ row }) => {
+        const menu = row.original
+        return (
+          <span className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+            typeBadgeStyle[menu.type ?? ""] ?? "bg-muted text-muted-foreground"
+          )}>
+            {getTypeLabel(menu.type)}
+          </span>
+        )
+      },
+    },
+    {
+      id: "order",
+      header: "Urutan",
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums text-muted-foreground">{row.original.order}</span>
+      ),
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const menu = row.original
+        const isActive = menu.status === 1
+        return (
+          <span className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+            isActive
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              : "bg-muted text-muted-foreground"
+          )}>
+            {isActive ? "Aktif" : "Nonaktif"}
+          </span>
+        )
+      },
+    },
+    {
+      id: "actions",
+      header: "Aksi",
+      cell: ({ row }) => {
+        const menu = row.original
+        const isActive = menu.status === 1
+        return (
+          <div className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                <DropdownMenuItem asChild className="gap-2 cursor-pointer rounded-lg">
+                  <Link href={`/admin/menus/${menu.id}`}>
+                    <Pencil className="h-3.5 w-3.5" /> Edit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleToggleStatus(menu.id)} className="gap-2 cursor-pointer rounded-lg">
+                  {isActive
+                    ? <><EyeOff className="h-3.5 w-3.5" /> Nonaktifkan</>
+                    : <><Eye className="h-3.5 w-3.5" /> Aktifkan</>
+                  }
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <ConfirmDialog
+                  title="Hapus Menu?"
+                  description={`"${menu.title}" akan dihapus secara permanen.`}
+                  onConfirm={() => handleDelete(menu.id)}
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Hapus
+                    </DropdownMenuItem>
+                  }
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )
+      },
+    },
+  ], [])
+
   return (
     <div className="space-y-4">
       {/* Filter row */}
@@ -122,165 +283,43 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Bulk action section */}
+      {selectedRows.length > 0 && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+          <span className="text-sm text-red-700 dark:text-red-400 flex-1">
+            {selectedRows.length} menu dipilih
+          </span>
+          <ConfirmDialog
+            open={showBulkDeleteDialog}
+            onOpenChange={setShowBulkDeleteDialog}
+            title="Hapus Menu Terpilih?"
+            description={`${selectedRows.length} menu akan dihapus secara permanen termasuk sub-menuny. Tindakan ini tidak dapat dibatalkan.`}
+            onConfirm={handleBulkDelete}
+            confirmText="Hapus"
+            isLoading={isBulkDeleting}
+            trigger={
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setShowBulkDeleteDialog(true)}
+              >
+                Hapus Terpilih
+              </Button>
+            }
+          />
+        </div>
+      )}
+
+      {/* DataTable */}
       <div className="rounded-xl border border-border/60 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Menu</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipe</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Urutan</TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {parentMenus.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-sm text-muted-foreground">
-                  Tidak ada menu yang cocok dengan filter.
-                </TableCell>
-              </TableRow>
-            ) : (
-              parentMenus.map((menu) => (
-                <React.Fragment key={menu.id}>
-                  <MenuRow
-                    menu={menu}
-                    depth={0}
-                    isExpanded={expandedIds.has(menu.id)}
-                    onToggleExpand={() => toggleExpand(menu.id)}
-                    onDelete={handleDelete}
-                    onToggleStatus={handleToggleStatus}
-                  />
-                  {expandedIds.has(menu.id) && menu.children?.map((child) => (
-                    <MenuRow
-                      key={child.id}
-                      menu={child}
-                      depth={1}
-                      isExpanded={false}
-                      onToggleExpand={() => { }}
-                      onDelete={handleDelete}
-                      onToggleStatus={handleToggleStatus}
-                    />
-                  ))}
-                </React.Fragment>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <DataTable
+          columns={columns}
+          data={parentMenus}
+          hidePagination={true}
+          enableRowSelection={true}
+          onRowSelectionChange={setSelectedRows}
+        />
       </div>
     </div>
-  )
-}
-
-function MenuRow({
-  menu, depth, isExpanded, onToggleExpand, onDelete, onToggleStatus
-}: {
-  menu: Menu
-  depth: number
-  isExpanded: boolean
-  onToggleExpand: () => void
-  onDelete: (id: string) => void
-  onToggleStatus: (id: string) => void
-}) {
-  const hasChildren = menu.children && menu.children.length > 0
-  const { icon: IconComponent, color } = getMenuIcon(menu.type)
-  const isActive = menu.status === 1
-
-  return (
-    <TableRow className={cn("group", depth > 0 && "bg-muted/20")}>
-      <TableCell>
-        <div className={cn("flex items-center gap-2.5", depth > 0 && "pl-6 border-l border-border/50 ml-2")}>
-          {hasChildren ? (
-            <button
-              onClick={onToggleExpand}
-              className="p-0.5 rounded-md hover:bg-muted transition-colors text-muted-foreground shrink-0"
-            >
-              {isExpanded
-                ? <ChevronDown className="w-3.5 h-3.5" />
-                : <ChevronRight className="w-3.5 h-3.5" />}
-            </button>
-          ) : (
-            <div className="w-5 shrink-0" />
-          )}
-          <IconComponent className={cn("w-4 h-4 shrink-0", color)} />
-          <div className="flex flex-col min-w-0">
-            <span className={cn(
-              "text-sm leading-snug truncate",
-              depth > 0 ? "text-muted-foreground" : "font-semibold text-foreground"
-            )}>
-              {menu.title}
-            </span>
-            <span className="text-[11px] text-muted-foreground font-mono truncate">
-              /{menu.slug}
-              {hasChildren && (
-                <span className="not-italic font-sans ml-1 text-muted-foreground/50">· {menu.children?.length} submenu</span>
-              )}
-            </span>
-          </div>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <span className={cn(
-          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-          typeBadgeStyle[menu.type ?? ""] ?? "bg-muted text-muted-foreground"
-        )}>
-          {getTypeLabel(menu.type)}
-        </span>
-      </TableCell>
-
-      <TableCell>
-        <span className="text-sm tabular-nums text-muted-foreground">{menu.order}</span>
-      </TableCell>
-
-      <TableCell>
-        <span className={cn(
-          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-          isActive
-            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-            : "bg-muted text-muted-foreground"
-        )}>
-          {isActive ? "Aktif" : "Nonaktif"}
-        </span>
-      </TableCell>
-
-      <TableCell className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 rounded-xl">
-            <DropdownMenuItem asChild className="gap-2 cursor-pointer rounded-lg">
-              <Link href={`/admin/menus/${menu.id}`}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onToggleStatus(menu.id)} className="gap-2 cursor-pointer rounded-lg">
-              {isActive
-                ? <><EyeOff className="h-3.5 w-3.5" /> Nonaktifkan</>
-                : <><Eye className="h-3.5 w-3.5" /> Aktifkan</>
-              }
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <ConfirmDialog
-              title="Hapus Menu?"
-              description={`"${menu.title}" akan dihapus secara permanen.`}
-              onConfirm={() => onDelete(menu.id)}
-              trigger={
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Hapus
-                </DropdownMenuItem>
-              }
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
   )
 }

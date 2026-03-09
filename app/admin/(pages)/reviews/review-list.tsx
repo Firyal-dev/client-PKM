@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { User, Eye, EyeOff, Search, X, Filter, SlidersHorizontal } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -14,11 +13,18 @@ import { toast } from "sonner"
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { ColumnDef } from "@tanstack/react-table"
+import { DataTable } from "@/components/ui/data-table"
 
 export function ReviewList({ reviews }: { reviews: Reviews[] }) {
     const [globalFilter, setGlobalFilter] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("all")
     const [publishFilter, setPublishFilter] = useState("all")
+    const [selectedRows, setSelectedRows] = useState<Reviews[]>([])
+    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
 
     const filteredReviews = useMemo(() => {
         let result = [...reviews]
@@ -37,6 +43,104 @@ export function ReviewList({ reviews }: { reviews: Reviews[] }) {
 
     const hasFilter = !!globalFilter || categoryFilter !== "all" || publishFilter !== "all"
     const categories = useMemo(() => [...new Set(reviews.map(r => r.category).filter(Boolean))], [reviews])
+
+    const columns: ColumnDef<Reviews>[] = useMemo(() => [
+        {
+            accessorKey: "username",
+            header: "Pengirim",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="font-semibold text-sm text-foreground">
+                        {row.getValue("username") || "Anonymous"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "category",
+            header: "Kategori",
+            cell: ({ row }) => (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-muted text-muted-foreground capitalize">
+                    {row.getValue("category") || "—"}
+                </span>
+            ),
+        },
+        {
+            accessorKey: "message",
+            header: "Pesan",
+            cell: ({ row }) => (
+                <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3 max-w-[380px]">
+                    {row.getValue("message")}
+                </p>
+            ),
+        },
+        {
+            id: "dateTime",
+            header: "Tanggal",
+            cell: ({ row }) => {
+                const item = row.original
+                const date = new Date(item.created_at)
+                const dateStr = isValid(date) ? format(date, "d MMM yyyy", { locale: id }) : "—"
+                const timeStr = isValid(date) ? format(date, "HH:mm", { locale: id }) : ""
+                return (
+                    <div className="flex flex-col">
+                        <span className="text-xs text-foreground/70">{dateStr}</span>
+                        <span className="text-[11px] text-muted-foreground/60">{timeStr}</span>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: "is_publish",
+            header: "Status",
+            cell: ({ row }) => (
+                <span className={cn(
+                    "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                    row.getValue("is_publish")
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-muted text-muted-foreground"
+                )}>
+                    {row.getValue("is_publish") ? "Ditampilkan" : "Disembunyikan"}
+                </span>
+            ),
+        },
+        {
+            id: "actions",
+            header: "Aksi",
+            cell: ({ row }) => {
+                const item = row.original
+                const handleUpdateStatus = (id: string, currentStatus: boolean) => {
+                    startTransition(async () => {
+                        const result = await toggleReviewPublishAction(id, !currentStatus)
+                        if (result?.success) {
+                            toast.success(`Ulasan ${!currentStatus ? 'ditampilkan' : 'disembunyikan'}`)
+                            router.refresh()
+                        } else {
+                            toast.error(result.error || "Gagal mengubah status")
+                        }
+                    })
+                }
+                return (
+                    <div className="text-right">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            disabled={isPending}
+                            title={item.is_publish ? "Sembunyikan" : "Tampilkan"}
+                            onClick={() => handleUpdateStatus(item.id, item.is_publish)}
+                        >
+                            {item.is_publish
+                                ? <EyeOff className="h-3.5 w-3.5" />
+                                : <Eye className="h-3.5 w-3.5" />
+                            }
+                        </Button>
+                    </div>
+                )
+            },
+        },
+    ], [isPending, router])
 
     const handleReset = () => {
         setGlobalFilter("")
@@ -100,120 +204,56 @@ export function ReviewList({ reviews }: { reviews: Reviews[] }) {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Bulk action section */}
+            {selectedRows.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
+                        {selectedRows.length} ulasan dipilih
+                    </span>
+                    <ConfirmDialog
+                        open={showBulkDeleteDialog}
+                        onOpenChange={setShowBulkDeleteDialog}
+                        title="Hapus Ulasan Terpilih?"
+                        description={`${selectedRows.length} ulasan akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+                        onConfirm={async () => {
+                            setIsBulkDeleting(true)
+                            try {
+                                await Promise.all(selectedRows.map(review => toggleReviewPublishAction(review.id, false)))
+                                toast.success(`${selectedRows.length} ulasan berhasil dihapus`)
+                                setShowBulkDeleteDialog(false)
+                                setSelectedRows([])
+                                router.refresh()
+                            } catch (error) {
+                                toast.error("Gagal menghapus beberapa ulasan")
+                            } finally {
+                                setIsBulkDeleting(false)
+                            }
+                        }}
+                        confirmText="Hapus"
+                        isLoading={isBulkDeleting}
+                        trigger={
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setShowBulkDeleteDialog(true)}
+                            >
+                                Hapus Terpilih
+                            </Button>
+                        }
+                    />
+                </div>
+            )}
+
+            {/* DataTable */}
             <div className="rounded-xl border border-border/60 overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        <TableRow className="bg-muted/40 hover:bg-muted/40">
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pengirim</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Kategori</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pesan</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tanggal</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                            <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Aksi</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredReviews.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center py-12 text-sm text-muted-foreground">
-                                    Tidak ada ulasan yang cocok dengan filter.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filteredReviews.map((item) => (
-                                <ReviewRow key={item.id} item={item} />
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                <DataTable
+                    columns={columns}
+                    data={filteredReviews}
+                    hidePagination={false}
+                    enableRowSelection={true}
+                    onRowSelectionChange={setSelectedRows}
+                />
             </div>
         </div>
-    )
-}
-
-function ReviewRow({ item }: { item: Reviews }) {
-    const [isPending, startTransition] = useTransition()
-    const router = useRouter()
-
-    const handleUpdateStatus = (id: string, currentStatus: boolean) => {
-        startTransition(async () => {
-            const result = await toggleReviewPublishAction(id, !currentStatus)
-            if (result?.success) {
-                toast.success(`Ulasan ${!currentStatus ? 'ditampilkan' : 'disembunyikan'}`)
-                router.refresh()
-            } else {
-                toast.error(result.error || "Gagal mengubah status")
-            }
-        })
-    }
-
-    const date = new Date(item.created_at)
-    const dateStr = isValid(date) ? format(date, "d MMM yyyy", { locale: id }) : "—"
-    const timeStr = isValid(date) ? format(date, "HH:mm", { locale: id }) : ""
-
-    return (
-        <TableRow className="group">
-            {/* Pengirim */}
-            <TableCell>
-                <div className="flex items-center gap-2">
-                    <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-semibold text-sm text-foreground">
-                        {item.username || "Anonymous"}
-                    </span>
-                </div>
-            </TableCell>
-
-            {/* Kategori */}
-            <TableCell>
-                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-muted text-muted-foreground capitalize">
-                    {item.category || "—"}
-                </span>
-            </TableCell>
-
-            {/* Pesan */}
-            <TableCell className="max-w-[380px]">
-                <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3">
-                    {item.message}
-                </p>
-            </TableCell>
-
-            {/* Tanggal */}
-            <TableCell>
-                <div className="flex flex-col">
-                    <span className="text-xs text-foreground/70">{dateStr}</span>
-                    <span className="text-[11px] text-muted-foreground/60">{timeStr}</span>
-                </div>
-            </TableCell>
-
-            {/* Status */}
-            <TableCell>
-                <span className={cn(
-                    "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                    item.is_publish
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-muted text-muted-foreground"
-                )}>
-                    {item.is_publish ? "Ditampilkan" : "Disembunyikan"}
-                </span>
-            </TableCell>
-
-            {/* Aksi */}
-            <TableCell className="text-right">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                    disabled={isPending}
-                    title={item.is_publish ? "Sembunyikan" : "Tampilkan"}
-                    onClick={() => handleUpdateStatus(item.id, item.is_publish)}
-                >
-                    {item.is_publish
-                        ? <EyeOff className="h-3.5 w-3.5" />
-                        : <Eye className="h-3.5 w-3.5" />
-                    }
-                </Button>
-            </TableCell>
-        </TableRow>
     )
 }
