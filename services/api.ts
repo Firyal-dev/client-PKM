@@ -32,7 +32,30 @@ function getTenantHeaders(): Record<string, string> {
 
 // Error handler for API responses
 async function handleApiError(response: Response): Promise<string> {
-    const msg = (await response.json())?.message || "Terjadi kesalahan"
+    let msg = "Terjadi kesalahan";
+
+    try {
+        // Get response body as text first
+        const bodyText = await response.text();
+
+        // Check if body is empty or null - use trimmed comparison for robustness
+        const trimmedBody = bodyText?.trim();
+        if (!bodyText || trimmedBody === 'null' || trimmedBody === '') {
+            msg = response.statusText || `HTTP Error: ${response.status}`;
+        } else {
+            // Try to parse as JSON
+            try {
+                const json = JSON.parse(bodyText);
+                msg = json?.message || msg;
+            } catch {
+                // If not valid JSON, use the text as message
+                msg = bodyText || msg;
+            }
+        }
+    } catch (e) {
+        // If we can't read the body at all
+        msg = `HTTP Error: ${response.status}`;
+    }
 
     if (typeof window !== 'undefined') {
         if (response.status === 401) {
@@ -73,7 +96,13 @@ const api = {
             throw new Error(errorMsg)
         }
 
-        const data = await response.json() as T
+        // Handle empty response
+        const text = await response.text()
+        if (!text || text === 'null' || text.trim() === 'null' || text === '') {
+            return { data: null as unknown as T }
+        }
+
+        const data = JSON.parse(text) as T
         return { data }
     },
 
@@ -100,11 +129,18 @@ const api = {
             })
         }
 
+        // Handle null/undefined data - don't send as JSON string "null", send empty body instead
+        let body: string | FormData | undefined;
+        if (data !== null && data !== undefined) {
+            body = isFormData ? data as FormData : JSON.stringify(data);
+        }
+        // If data is null or undefined, don't set body (will be sent as empty)
+
         const response = await fetch(`${baseURL}${url}`, {
             method: 'POST',
             credentials: 'include',
             headers,
-            body: isFormData ? data as FormData : JSON.stringify(data),
+            body,
         })
 
         if (!response.ok) {
@@ -112,7 +148,15 @@ const api = {
             throw new Error(errorMsg)
         }
 
-        const result = await response.json() as T
+        // Handle empty or null response
+        const text = await response.text()
+
+        // More robust null/empty check
+        if (!text || text === 'null' || text.trim() === 'null' || text === '') {
+            return { data: null as unknown as T }
+        }
+
+        const result = JSON.parse(text) as T
         return { data: result }
     },
 
@@ -151,7 +195,13 @@ const api = {
             throw new Error(errorMsg)
         }
 
-        const result = await response.json() as T
+        // Handle empty response
+        const patchText = await response.text()
+        if (!patchText || patchText === 'null' || patchText.trim() === 'null' || patchText === '') {
+            return { data: null as unknown as T }
+        }
+
+        const result = JSON.parse(patchText) as T
         return { data: result }
     },
 
@@ -182,7 +232,13 @@ const api = {
             throw new Error(errorMsg)
         }
 
-        const result = await response.json() as T
+        // Handle empty response
+        const deleteText = await response.text()
+        if (!deleteText || deleteText === 'null' || deleteText.trim() === 'null' || deleteText === '') {
+            return { data: null as unknown as T }
+        }
+
+        const result = JSON.parse(deleteText) as T
         return { data: result }
     },
 }

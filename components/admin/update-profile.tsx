@@ -56,7 +56,7 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
         <Sheet open={open} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
                 <SidebarMenuButton size="lg" className="cursor-pointer" tooltip="Edit Profil">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                         <Image src={photoSrc} width={100} height={100} className="w-full h-full object-cover rounded-full" alt="Profil" unoptimized />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">

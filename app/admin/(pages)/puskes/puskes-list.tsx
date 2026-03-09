@@ -1,30 +1,52 @@
 'use client'
 
-import { useTransition } from "react"
+import { useState, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Edit, Trash2, Loader2, Building2, MapPin, Eye, EyeOff } from "lucide-react"
+import { Edit, Trash2, Building2, MapPin, Search, X, SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
+import { ColumnDef } from "@tanstack/react-table"
 
-import { Puskesmas } from "@/services/puskesmas/puskesmas-service"
-import { deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
+import { Puskesmas, deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
-import { cn } from "@/lib/utils"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { DataTable } from "@/components/ui/data-table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 
-export function PuskesmasList({ puskesmas }: { puskesmas: Puskesmas[] }) {
-    const [isPending, startTransition] = useTransition()
+export function PuskesmasList({ 
+    puskesmas, 
+    total 
+}: { 
+    puskesmas: Puskesmas[]
+    total: number
+}) {
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
-    const handleDelete = (id: string) =>
-        startTransition(async () => {
-            const res = await deletePuskesmasAction(id)
-            res.success
-                ? toast.success("Puskesmas berhasil dihapus")
-                : toast.error(res.error || "Gagal menghapus puskesmas")
-        })
+    const [data] = useState<Puskesmas[]>(puskesmas)
+    const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
+    const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
+    const [selectedRows, setSelectedRows] = useState<Puskesmas[]>([])
+    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+
+    const filteredData = useMemo(() => {
+        let result = [...data]
+        if (globalFilter) {
+            const search = globalFilter.toLowerCase()
+            result = result.filter(p => p.name.toLowerCase().includes(search) || p.slug.toLowerCase().includes(search))
+        }
+        if (statusFilter !== "all") {
+            result = result.filter(p => p.status === statusFilter)
+        }
+        return result
+    }, [data, globalFilter, statusFilter])
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -32,102 +54,230 @@ export function PuskesmasList({ puskesmas }: { puskesmas: Puskesmas[] }) {
                 return <Badge className="bg-green-500">Aktif</Badge>
             case 'INACTIVE':
                 return <Badge variant="secondary">Tidak Aktif</Badge>
-            case 'SUSPENDED':
-                return <Badge variant="destructive">Ditangguhkan</Badge>
             default:
                 return <Badge>{status}</Badge>
         }
     }
 
-    return (
-        <div className="space-y-3">
-            {puskesmas.map((p) => (
-                <div
-                    key={p.id}
-                    className={cn(
-                        "group relative overflow-hidden rounded-lg border transition-all duration-200",
-                        "bg-white dark:bg-slate-900",
-                        "border-slate-200 dark:border-slate-800",
-                        "hover:shadow-md dark:hover:shadow-slate-900/50"
-                    )}
-                >
-                    <div className="flex flex-col sm:flex-row gap-3 p-3">
-                        {/* Logo */}
-                        <div className="relative aspect-square w-24 h-24 shrink-0 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+    const columns: ColumnDef<Puskesmas>[] = useMemo(() => [
+        {
+            id: "index",
+            header: "#",
+            cell: ({ row }) => (
+                <span className="text-xs tabular-nums text-muted-foreground">{row.index + 1}</span>
+            ),
+            size: 40,
+        },
+        {
+            id: "name",
+            accessorKey: "name",
+            header: "Nama Puskesmas",
+            cell: ({ row }) => {
+                const p = row.original
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="relative w-8 h-8 rounded overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
                             {p.logo_path ? (
                                 <Image
                                     src={getMediaUrl(p.logo_path) || "/placeholder.jpg"}
                                     alt={p.name}
                                     fill
                                     unoptimized
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    className="object-cover"
                                 />
                             ) : (
-                                <Building2 className="w-10 h-10 text-slate-400" />
+                                <Building2 className="w-4 h-4 text-slate-400" />
                             )}
                         </div>
-
-                        {/* Content */}
-                        <div className="flex flex-1 flex-col justify-between min-w-0">
-                            <div className="flex-1">
-                                {/* Name */}
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className="text-lg font-medium text-slate-700 dark:text-slate-200">
-                                        {p.name}
-                                    </p>
-                                    {getStatusBadge(p.status)}
-                                </div>
-
-                                {/* Slug */}
-                                <p className="text-sm text-primary font-medium mb-1">
-                                    {p.slug}
-                                </p>
-
-                                {/* Address */}
-                                <div className="flex items-start gap-1 text-sm text-slate-500 dark:text-slate-400">
-                                    <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                                    <span className="line-clamp-2">
-                                        {p.alamat || "Alamat belum diatur"}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center justify-end gap-1.5 mt-3">
-                                <Button
-                                    asChild
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 px-2.5 gap-1.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
-                                >
-                                    <Link href={`/admin/puskes/${p.id}`}>
-                                        <Edit className="h-3.5 w-3.5" />
-                                        <span className="hidden sm:inline">Edit</span>
-                                    </Link>
-                                </Button>
-
-                                <ConfirmDialog
-                                    trigger={
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="h-8 px-2.5 gap-1.5 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                            <span className="hidden sm:inline">Hapus</span>
-                                        </Button>
-                                    }
-                                    title="Hapus Puskesmas?"
-                                    description={`Puskesmas "${p.name}" akan dihapus secara permanen.`}
-                                    confirmText="Hapus"
-                                    isLoading={isPending}
-                                    onConfirm={() => handleDelete(p.id)}
-                                />
-                            </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{p.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{p.slug}</p>
                         </div>
                     </div>
+                )
+            },
+        },
+        {
+            id: "address",
+            accessorKey: "alamat",
+            header: "Alamat",
+            cell: ({ row }) => (
+                <div className="flex items-start gap-1 text-sm text-muted-foreground max-w-xs">
+                    <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <span className="line-clamp-2">{row.original.alamat || "—"}</span>
                 </div>
-            ))}
+            ),
+        },
+        {
+            id: "status",
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => getStatusBadge(row.original.status),
+        },
+        {
+            id: "actions",
+            header: "Aksi",
+            cell: ({ row }) => {
+                const p = row.original
+                return (
+                    <div className="text-right flex items-center justify-end gap-1">
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                        >
+                            <Link href={`/admin/puskes/${p.id}`}>
+                                <Edit className="h-3.5 w-3.5" />
+                            </Link>
+                        </Button>
+
+                        <ConfirmDialog
+                            trigger={
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full text-destructive hover:text-destructive hover:bg-red-50 dark:hover:bg-red-950/30"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                            }
+                            title="Hapus Puskesmas?"
+                            description={`Puskesmas "${p.name}" akan dihapus secara permanen.`}
+                            confirmText="Hapus"
+                            onConfirm={async () => {
+                                try {
+                                    const res = await deletePuskesmasAction(p.id)
+                                    if (res.success) {
+                                        toast.success("Puskesmas berhasil dihapus")
+                                        router.refresh()
+                                    } else {
+                                        toast.error(res.error || "Gagal menghapus puskesmas")
+                                    }
+                                } catch (error) {
+                                    toast.error("Gagal menghapus puskesmas")
+                                }
+                            }}
+                        />
+                    </div>
+                )
+            },
+        },
+    ], [router])
+
+    const handleSearch = (value: string) => {
+        setGlobalFilter(value)
+        const params = new URLSearchParams(searchParams.toString())
+        value ? params.set("search", value) : params.delete("search")
+        router.push(`/admin/puskes?${params.toString()}`)
+    }
+
+    const handleStatusFilter = (value: string) => {
+        setStatusFilter(value)
+        const params = new URLSearchParams(searchParams.toString())
+        value && value !== "all" ? params.set("status", value) : params.delete("status")
+        router.push(`/admin/puskes?${params.toString()}`)
+    }
+
+    const handleReset = () => {
+        setGlobalFilter("")
+        setStatusFilter("all")
+        router.push("/admin/puskes")
+    }
+
+    const hasFilter = statusFilter !== "all" || !!globalFilter
+    const currentStatusFilter = searchParams.get("status") || "all"
+
+    const handleBulkDelete = async () => {
+        setIsBulkDeleting(true)
+        try {
+            await Promise.all(selectedRows.map(p => deletePuskesmasAction(p.id)))
+            toast.success(`${selectedRows.length} puskesmas berhasil dihapus`)
+            setShowBulkDeleteDialog(false)
+            setSelectedRows([])
+            router.refresh()
+        } catch (error) {
+            toast.error("Gagal menghapus beberapa puskesmas")
+        } finally {
+            setIsBulkDeleting(false)
+        }
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Filter row */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2 flex-1 flex-wrap">
+                    <div className="relative flex-1 min-w-[180px] max-w-xs">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <Input
+                            placeholder="Cari nama atau slug..."
+                            value={globalFilter}
+                            onChange={(e) => handleSearch(e.target.value)}
+                            className="pl-8 h-9 rounded-xl text-sm"
+                        />
+                    </div>
+                    <Select value={currentStatusFilter} onValueChange={handleStatusFilter}>
+                        <SelectTrigger className="w-[160px] h-9 rounded-xl border-border/60 text-sm">
+                            <div className="flex items-center gap-2">
+                                <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
+                                <SelectValue placeholder="Semua Status" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                            <SelectItem value="all">Semua Status</SelectItem>
+                            <SelectItem value="ACTIVE">Aktif</SelectItem>
+                            <SelectItem value="INACTIVE">Tidak Aktif</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {hasFilter && (
+                        <Button variant="ghost" size="sm" onClick={handleReset} className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1">
+                            <X className="w-3.5 h-3.5" /> Reset
+                        </Button>
+                    )}
+                </div>
+                <div className="text-xs text-muted-foreground bg-muted/50 border border-border/50 px-3 py-1.5 rounded-full font-medium shrink-0">
+                    {total} puskesmas
+                </div>
+            </div>
+
+            {/* Bulk delete section */}
+            {selectedRows.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
+                        {selectedRows.length} puskesmas dipilih
+                    </span>
+                    <ConfirmDialog
+                        open={showBulkDeleteDialog}
+                        onOpenChange={setShowBulkDeleteDialog}
+                        title="Hapus Puskesmas Terpilih?"
+                        description={`${selectedRows.length} puskesmas akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+                        onConfirm={handleBulkDelete}
+                        confirmText="Hapus"
+                        isLoading={isBulkDeleting}
+                        trigger={
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setShowBulkDeleteDialog(true)}
+                            >
+                                Hapus Terpilih
+                            </Button>
+                        }
+                    />
+                </div>
+            )}
+
+            {/* DataTable */}
+            <div className="rounded-xl border border-border/60 overflow-hidden">
+                <DataTable
+                    columns={columns}
+                    data={filteredData}
+                    hidePagination={true}
+                    enableRowSelection={true}
+                    onRowSelectionChange={setSelectedRows}
+                />
+            </div>
         </div>
     )
 }
