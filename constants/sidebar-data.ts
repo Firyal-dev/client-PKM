@@ -135,7 +135,7 @@ export const sidebarData = {
                 },
                 {
                     title: "Log Aktivitas",
-                    url: "/admin/activities-log",
+                    url: "/admin/activity-logs",
                     icon: ClipboardClock,
                 }
             ]
