@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header"
 import { getAdmins } from "@/services/admin/admin-data-service"
+import { getAdminProfile } from "@/services/admin/admin-service"
 import AdminDataList from "./admin-data-list"
 import { CreateAdminDialog } from "./create-admin-dialog"
 import { cn } from "@/lib/utils"
@@ -13,6 +14,7 @@ export default async function AdminDataPage({ searchParams }: { searchParams: Pr
     const offset = (page - 1) * limit
 
     const { data: initialData, total } = await getAdmins(params.search, params.role, limit, offset)
+    const currentAdmin = await getAdminProfile()
     const isEmpty = initialData.length === 0 && !params.search && !params.role
     const totalPages = Math.ceil(total / limit)
 
@@ -44,7 +46,7 @@ export default async function AdminDataPage({ searchParams }: { searchParams: Pr
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <AdminDataList initialData={initialData} total={total} currentPage={page} totalPages={totalPages} />
+                    <AdminDataList initialData={initialData} total={total} currentPage={page} totalPages={totalPages} currentAdmin={currentAdmin} />
                 )}
             </div>
         </div>

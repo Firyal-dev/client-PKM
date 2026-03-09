@@ -5,17 +5,14 @@ import { usePathname } from 'next/navigation'
 import { Menu } from '@/services/menu/menu-service'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState, useRef } from 'react'
+import { cn } from '@/lib/utils'
 
 interface ListMenuProps {
     menus: Menu[]
 }
 
-// ── Helper buat ngecek id parent ──
-const getParentId = (menu: Menu): string | null => {
-    return menu.parent_id ?? menu.parent?.id ?? null
-}
+const getParentId = (menu: Menu): string | null => menu.parent_id ?? menu.parent?.id ?? null
 
-// ── Helper buat nyari anak-anak dari sebuah menu ──
 const getChildren = (menu: Menu, allMenus: Menu[]) => {
     return (menu.children && menu.children.length > 0)
         ? menu.children.filter(sub => sub.status === 1).sort((a, b) => a.order - b.order)
@@ -24,8 +21,12 @@ const getChildren = (menu: Menu, allMenus: Menu[]) => {
             .sort((a, b) => a.order - b.order)
 }
 
-// ── KOMPONEN RECURSIVE ──
-const MenuItem = ({ menu, allMenus, level = 0, pathname }: { menu: Menu, allMenus: Menu[], level?: number, pathname: string }) => {
+const MenuItem = ({ menu, allMenus, level = 0, pathname }: {
+    menu: Menu
+    allMenus: Menu[]
+    level?: number
+    pathname: string
+}) => {
     const children = getChildren(menu, allMenus)
     const hasChildren = children.length > 0
     const menuHref = `/${menu.slug}`
@@ -38,62 +39,37 @@ const MenuItem = ({ menu, allMenus, level = 0, pathname }: { menu: Menu, allMenu
     const handleMouseEnter = () => {
         if (liRef.current) {
             const rect = liRef.current.getBoundingClientRect()
-            const dropdownWidth = 250
-            if (level === 0) {
-                setIsNearRightEdge(rect.left + dropdownWidth > window.innerWidth)
-            } else {
-                setIsNearRightEdge(rect.right + dropdownWidth > window.innerWidth)
-            }
+            const dropdownWidth = 220
+            setIsNearRightEdge(
+                level === 0
+                    ? rect.left + dropdownWidth > window.innerWidth
+                    : rect.right + dropdownWidth > window.innerWidth
+            )
         }
         setIsOpen(true)
     }
 
-    const handleMouseLeave = () => {
-        setIsOpen(false)
-    }
-
-    // Base dropdown styles
-    const baseDropdown = `absolute transition-all duration-300 z-50 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 flex flex-col py-1 list-none m-0`
-
-    // Visibility
-    const visibilityClasses = isOpen
-        ? 'opacity-100 pointer-events-auto'
-        : 'opacity-0 pointer-events-none'
-
-    // Direction + animation
-    let positionClasses = ''
-    if (level === 0) {
-        const slideClass = isOpen ? 'translate-y-0' : 'translate-y-2'
-        positionClasses = `top-full pt-4 ${slideClass} ${isNearRightEdge ? 'right-0' : 'left-0'}`
-    } else {
-        const slideClass = isOpen
-            ? 'translate-x-0'
-            : isNearRightEdge ? 'translate-x-2' : '-translate-x-2'
-        positionClasses = `top-0 ${slideClass} ${isNearRightEdge ? 'right-full pr-2' : 'left-full pl-2'}`
-    }
-
-    // Kalau TIDAK punya anak (Leaf Node)
+    // Leaf node
     if (!hasChildren) {
         if (level === 0) {
             return (
                 <li>
-                    <NavLink href={menuHref} active={pathname === menuHref}>
+                    <NavLink href={menuHref} active={isActive}>
                         {menu.title}
                     </NavLink>
                 </li>
             )
         }
         return (
-            <li className="w-full relative">
+            <li>
                 <Link
                     href={menuHref}
-                    className={`
-                        block px-5 py-2.5 text-sm transition-colors text-left
-                        ${pathname === menuHref
-                            ? 'bg-blue-50/50 text-blue-600 dark:bg-slate-700/50 dark:text-blue-400 font-medium'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400'
-                        }
-                    `}
+                    className={cn(
+                        "block px-4 py-2.5 text-sm transition-colors rounded-lg mx-1",
+                        isActive
+                            ? "bg-primary/8 text-primary font-medium"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
                 >
                     {menu.title}
                 </Link>
@@ -101,42 +77,76 @@ const MenuItem = ({ menu, allMenus, level = 0, pathname }: { menu: Menu, allMenu
         )
     }
 
-    // Kalau PUNYA anak (Dropdown)
+    // Dropdown
+    const dropdownBase = cn(
+        "absolute z-50 w-52 bg-white rounded-xl shadow-lg shadow-slate-200/80",
+        "border border-slate-100 py-1.5 list-none m-0",
+        "transition-all duration-200",
+        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+    )
+
+    const dropdownPosition = level === 0
+        ? cn(
+            "top-full pt-3",
+            isOpen ? "translate-y-0" : "translate-y-1",
+            isNearRightEdge ? "right-0" : "left-0"
+        )
+        : cn(
+            "top-0",
+            isOpen
+                ? "translate-x-0"
+                : isNearRightEdge ? "translate-x-1" : "-translate-x-1",
+            isNearRightEdge ? "right-full pr-2" : "left-full pl-2"
+        )
+
     return (
         <li
             ref={liRef}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className={`relative ${level === 0 ? 'py-2' : 'w-full'}`}
+            onMouseLeave={() => setIsOpen(false)}
+            className={cn("relative", level === 0 ? "py-2" : "w-full")}
         >
+            {/* Trigger */}
             <button
-                className={
+                className={cn(
+                    "flex items-center gap-1 text-sm font-semibold transition-colors cursor-default",
                     level === 0
-                        ? `text-sm font-semibold tracking-wide transition-colors flex items-center gap-1 cursor-default ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400'}`
-                        : `w-full flex items-center justify-between px-5 py-2.5 text-sm transition-colors cursor-default text-left ${isActive ? 'bg-blue-50/50 text-blue-600 dark:bg-slate-700/50 dark:text-blue-400 font-medium' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400'}`
-                }
+                        ? isActive
+                            ? "text-primary"
+                            : "text-slate-700 hover:text-primary"
+                        : cn(
+                            "w-full justify-between px-4 py-2.5 rounded-lg mx-1",
+                            isActive
+                                ? "bg-primary/8 text-primary"
+                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        )
+                )}
             >
                 {menu.title}
-                {level === 0 ? (
-                    <ChevronDown className="w-3.5 h-3.5 opacity-70" strokeWidth={3} />
-                ) : (
-                    isNearRightEdge ? (
-                        <ChevronDown className="w-3.5 h-3.5 opacity-70 rotate-90" strokeWidth={3} />
-                    ) : (
-                        <ChevronRight className="w-3.5 h-3.5 opacity-70" strokeWidth={3} />
-                    )
-                )}
+                {level === 0
+                    ? <ChevronDown className={cn("w-3.5 h-3.5 opacity-60 transition-transform duration-200", isOpen && "rotate-180")} strokeWidth={2.5} />
+                    : isNearRightEdge
+                        ? <ChevronRight className="w-3.5 h-3.5 opacity-60 rotate-180" strokeWidth={2.5} />
+                        : <ChevronRight className="w-3.5 h-3.5 opacity-60" strokeWidth={2.5} />
+                }
             </button>
 
-            <ul className={`${baseDropdown} ${positionClasses} ${visibilityClasses}`}>
+            {/* Dropdown list */}
+            <ul className={cn(dropdownBase, dropdownPosition)}>
                 {children.map((child) => (
-                    <MenuItem key={child.id} menu={child} allMenus={allMenus} level={level + 1} pathname={pathname} />
+                    <MenuItem
+                        key={child.id}
+                        menu={child}
+                        allMenus={allMenus}
+                        level={level + 1}
+                        pathname={pathname}
+                    />
                 ))}
             </ul>
         </li>
     )
 }
-// ── KOMPONEN UTAMA ──
+
 export default function ListMenu({ menus }: ListMenuProps) {
     const pathname = usePathname()
 
@@ -145,23 +155,16 @@ export default function ListMenu({ menus }: ListMenuProps) {
         .sort((a, b) => a.order - b.order)
 
     return (
-        <ul className="flex items-center gap-6 list-none m-0 p-0">
+        <ul className="flex items-center gap-1 list-none m-0 p-0">
             <li>
-                <NavLink href="/" active={pathname === '/'}>
-                    Beranda
-                </NavLink>
+                <NavLink href="/" active={pathname === '/'}>Beranda</NavLink>
             </li>
             <li>
-                <NavLink href="/galeri" active={pathname === '/galeri'}>
-                    Galeri
-                </NavLink>
+                <NavLink href="/galeri" active={pathname === '/galeri'}>Galeri</NavLink>
             </li>
             <li>
-                <NavLink href="/agenda" active={pathname === '/agenda'}>
-                    Agenda
-                </NavLink>
+                <NavLink href="/agenda" active={pathname === '/agenda'}>Agenda</NavLink>
             </li>
-
             {mainMenus.map((menu) => (
                 <MenuItem
                     key={menu.id}
@@ -175,9 +178,23 @@ export default function ListMenu({ menus }: ListMenuProps) {
     )
 }
 
-function NavLink({ href, children, active, className = '' }: { href: string, children: React.ReactNode, active?: boolean, className?: string }) {
+function NavLink({ href, children, active }: {
+    href: string
+    children: React.ReactNode
+    active?: boolean
+}) {
     return (
-        <Link href={href} className={`relative text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-all after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-blue-600 dark:after:bg-blue-400 after:transition-transform hover:after:scale-x-100 ${active ? 'text-blue-600 dark:text-blue-400 after:scale-x-100' : ''} ${className}`}>
+        <Link
+            href={href}
+            className={cn(
+                "relative px-3 py-2 text-sm font-semibold transition-colors rounded-lg block",
+                "after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:rounded-full",
+                "after:origin-left after:transition-transform after:duration-200",
+                active
+                    ? "text-primary after:bg-primary after:scale-x-100"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 after:bg-primary after:scale-x-0 hover:after:scale-x-100"
+            )}
+        >
             {children}
         </Link>
     )

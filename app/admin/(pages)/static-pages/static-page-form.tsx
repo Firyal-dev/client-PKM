@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useState, useRef } from "react"
+import { useActionState, useEffect, useState, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,18 @@ export function StaticPageForm({ action, initialData, menus }: StaticPageFormPro
     const [existingPage, setExistingPage] = useState<{ id: string; title: string; menu_title: string } | null>(null)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [isChecking, setIsChecking] = useState(false)
+
+    // Flatten menus to include both parent and child menus, filter by static type
+    const allMenus = useMemo(() => {
+        const result: Menu[] = [...menus]
+        menus.forEach(menu => {
+            if (menu.children && menu.children.length > 0) {
+                result.push(...menu.children)
+            }
+        })
+        // Filter to only show static type menus
+        return result.filter(menu => menu.type === 'static')
+    }, [menus])
 
     const handleMenuChange = async (menuId: string) => {
         setSelectedMenuId(menuId)
@@ -99,7 +111,7 @@ export function StaticPageForm({ action, initialData, menus }: StaticPageFormPro
                             <SelectValue placeholder="Pilih menu..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {menus.map((menu) => (
+                            {allMenus.map((menu) => (
                                 <SelectItem key={menu.id} value={menu.id}>
                                     {menu.title}
                                 </SelectItem>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { getAdminStaticPageById } from "@/services/static-page/static-page-service"
-import { getAdminMenusByType } from "@/services/menu/menu-service"
+import { getAdminMenusLegacy } from "@/services/menu/menu-service"
 import { PageHeader } from "@/components/admin/page-header"
 import { StaticPageForm } from "../static-page-form"
 import { updateStaticPageAction } from "@/services/static-page/static-page-service"
@@ -15,7 +15,7 @@ export default async function EditStaticPagePage({
 
   const [staticPage, menus] = await Promise.all([
     getAdminStaticPageById(id),
-    getAdminMenusByType('static'),
+    getAdminMenusLegacy(),
   ])
 
   if (!staticPage) {

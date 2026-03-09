@@ -2,14 +2,15 @@
 
 import { useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal, MoreVertical } from "lucide-react"
+import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
 import { format, parseISO } from "date-fns"
 import { id } from "date-fns/locale"
+import { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataTable } from "@/components/ui/data-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
@@ -18,18 +19,20 @@ import { Admin } from "@/types/admin"
 import Image from "next/image"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { EditAdminDialog } from "./create-admin-dialog"
-import { PaginationControl } from "@/components/pagination-control"
+import { cn } from "@/lib/utils"
 
 export default function AdminDataList({
     initialData,
     total,
     currentPage,
-    totalPages
+    totalPages,
+    currentAdmin
 }: {
     initialData: Admin[];
     total: number;
     currentPage: number;
-    totalPages: number
+    totalPages: number;
+    currentAdmin?: { id: string; name: string } | null | undefined;
 }) {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -40,6 +43,11 @@ export default function AdminDataList({
     const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
     const [deleteAdminId, setDeleteAdminId] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [selectedRows, setSelectedRows] = useState<Admin[]>([])
+    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+
+    const currentUserInSelection = selectedRows.find(admin => admin.id === currentAdmin?.id)
 
     const filteredAdmins = useMemo(() => {
         let result = [...admins]
@@ -50,6 +58,93 @@ export default function AdminDataList({
         if (roleFilter !== "all") result = result.filter(a => a.role === roleFilter)
         return result
     }, [admins, globalFilter, roleFilter])
+
+    const columns: ColumnDef<Admin>[] = useMemo(() => [
+        {
+            id: "index",
+            header: "#",
+            cell: ({ row }) => (
+                <span className="text-xs tabular-nums text-muted-foreground">{row.index + 1}</span>
+            ),
+            size: 40,
+        },
+        {
+            accessorKey: "name",
+            header: "Nama",
+            cell: ({ row }) => {
+                const admin = row.original
+                return (
+                    <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted shrink-0 border border-border/50">
+                            <Image
+                                src={admin.photo ? getMediaUrl(admin.photo) || "/userPlaceholder.jpg" : "/userPlaceholder.jpg"}
+                                alt={admin.name}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                            />
+                        </div>
+                        <span className="font-semibold text-sm text-foreground">{admin.name}</span>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: "role",
+            header: "Level",
+            cell: ({ row }) => {
+                const role = row.getValue("role") as string
+                return role === "SUPER_ADMIN" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                        <ShieldCheck className="w-3 h-3" /> Super Admin
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400">
+                        <Shield className="w-3 h-3" /> Operator
+                    </span>
+                )
+            },
+        },
+        {
+            id: "createdAt",
+            accessorKey: "created_at",
+            header: "Tanggal Dibuat",
+            cell: ({ row }) => {
+                const admin = row.original
+                return (
+                    <span className="text-xs text-muted-foreground">
+                        {admin.created_at ? format(parseISO(admin.created_at), 'dd MMM yyyy', { locale: id }) : '—'}
+                    </span>
+                )
+            },
+        },
+        {
+            id: "actions",
+            header: "Aksi",
+            cell: ({ row }) => {
+                const admin = row.original
+                return (
+                    <div className="text-right">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground">
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                                <DropdownMenuItem onClick={() => setEditingAdmin(admin)} className="gap-2 cursor-pointer rounded-lg">
+                                    <Pencil className="h-3.5 w-3.5" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setDeleteAdminId(admin.id)} className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive">
+                                    <Trash2 className="h-3.5 w-3.5" /> Hapus
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )
+            },
+        },
+    ], [])
 
     const handleSearch = (value: string) => {
         setGlobalFilter(value)
@@ -129,91 +224,80 @@ export default function AdminDataList({
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="rounded-xl border border-border/60 overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        <TableRow className="bg-muted/40 hover:bg-muted/40">
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-10">#</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nama</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Level</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tanggal Dibuat</TableHead>
-                            <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Aksi</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredAdmins.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="text-center py-12 text-sm text-muted-foreground">
-                                    Tidak ada admin yang cocok dengan filter.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filteredAdmins.map((admin, index) => (
-                                <TableRow key={admin.id} className="group">
-                                    <TableCell>
-                                        <span className="text-xs tabular-nums text-muted-foreground">{index + 1}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted shrink-0 border border-border/50">
-                                                <Image
-                                                    src={admin.photo ? getMediaUrl(admin.photo) || "/userPlaceholder.jpg" : "/userPlaceholder.jpg"}
-                                                    alt={admin.name}
-                                                    fill
-                                                    className="object-cover"
-                                                    unoptimized
-                                                />
-                                            </div>
-                                            <span className="font-semibold text-sm text-foreground">{admin.name}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {admin.role === "SUPER_ADMIN" ? (
-                                            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                                                <ShieldCheck className="w-3 h-3" /> Super Admin
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400">
-                                                <Shield className="w-3 h-3" /> Operator
-                                            </span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="text-xs text-muted-foreground">
-                                            {admin.created_at ? format(parseISO(admin.created_at), 'dd MMM yyyy', { locale: id }) : '—'}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-40 rounded-xl">
-                                                <DropdownMenuItem onClick={() => setEditingAdmin(admin)} className="gap-2 cursor-pointer rounded-lg">
-                                                    <Pencil className="h-3.5 w-3.5" /> Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => setDeleteAdminId(admin.id)} className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive">
-                                                    <Trash2 className="h-3.5 w-3.5" /> Hapus
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="mt-4 flex justify-center">
-                    <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+            {/* Bulk action section - Current user warning */}
+            {currentUserInSelection && (
+                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg">
+                    <div className="flex-1">
+                        <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                            ⚠️ Akun yang sedang Anda gunakan ({currentUserInSelection.name}) dipilih
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                            Jika akun ini dihapus, Anda akan logout secara otomatis
+                        </p>
+                    </div>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                            setSelectedRows(selectedRows.filter(a => a.id !== currentAdmin?.id))
+                        }}
+                    >
+                        Batalkan Pilihan
+                    </Button>
                 </div>
             )}
+
+            {/* Bulk delete section */}
+            {selectedRows.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
+                        {selectedRows.length} admin dipilih
+                    </span>
+                    <ConfirmDialog
+                        open={showBulkDeleteDialog}
+                        onOpenChange={setShowBulkDeleteDialog}
+                        title="Hapus Admin Terpilih?"
+                        description={`${selectedRows.length} admin akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+                        onConfirm={async () => {
+                            setIsBulkDeleting(true)
+                            try {
+                                await Promise.all(selectedRows.map(admin => deleteAdmin(admin.id)))
+                                toast.success(`${selectedRows.length} admin berhasil dihapus`)
+                                setShowBulkDeleteDialog(false)
+                                setSelectedRows([])
+                                router.refresh()
+                            } catch (error) {
+                                toast.error("Gagal menghapus beberapa admin")
+                            } finally {
+                                setIsBulkDeleting(false)
+                            }
+                        }}
+                        confirmText="Hapus"
+                        isLoading={isBulkDeleting}
+                        trigger={
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setShowBulkDeleteDialog(true)}
+                                disabled={currentUserInSelection !== undefined}
+                            >
+                                Hapus Terpilih
+                            </Button>
+                        }
+                    />
+                </div>
+            )}
+
+            {/* DataTable */}
+            <div className="rounded-xl border border-border/60 overflow-hidden">
+                <DataTable
+                    columns={columns}
+                    data={filteredAdmins}
+                    hidePagination={false}
+                    enableRowSelection={true}
+                    onRowSelectionChange={setSelectedRows}
+                />
+            </div>
 
             <EditAdminDialog
                 admin={editingAdmin as Admin}

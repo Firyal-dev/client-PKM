@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { getAdminPageById, updatePageAction } from "@/services/page/page-service"
-import { getAdminMenusByType } from "@/services/menu/menu-service"
+import { getAdminMenusLegacy } from "@/services/menu/menu-service"
 import { SetBreadcrumb } from "@/components/admin/breadcrumb-context"
 
 export default async function EditPagePage({ params }: { params: { id: string } }) {
@@ -13,7 +13,7 @@ export default async function EditPagePage({ params }: { params: { id: string } 
     const page = await getAdminPageById(id)
     if (!page) return notFound()
 
-    const menus = await getAdminMenusByType('dynamic')
+    const menus = await getAdminMenusLegacy()
 
     return (
         <div className="px-5 pb-10">
