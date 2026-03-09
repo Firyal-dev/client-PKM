@@ -2,12 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
-import { Menu as MenuIcon, MessageSquare, ChevronRight } from "lucide-react"
-
+import { Menu as MenuIcon, ChevronDown, Phone, X, Home, Image as ImageIcon, Calendar, FileText, Layers } from "lucide-react"
 import { Menu as MenuType } from "@/services/menu/menu-service"
 import { cn } from "@/lib/utils"
-
 import {
     Sheet,
     SheetContent,
@@ -18,20 +15,22 @@ import {
 
 interface MobileNavbarProps {
     menus?: MenuType[]
+    webInfo?: {
+        logo?: string | null
+        web_title?: string | null
+        contact?: string | null
+    }
 }
 
-export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
+export default function MobileNavbar({ menus = [], webInfo }: MobileNavbarProps) {
     const [open, setOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+    useEffect(() => { setMounted(true) }, [])
 
-    const getParentId = (menu: MenuType): string | null => {
-        return menu.parent_id ?? menu.parent?.id ?? null
-    }
+    const getParentId = (menu: MenuType): string | null =>
+        menu.parent_id ?? menu.parent?.id ?? null
 
     const mainMenus = menus
         .filter(menu => getParentId(menu) === null && menu.status === 1)
@@ -40,115 +39,109 @@ export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
     const toggleMenu = (id: string, e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        setExpandedMenus(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }))
+        setExpandedMenus(prev => ({ ...prev, [id]: !prev[id] }))
     }
 
-    if (!mounted) {
-        return (
-            <button className="lg:hidden p-2 rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-colors dark:bg-primary/20 dark:text-primary-foreground">
-                <MenuIcon className="w-6 h-6" strokeWidth={2.5} />
-            </button>
-        )
-    }
+    const emergencyContact = webInfo?.contact || '0251 1234567'
+
+    const triggerBtn = (
+        <button className={cn(
+            "lg:hidden relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200",
+            "bg-white/12 border border-white/20 text-white hover:bg-white/20",
+            "[header[data-scroll=up]_&]:bg-slate-100 [header[data-scroll=up]_&]:border-slate-200",
+            "[header[data-scroll=up]_&]:text-slate-600 [header[data-scroll=up]_&]:hover:bg-slate-200",
+        )}>
+            <MenuIcon className="w-5 h-5" strokeWidth={2.2} />
+        </button>
+    )
+
+    if (!mounted) return triggerBtn
+
+    const staticMenus = [
+        { href: "/", label: "Beranda", icon: Home },
+        { href: "/galeri", label: "Galeri", icon: ImageIcon },
+        { href: "/agenda", label: "Agenda", icon: Calendar },
+    ]
 
     return (
-        <Sheet open={open} onOpenChange={setOpen} >
-            {/* Trigger */}
-            <SheetTrigger asChild>
-                <button className="lg:hidden p-2 rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-colors dark:bg-primary/20 dark:text-primary-foreground">
-                    <MenuIcon className="w-6 h-6" strokeWidth={2.5} />
-                </button>
-            </SheetTrigger>
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>{triggerBtn}</SheetTrigger>
 
-            {/* Content */}
-            <SheetContent side="right" className="w-[300px] sm:w-[380px] z-[999] px-0 dark:bg-slate-900 overflow-y-auto">
-                {/* Header */}
-                <SheetHeader className="px-6 pb-6 border-b dark:border-slate-700">
-                    <SheetTitle>
-                        <Link
-                            href="/"
-                            onClick={() => setOpen(false)}
-                            className="flex items-center gap-3"
-                        >
-                            <div className="bg-primary/5 p-2 rounded-xl ring-1 ring-primary/10 dark:bg-primary/20">
-                                <Image
-                                    src="/puskesmasLogo.png"
-                                    alt="Logo Puskesmas"
-                                    width={32}
-                                    height={32}
-                                />
-                            </div>
-                            <div className="text-left">
-                                <p className="font-bold text-lg leading-none text-primary dark:text-primary-foreground">
-                                    PUSKESMAS
-                                </p>
-                                <p className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-slate-400 mt-1">
-                                    Kecamatan Sehat
-                                </p>
-                            </div>
-                        </Link>
+            <SheetContent
+                side="left"
+                className="w-[280px] sm:w-[320px] z-[999] p-0 border-l border-slate-100 flex flex-col bg-white"
+            >
+                {/* ── Header ── */}
+                <SheetHeader className="relative shrink-0 px-5 py-4 border-b border-slate-100">
+                    <SheetTitle className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
+                        Navigasi
                     </SheetTitle>
                 </SheetHeader>
 
-                {/* Menu */}
-                <div className="flex flex-col gap-1 px-4 py-6">
-                    <Link
-                        href="/"
-                        onClick={() => setOpen(false)}
-                        className="px-4 py-3 rounded-xl text-base font-medium transition-all hover:bg-primary/10 dark:hover:bg-primary/20 text-foreground dark:text-slate-200"
-                    >
-                        Beranda
-                    </Link>
+                {/* ── Menu list ── */}
+                <div className="flex-1 overflow-y-auto px-2 py-3">
+
+                    {staticMenus.map(({ href, label, icon: Icon }) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13.5px] font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all group"
+                        >
+                            <Icon className="w-[17px] h-[17px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0" strokeWidth={1.8} />
+                            {label}
+                        </Link>
+                    ))}
+
+                    {mainMenus.length > 0 && (
+                        <div className="mx-3 my-2 h-px bg-slate-100" />
+                    )}
 
                     {mainMenus.map((menu) => {
                         const subMenus = (menu.children && menu.children.length > 0)
-                            ? menu.children.filter(sub => sub.status === 1).sort((a, b) => a.order - b.order)
-                            : menus
-                                .filter(sub => getParentId(sub) === menu.id && sub.status === 1)
-                                .sort((a, b) => a.order - b.order)
+                            ? menu.children.filter(s => s.status === 1).sort((a, b) => a.order - b.order)
+                            : menus.filter(s => getParentId(s) === menu.id && s.status === 1).sort((a, b) => a.order - b.order)
 
                         const hasSubMenus = subMenus.length > 0
                         const isExpanded = expandedMenus[menu.id]
 
                         if (hasSubMenus) {
                             return (
-                                <div key={menu.id} className="flex flex-col">
-                                    {/* ✅ FIX: Ganti jadi <button> utuh biar seluruh area baris bisa diklik buat buka/tutup */}
+                                <div key={menu.id}>
                                     <button
                                         onClick={(e) => toggleMenu(menu.id, e)}
-                                        className="flex items-center justify-between w-full px-4 py-2 rounded-xl transition-all hover:bg-primary/10 dark:hover:bg-primary/20 text-foreground dark:text-slate-200 text-left"
-                                    >
-                                        <span className="py-1 text-base font-medium">
-                                            {menu.title}
-                                        </span>
-                                        <div className="p-2 -mr-2 rounded-lg text-muted-foreground transition-colors">
-                                            <ChevronRight className={cn(
-                                                "w-5 h-5 transition-transform duration-300",
-                                                isExpanded && "rotate-90"
-                                            )} />
-                                        </div>
-                                    </button>
-
-                                    {/* Submenu dengan animasi Collapsible */}
-                                    <div
                                         className={cn(
-                                            "grid transition-all duration-300 ease-in-out",
-                                            isExpanded ? "grid-rows-[1fr] opacity-100 mt-1 mb-2" : "grid-rows-[0fr] opacity-0"
+                                            "flex items-center gap-3 w-full px-3 py-3 rounded-xl text-[13.5px] font-medium transition-all text-left group",
+                                            isExpanded
+                                                ? "text-blue-700 bg-blue-50"
+                                                : "text-slate-600 hover:text-blue-700 hover:bg-blue-50"
                                         )}
                                     >
+                                        <Layers className={cn(
+                                            "w-[17px] h-[17px] shrink-0 transition-colors",
+                                            isExpanded ? "text-blue-500" : "text-slate-400 group-hover:text-blue-500"
+                                        )} strokeWidth={1.8} />
+                                        <span className="flex-1">{menu.title}</span>
+                                        <ChevronDown className={cn(
+                                            "w-3.5 h-3.5 text-slate-400 transition-transform duration-300 shrink-0",
+                                            isExpanded && "rotate-180 text-blue-400"
+                                        )} />
+                                    </button>
+
+                                    <div className={cn(
+                                        "grid transition-all duration-300 ease-in-out",
+                                        isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                                    )}>
                                         <div className="overflow-hidden">
-                                            <div className="ml-4 border-l-2 border-primary/20 dark:border-primary/40 pl-4 py-1 space-y-1">
-                                                {subMenus.map((subMenu) => (
+                                            <div className="ml-[42px] border-l-2 border-slate-100 pl-3 py-1 space-y-0.5">
+                                                {subMenus.map((sub) => (
                                                     <Link
-                                                        key={subMenu.id}
-                                                        href={`/${subMenu.slug}`}
+                                                        key={sub.id}
+                                                        href={`/${sub.slug}`}
                                                         onClick={() => setOpen(false)}
-                                                        className="block px-4 py-2 rounded-lg text-sm text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-slate-200 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"
+                                                        className="block px-3 py-2.5 rounded-lg text-[13px] text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition-all"
                                                     >
-                                                        {subMenu.title}
+                                                        {sub.title}
                                                     </Link>
                                                 ))}
                                             </div>
@@ -163,42 +156,29 @@ export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
                                 key={menu.id}
                                 href={`/${menu.slug}`}
                                 onClick={() => setOpen(false)}
-                                className="px-4 py-3 rounded-xl text-base font-medium transition-all hover:bg-primary/10 dark:hover:bg-primary/20 text-foreground dark:text-slate-200"
+                                className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13.5px] font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all group"
                             >
+                                <FileText className="w-[17px] h-[17px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0" strokeWidth={1.8} />
                                 {menu.title}
                             </Link>
                         )
                     })}
                 </div>
 
-                <div className="mx-6 border-t dark:border-slate-700" />
-
-                {/* CTA WhatsApp */}
-                <div className="px-6 pt-6">
-                    <Link
-                        href="https://wa.me/628xxxxxxxxx"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition-colors"
+                {/* ── Footer — satu tombol ── */}
+                <div className="shrink-0 p-4 border-t border-slate-100">
+                    <a
+                        href={`tel:${emergencyContact.replace(/\D/g, '')}`}
+                        className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
                     >
-                        <MessageSquare className="w-4 h-4" />
-                        Konsultasi WhatsApp
-                    </Link>
-                </div>
-
-                {/* Emergency Contact */}
-                <div className="px-6 pt-6 pb-8">
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-border/50 dark:bg-slate-800 dark:border-slate-700">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider dark:text-slate-400">
-                            Kontak Darurat
-                        </p>
-                        <a
-                            href="tel:02511234567"
-                            className="text-lg font-bold text-primary dark:text-primary-foreground"
-                        >
-                            (0251) 1234567
-                        </a>
-                    </div>
+                        <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                            <Phone className="w-3.5 h-3.5 text-white" strokeWidth={2} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest leading-none">Hubungi Kami</p>
+                            <p className="text-[14px] font-bold text-white leading-tight mt-0.5">{emergencyContact}</p>
+                        </div>
+                    </a>
                 </div>
             </SheetContent>
         </Sheet>

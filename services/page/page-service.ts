@@ -84,16 +84,17 @@ export async function getPublicPageById(id: string): Promise<Page> {
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
-// Publik: Ambil halaman pelayanan
-export async function getPublicPelayanan(): Promise<Page[]> {
+// Publik: Ambil halaman pelayanan dengan limit
+export async function getPublicPelayanan(limit = 6): Promise<Page[]> {
   try {
-    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
+    const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan?limit=${limit}`, {
       headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
     const data = await res.json()
-    return Array.isArray(data) ? data : []
+    const items = Array.isArray(data) ? data : []
+    return items.slice(0, limit)
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
 }
 

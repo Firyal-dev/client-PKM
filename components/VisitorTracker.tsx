@@ -41,7 +41,7 @@ export default function VisitorTracker() {
 
             try {
                 // Include tenant slug in request header for subdomain-based tracking
-                await api.post('/v1/visitor/track', null, {
+                await api.post('/v1/visitor/log', null, {
                     headers: {
                         'x-tenant-slug': slug
                     }
