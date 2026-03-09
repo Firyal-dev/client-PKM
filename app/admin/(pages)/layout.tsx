@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const ALLOWED_ROUTES_FOR_SUPERADMIN_WITHOUT_PUSKESMAS = [
     '/admin/dashboard',
     '/admin/admin-data',
-    '/admin/activities-log',
+    '/admin/activity-logs',
     '/admin/admin-data/create',
     '/admin/admin-data/edit',
 ]
