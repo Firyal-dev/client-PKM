@@ -1,7 +1,8 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, getBaseUrl, buildParams } from "@/services/helpers"
+import { getBaseUrl, buildParams } from "@/services/helpers"
+import {authHeaders, getTenantHeader} from "@/services/server-helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
@@ -20,6 +21,7 @@ export interface StaticPage {
 export async function getPublicStaticPages(): Promise<StaticPage[]> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/static-pages`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')
@@ -31,6 +33,7 @@ export async function getPublicStaticPages(): Promise<StaticPage[]> {
 export async function getPublicStaticPageById(id: string): Promise<StaticPage> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/static-pages/${id}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')
@@ -42,6 +45,7 @@ export async function getPublicStaticPageById(id: string): Promise<StaticPage> {
 export async function getPublicStaticPageByMenuId(menuId: string): Promise<StaticPage> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/static-pages/menu/${menuId}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')

@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Agenda } from '@/types/agenda-prop'
 import { revalidateTag } from 'next/cache'
@@ -10,6 +11,7 @@ import { revalidateTag } from 'next/cache'
 export async function getPublicAgenda(page = 1, limit = 10) {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/agenda?${buildParams(page, limit)}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
         if (!res.ok) throw new Error('Gagal ambil agenda')
@@ -22,6 +24,7 @@ export async function getPublicAgenda(page = 1, limit = 10) {
 export async function getPublicAgendaBySlug(slug: string): Promise<Agenda | null> {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/agenda/${slug}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
         return res.ok ? await res.json() : null

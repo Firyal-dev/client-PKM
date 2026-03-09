@@ -7,15 +7,15 @@ import { cn } from "@/lib/utils"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Users } from "lucide-react"
 
-export default async function AdminDataPage({ searchParams }: { searchParams: Promise<{ search?: string; level?: string; page?: string }> }) {
+export default async function AdminDataPage({ searchParams }: { searchParams: Promise<{ search?: string; role?: string; page?: string }> }) {
     const params = await searchParams
     const page = parseInt(params.page || '1')
     const limit = 10
     const offset = (page - 1) * limit
 
-    const { data: initialData, total } = await getAdmins(params.search, params.level, limit, offset)
+    const { data: initialData, total } = await getAdmins(params.search, params.role, limit, offset)
     const currentAdmin = await getAdminProfile()
-    const isEmpty = initialData.length === 0 && !params.search && !params.level
+    const isEmpty = initialData.length === 0 && !params.search && !params.role
     const totalPages = Math.ceil(total / limit)
 
     return (

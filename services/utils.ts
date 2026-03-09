@@ -30,6 +30,7 @@ export const handleServiceError = (err: unknown, fallback: string): string => {
             return axiosErr.response?.data?.message || axiosErr.message || fallback;
         }
     }
+
     if (err instanceof Error) return err.message;
     return fallback;
 }
@@ -85,4 +86,5 @@ export const CACHE_TAGS = {
     SERVICES: 'services',
     CONSULTATION: 'consultation',
     WEB_INFO: 'web_info',
+    PUSKESMAS: 'puskesmas',
 } as const

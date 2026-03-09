@@ -1,12 +1,22 @@
 'use server'
 
 import api from '@/services/api'
-import { setAuthToken, getAuthToken, clearAuthToken } from '@/services/auth-token'
+import { setAuthToken, getAuthToken, clearAuthToken, setTenantId } from '@/services/auth-token'
 import { tryAction } from '@/services/utils'
 import { redirect } from 'next/navigation'
 
 export interface LoginCredentials { name: string; password: string }
-export interface LoginResponse { access_token: string; user: { id: string; name: string; email: string } }
+export interface LoginResponse {
+    access_token: string;
+    user: {
+        id: string;
+        name: string;
+        email?: string;
+        role: string;
+        puskesmas_id?: string | null;
+        active_tenant?: string | null;
+    }
+}
 
 // Login
 export async function loginAction(_: unknown, formData: FormData) {
@@ -20,6 +30,13 @@ export async function loginAction(_: unknown, formData: FormData) {
     const result = await tryAction<LoginResponse>(async () => {
         const res = await api.post<LoginResponse>('/v1/auth/login', { name, password, recaptchaToken })
         await setAuthToken(res.data.access_token)
+
+        // Set tenant ID cookie for API interceptor
+        const tenantId = res.data.user.puskesmas_id || res.data.user.active_tenant
+        if (tenantId) {
+            await setTenantId(tenantId)
+        }
+
         return res.data
     }, 'Login gagal')
 

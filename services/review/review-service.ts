@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Reviews } from '@/types/review-prop'
 import { revalidateTag } from 'next/cache'
@@ -10,6 +11,7 @@ import { revalidateTag } from 'next/cache'
 export async function getPublicReviews(page = 1, limit = 10) {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/reviews?${buildParams(page, limit)}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.REVIEW] }
         })
         if (!res.ok) throw new Error('Gagal ambil review')

@@ -17,8 +17,11 @@ import { logoutAction } from "@/services/auth/logout-service"
 import { useActionState, useTransition } from "react"
 import { UpdateProfile } from "@/components/admin/update-profile"
 import { AdminProfileProp } from "@/types/admin-profile-prop"
+import { TenantSwitcher } from "@/components/admin/tenant-switcher"
+import { Building2 } from "lucide-react"
+import Link from "next/link"
 
-export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ profile, tenants = [], ...props }: { profile: AdminProfileProp, tenants?: any[] } & React.ComponentProps<typeof Sidebar>) {
   const [state, logout, isPending] = useActionState(logoutAction, null)
   const [isTransitionPending, startTransition] = useTransition()
 
@@ -28,6 +31,14 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
     })
   }
 
+  // Cek apakah user adalah SUPER_ADMIN dan sudah memilih puskesmas
+  const isSuperAdmin = profile.role === 'SUPER_ADMIN'
+  const hasSelectedPuskesmas = !!profile.active_tenant
+
+  // SUPER_ADMIN: hanya tampilkan menu terbatas jika belum memilih puskesmas
+  // Jika sudah memilih puskes, tampilkan semua menu
+  const showLimitedMenu = isSuperAdmin && !hasSelectedPuskesmas
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -35,16 +46,32 @@ export function AppSidebar({ profile, ...props }: { profile: AdminProfileProp } 
           <SidebarMenuItem>
             <UpdateProfile profile={profile} />
           </SidebarMenuItem>
+          {isSuperAdmin && (
+            <TenantSwitcher tenants={tenants} activeTenantId={profile.active_tenant} />
+          )}
         </SidebarMenu>
       </SidebarHeader>
       <Separator />
       <SidebarContent>
-        <NavMain items={sidebarData.navMain} />
-        <NavMedia navMedia={sidebarData.navMedia} />
-        <NavActivities navActivities={sidebarData.navActivities} />
-        <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
-        <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
-        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+        {/* SUPER_ADMIN belum pilih puskes: hanya Dashboard, Data Admin, Log Aktivitas */}
+        {showLimitedMenu ? (
+          <>
+            {/* Dashboard saja */}
+            <NavMain items={sidebarData.navMain.slice(0, 1)} />
+            {/* Manajemen Admin: Data Admin dan Log Aktivitas */}
+            <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+          </>
+        ) : (
+          <>
+            {/* Semua menu untuk: non-SUPER_ADMIN ATAU SUPER_ADMIN yang sudah pilih puskes */}
+            <NavMain items={sidebarData.navMain} />
+            <NavMedia navMedia={sidebarData.navMedia} />
+            <NavActivities navActivities={sidebarData.navActivities} />
+            <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
+            <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
+            <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <div className="flex gap-2">

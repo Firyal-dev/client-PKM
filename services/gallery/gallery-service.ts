@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Gallery } from '@/types/gallery-prop'
 import { revalidateTag } from 'next/cache'
@@ -14,6 +15,7 @@ export async function getPublicGallery(page = 1, limit = 20, options?: { albumId
         options?.noAlbum && params.append('no_album', 'true')
 
         const res = await fetch(`${getBaseUrl()}/v1/gallery?${params}`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.GALLERY] }
         })
         if (!res.ok) throw new Error('Gagal ambil gallery')

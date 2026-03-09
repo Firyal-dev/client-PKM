@@ -1,7 +1,8 @@
 "use server"
 
 import api from "@/services/api"
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from "@/services/helpers"
+import { getBaseUrl, buildParams, parseResponse } from "@/services/helpers"
+import { authHeaders, getTenantHeader } from "@/services/server-helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
@@ -9,8 +10,9 @@ import { revalidateTag } from "next/cache"
 export interface Page {
   id: string
   menu_id: string
-  menu?: { id: string; title: string }
+  menu?: { id: string; title: string; slug?: string }
   title: string
+  slug?: string
   dynamic_content: string
   content?: string // Alias for dynamic_content used in some components
   image?: string
@@ -25,6 +27,7 @@ export interface Page {
 export async function getPublicPages(): Promise<Page[]> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
@@ -36,6 +39,7 @@ export async function getPublicPages(): Promise<Page[]> {
 export async function getPublishedPages(): Promise<Page[]> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages?status=1`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
@@ -48,6 +52,7 @@ export async function getPublishedPages(): Promise<Page[]> {
 export async function getPublicPageByMenuId(menuId: string): Promise<Page> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
@@ -59,6 +64,7 @@ export async function getPublicPageByMenuId(menuId: string): Promise<Page> {
 export async function getPublicPagesByMenuId(menuId: string, page = 1, limit = 10): Promise<{ data: Page[]; lastPage: number; total: number }> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages/menu/${menuId}/all?${buildParams(page, limit)}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
@@ -70,6 +76,7 @@ export async function getPublicPagesByMenuId(menuId: string, page = 1, limit = 1
 export async function getPublicPageById(id: string): Promise<Page> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages/${id}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
@@ -81,6 +88,7 @@ export async function getPublicPageById(id: string): Promise<Page> {
 export async function getPublicPelayanan(): Promise<Page[]> {
   try {
     const res = await fetch(`${getBaseUrl()}/v1/pages/pelayanan`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
@@ -97,6 +105,7 @@ export async function getPublicBerita(page?: number, limit?: number): Promise<Pa
     if (limit !== undefined) params.set('limit', String(limit))
     const query = params.toString() ? `?${params.toString()}` : ''
     const res = await fetch(`${getBaseUrl()}/v1/pages/berita${query}`, {
+      headers: await getTenantHeader(),
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data berita: ${res.status}`)

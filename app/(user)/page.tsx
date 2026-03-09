@@ -36,8 +36,6 @@ export default async function Home() {
             {/* Bagian Sambutan Kepala Puskesmas */}
             <Sambutan />
 
-            {/* Bagian Pelayanan Dinamis (Hanya kategori Pelayanan) */}
-            <Pelayanan data={pelayanan} />
 
             {/* Bagian Agenda Kegiatan */}
             <Agenda data={agendas.data} />
@@ -45,6 +43,9 @@ export default async function Home() {
             {/* Bagian Galeri Foto */}
             <Galeri data={galeri.data} />
 
+            {/* Bagian Pelayanan Dinamis (Hanya kategori Pelayanan) */}
+            <Pelayanan data={pelayanan} />
+            
             {/* Bagian Berita */}
             <Berita data={berita} />
         </main>

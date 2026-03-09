@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils"
 import { getAdminMenus } from "@/services/menu/menu-service"
 import { PaginationControl } from "@/components/pagination-control"
 
+export const dynamic = 'force-dynamic'
+
 export default async function MenusPage({
     searchParams,
 }: {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Menu as MenuIcon, MessageSquare, ChevronRight } from "lucide-react"
@@ -22,7 +22,12 @@ interface MobileNavbarProps {
 
 export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
     const [open, setOpen] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const getParentId = (menu: MenuType): string | null => {
         return menu.parent_id ?? menu.parent?.id ?? null
@@ -39,6 +44,14 @@ export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
             ...prev,
             [id]: !prev[id]
         }))
+    }
+
+    if (!mounted) {
+        return (
+            <button className="lg:hidden p-2 rounded-xl bg-primary/5 text-primary hover:bg-primary/10 transition-colors dark:bg-primary/20 dark:text-primary-foreground">
+                <MenuIcon className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+        )
     }
 
     return (
@@ -104,7 +117,7 @@ export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
                             return (
                                 <div key={menu.id} className="flex flex-col">
                                     {/* ✅ FIX: Ganti jadi <button> utuh biar seluruh area baris bisa diklik buat buka/tutup */}
-                                    <button 
+                                    <button
                                         onClick={(e) => toggleMenu(menu.id, e)}
                                         className="flex items-center justify-between w-full px-4 py-2 rounded-xl transition-all hover:bg-primary/10 dark:hover:bg-primary/20 text-foreground dark:text-slate-200 text-left"
                                     >
@@ -113,14 +126,14 @@ export default function MobileNavbar({ menus = [] }: MobileNavbarProps) {
                                         </span>
                                         <div className="p-2 -mr-2 rounded-lg text-muted-foreground transition-colors">
                                             <ChevronRight className={cn(
-                                                "w-5 h-5 transition-transform duration-300", 
+                                                "w-5 h-5 transition-transform duration-300",
                                                 isExpanded && "rotate-90"
                                             )} />
                                         </div>
                                     </button>
-                                    
+
                                     {/* Submenu dengan animasi Collapsible */}
-                                    <div 
+                                    <div
                                         className={cn(
                                             "grid transition-all duration-300 ease-in-out",
                                             isExpanded ? "grid-rows-[1fr] opacity-100 mt-1 mb-2" : "grid-rows-[0fr] opacity-0"

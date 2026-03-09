@@ -1,7 +1,8 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders, getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { getBaseUrl, buildParams, parseResponse } from '@/services/helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from '@/services/utils'
 import { Banner } from '@/types/banner-prop'
 import { revalidateTag } from 'next/cache'
@@ -11,6 +12,7 @@ import { redirect } from 'next/navigation'
 export async function getPublicBanners(): Promise<Banner[]> {
     try {
         const res = await fetch(`${getBaseUrl()}/v1/banner`, {
+            headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.BANNER] }
         })
         if (!res.ok) throw new Error('Gagal ambil banner')
