@@ -74,7 +74,7 @@ async function handleApiError(response: Response): Promise<string> {
 
 // API client using fetch
 const api = {
-    async get<T = any>(url: string, options?: { headers?: Record<string, string> }): Promise<{ data: T }> {
+    async get<T = any>(url: string, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
         const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
 
         // Merge tenant headers with custom headers
@@ -89,6 +89,7 @@ const api = {
             method: 'GET',
             credentials: 'include',
             headers,
+            next: options?.next,
         })
 
         if (!response.ok) {
@@ -106,7 +107,7 @@ const api = {
         return { data }
     },
 
-    async post<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string> }): Promise<{ data: T }> {
+    async post<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
         const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
         const isFormData = data instanceof FormData
 
@@ -141,6 +142,7 @@ const api = {
             credentials: 'include',
             headers,
             body,
+            next: options?.next,
         })
 
         if (!response.ok) {
@@ -160,7 +162,7 @@ const api = {
         return { data: result }
     },
 
-    async patch<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string> }): Promise<{ data: T }> {
+    async patch<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
         const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
         const isFormData = data instanceof FormData
 
@@ -188,6 +190,7 @@ const api = {
             credentials: 'include',
             headers,
             body: isFormData ? data as FormData : JSON.stringify(data),
+            next: options?.next,
         })
 
         if (!response.ok) {
@@ -205,12 +208,12 @@ const api = {
         return { data: result }
     },
 
-    async put<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string> }): Promise<{ data: T }> {
+    async put<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
         // Redirect PUT to PATCH for consistency
         return this.patch<T>(url, data, options)
     },
 
-    async delete<T = any>(url: string, options?: { headers?: Record<string, string> }): Promise<{ data: T }> {
+    async delete<T = any>(url: string, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
         const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
 
         // Merge tenant headers with custom headers
@@ -225,6 +228,7 @@ const api = {
             method: 'DELETE',
             credentials: 'include',
             headers,
+            next: options?.next,
         })
 
         if (!response.ok) {

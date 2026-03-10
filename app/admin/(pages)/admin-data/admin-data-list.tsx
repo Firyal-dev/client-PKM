@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
@@ -14,6 +14,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 import { deleteAdmin } from "@/services/admin/admin-data-service"
 import { Admin } from "@/types/admin"
 import Image from "next/image"
@@ -42,10 +43,8 @@ export default function AdminDataList({
     const [roleFilter, setRoleFilter] = useState(searchParams.get("role") || "all")
     const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
     const [deleteAdminId, setDeleteAdminId] = useState<string | null>(null)
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedRows, setSelectedRows] = useState<Admin[]>([])
-    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
     const currentUserInSelection = selectedRows.find(admin => admin.id === currentAdmin?.id)
 
@@ -168,7 +167,6 @@ export default function AdminDataList({
 
     const handleDelete = async () => {
         if (!deleteAdminId) return
-        setIsSubmitting(true)
         try {
             const result = await deleteAdmin(deleteAdminId)
             if (result.success) {
@@ -178,8 +176,8 @@ export default function AdminDataList({
             } else {
                 toast.error(result.error || "Gagal menghapus admin")
             }
-        } finally {
-            setIsSubmitting(false)
+        } catch (error) {
+            toast.error("Gagal menghapus admin")
         }
     }
 
@@ -224,69 +222,50 @@ export default function AdminDataList({
                 </div>
             </div>
 
-            {/* Bulk action section - Current user warning */}
-            {currentUserInSelection && (
-                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg">
-                    <div className="flex-1">
-                        <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
-                            ⚠️ Akun yang sedang Anda gunakan ({currentUserInSelection.name}) dipilih
-                        </p>
-                        <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
-                            Jika akun ini dihapus, Anda akan logout secara otomatis
-                        </p>
-                    </div>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                            setSelectedRows(selectedRows.filter(a => a.id !== currentAdmin?.id))
-                        }}
-                    >
-                        Batalkan Pilihan
-                    </Button>
-                </div>
-            )}
-
-            {/* Bulk delete section */}
-            {selectedRows.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
-                        {selectedRows.length} admin dipilih
-                    </span>
-                    <ConfirmDialog
-                        open={showBulkDeleteDialog}
-                        onOpenChange={setShowBulkDeleteDialog}
-                        title="Hapus Admin Terpilih?"
-                        description={`${selectedRows.length} admin akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
-                        onConfirm={async () => {
-                            setIsBulkDeleting(true)
-                            try {
-                                await Promise.all(selectedRows.map(admin => deleteAdmin(admin.id)))
-                                toast.success(`${selectedRows.length} admin berhasil dihapus`)
-                                setShowBulkDeleteDialog(false)
-                                setSelectedRows([])
-                                router.refresh()
-                            } catch (error) {
-                                toast.error("Gagal menghapus beberapa admin")
-                            } finally {
-                                setIsBulkDeleting(false)
-                            }
-                        }}
-                        confirmText="Hapus"
-                        isLoading={isBulkDeleting}
-                        trigger={
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => setShowBulkDeleteDialog(true)}
-                                disabled={currentUserInSelection !== undefined}
-                            >
-                                Hapus Terpilih
-                            </Button>
+            {/* Bulk Action Bar */}
+            <BulkActionBar
+                selectedCount={selectedRows.length}
+                label="admin"
+                onCancel={() => setSelectedRows([])}
+                onConfirm={() => {
+                    startTransition(async () => {
+                        try {
+                            await Promise.all(selectedRows.map(admin => deleteAdmin(admin.id)))
+                            toast.success(`${selectedRows.length} admin berhasil dihapus`)
+                            setSelectedRows([])
+                            router.refresh()
+                        } catch (error) {
+                            toast.error("Gagal menghapus beberapa admin")
                         }
-                    />
-                </div>
-            )}
+                    })
+                }}
+                isPending={isPending}
+                title="Hapus Admin Terpilih?"
+                description={`${selectedRows.length} admin akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+                disabled={!!currentUserInSelection}
+                warning={currentUserInSelection ? (
+                    <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl shadow-lg">
+                        <div className="flex-1">
+                            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">
+                                ⚠️ Peringatan
+                            </p>
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
+                                Akun yang sedang digunakan ({currentUserInSelection.name}) tidak bisa dihapus.
+                            </p>
+                        </div>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-[11px] border-amber-200 bg-amber-50/50 hover:bg-amber-100 dark:bg-amber-950/30 dark:border-amber-900/50 rounded-lg"
+                            onClick={() => {
+                                setSelectedRows(selectedRows.filter(a => a.id !== currentAdmin?.id))
+                            }}
+                        >
+                            Batalkan Akun Saya
+                        </Button>
+                    </div>
+                ) : null}
+            />
 
             {/* DataTable */}
             <div className="rounded-xl border border-border/60 overflow-hidden">
@@ -311,7 +290,7 @@ export default function AdminDataList({
                 title="Hapus Admin?"
                 description="Admin ini akan dihapus secara permanen dan tidak dapat dikembalikan."
                 confirmText="Hapus"
-                isLoading={isSubmitting}
+                isLoading={isPending}
             />
         </div>
     )

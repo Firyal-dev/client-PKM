@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useTransition } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 import { SearchFilter } from "@/components/admin/SearchFilter"
 import { deleteMenuAction, toggleMenuStatusAction, Menu } from "@/services/menu/menu-service"
 import { cn } from "@/lib/utils"
@@ -47,25 +48,28 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
 
   const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
   const [selectedRows, setSelectedRows] = useState<Menu[]>([])
-  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const parentMenus = useMemo(() => menus.filter((m) => !m.parent_id), [menus])
   const currentTypeFilter = searchParams.get("type") || ""
   const hasActiveFilter = !!(currentTypeFilter || globalFilter)
 
-  const handleDelete = async (id: string) => {
-    const result = await deleteMenuAction(id)
-    result.success
-      ? (toast.success("Menu berhasil dihapus"), router.refresh())
-      : toast.error(result.error || "Gagal menghapus menu")
+  const handleDelete = (id: string) => {
+    startTransition(async () => {
+      const result = await deleteMenuAction(id)
+      result.success
+        ? (toast.success("Menu berhasil dihapus"), router.refresh())
+        : toast.error(result.error || "Gagal menghapus menu")
+    })
   }
 
-  const handleToggleStatus = async (id: string) => {
-    const result = await toggleMenuStatusAction(id)
-    result.success
-      ? (toast.success("Status menu berhasil diubah"), router.refresh())
-      : toast.error(result.error || "Gagal mengubah status")
+  const handleToggleStatus = (id: string) => {
+    startTransition(async () => {
+      const result = await toggleMenuStatusAction(id)
+      result.success
+        ? (toast.success("Status menu berhasil diubah"), router.refresh())
+        : toast.error(result.error || "Gagal mengubah status")
+    })
   }
 
   const handleSearch = (value: string) => {
@@ -101,17 +105,14 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
 
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) return
-    setIsBulkDeleting(true)
     try {
       const allMenuIds = getAllMenuIds(selectedRows)
       await Promise.all(allMenuIds.map(id => deleteMenuAction(id)))
       toast.success(`${selectedRows.length} menu berhasil dihapus`)
-      setShowBulkDeleteDialog(false)
+      setSelectedRows([])
       router.refresh()
     } catch (error) {
       toast.error("Gagal menghapus beberapa menu")
-    } finally {
-      setIsBulkDeleting(false)
     }
   }
 
@@ -144,7 +145,7 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
         const { icon: IconComponent, color } = getMenuIcon(menu.type)
         const hasChildren = menu.children && menu.children.length > 0
         const depth = row.depth || 0
-        
+
         return (
           <div className={cn("flex items-center gap-2.5", depth > 0 && "pl-6 border-l border-border/50 ml-2")}>
             <IconComponent className={cn("w-4 h-4 shrink-0", color)} />
@@ -237,10 +238,12 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
                   title="Hapus Menu?"
                   description={`"${menu.title}" akan dihapus secara permanen.`}
                   onConfirm={() => handleDelete(menu.id)}
+                  isLoading={isPending}
                   trigger={
                     <DropdownMenuItem
                       onSelect={(e) => e.preventDefault()}
                       className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive"
+                      disabled={isPending}
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Hapus
                     </DropdownMenuItem>
@@ -283,32 +286,16 @@ export function MenuList({ menus, total }: { menus: Menu[]; total: number }) {
         </div>
       </div>
 
-      {/* Bulk action section */}
-      {selectedRows.length > 0 && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-          <span className="text-sm text-red-700 dark:text-red-400 flex-1">
-            {selectedRows.length} menu dipilih
-          </span>
-          <ConfirmDialog
-            open={showBulkDeleteDialog}
-            onOpenChange={setShowBulkDeleteDialog}
-            title="Hapus Menu Terpilih?"
-            description={`${selectedRows.length} menu akan dihapus secara permanen termasuk sub-menuny. Tindakan ini tidak dapat dibatalkan.`}
-            onConfirm={handleBulkDelete}
-            confirmText="Hapus"
-            isLoading={isBulkDeleting}
-            trigger={
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => setShowBulkDeleteDialog(true)}
-              >
-                Hapus Terpilih
-              </Button>
-            }
-          />
-        </div>
-      )}
+      {/* Bulk Action Bar */}
+      <BulkActionBar
+        selectedCount={selectedRows.length}
+        label="menu"
+        onCancel={() => setSelectedRows([])}
+        onConfirm={() => startTransition(handleBulkDelete)}
+        isPending={isPending}
+        title="Hapus Menu Terpilih?"
+        description={`${selectedRows.length} menu akan dihapus secara permanen termasuk sub-menuny. Tindakan ini tidak dapat dibatalkan.`}
+      />
 
       {/* DataTable */}
       <div className="rounded-xl border border-border/60 overflow-hidden">

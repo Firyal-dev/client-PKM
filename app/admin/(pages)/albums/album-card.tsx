@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useTransition } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
@@ -142,6 +142,19 @@ function AlbumCover({ id, count, disabled, cover }: { id: string; count: number;
 
 function AlbumActions({ id, onRename }: { id: string; onRename: () => void }) {
     const [isDelOpen, setIsDelOpen] = useState(false)
+    const [isPending, startTransition] = useTransition()
+
+    const handleDelete = () => {
+        startTransition(async () => {
+            const result = await deleteAlbumAction(id)
+            if (result.success) {
+                toast.success("Album berhasil dihapus")
+                setIsDelOpen(false)
+            } else {
+                toast.error(result.error || "Gagal menghapus album")
+            }
+        })
+    }
 
     return (
         <>
@@ -173,8 +186,9 @@ function AlbumActions({ id, onRename }: { id: string; onRename: () => void }) {
                 onOpenChange={setIsDelOpen}
                 title="Hapus Album?"
                 description="Data foto di dalamnya tidak akan terhapus, hanya albumnya saja yang hilang."
-                onConfirm={() => deleteAlbumAction(id)}
+                onConfirm={handleDelete}
                 confirmText="Hapus"
+                isLoading={isPending}
             />
         </>
     )

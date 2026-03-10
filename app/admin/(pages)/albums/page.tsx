@@ -47,9 +47,6 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
                                 Mulai buat album pertamamu untuk mengorganisir foto-foto kamu dengan rapi.
                             </EmptyDescription>
                         </EmptyHeader>
-                        <div className="mt-5">
-                            <CreateAlbumDialog />
-                        </div>
                     </Empty>
                 ) : (
                     <>

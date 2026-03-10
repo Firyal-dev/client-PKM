@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useTransition } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Pencil, Trash2, CalendarDays, MapPin, Clock, MoreVertical } from "lucide-react"
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 import { SearchFilter } from "@/components/admin/SearchFilter"
 import { deleteAgendaAction } from "@/services/agenda/agenda-service"
 import { Agenda } from "@/types/agenda-prop"
@@ -25,8 +26,7 @@ export function AgendaList({ agendas }: { agendas: Agenda[] }) {
     const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
     const [dateFilter, setDateFilter] = useState(searchParams.get("dateFilter") || "all")
     const [selectedRows, setSelectedRows] = useState<Agenda[]>([])
-    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
     const filteredAgendas = useMemo(() => {
         let result = [...agendas]
@@ -137,10 +137,12 @@ export function AgendaList({ agendas }: { agendas: Agenda[] }) {
                                     title="Hapus Agenda?"
                                     description={`"${agenda.activity_name}" akan dihapus secara permanen.`}
                                     onConfirm={() => handleDelete(agenda.id)}
+                                    isLoading={isPending}
                                     trigger={
                                         <DropdownMenuItem
                                             onSelect={(e) => e.preventDefault()}
                                             className="gap-2 cursor-pointer rounded-lg text-destructive focus:text-destructive"
+                                            disabled={isPending}
                                         >
                                             <Trash2 className="h-3.5 w-3.5" /> Hapus
                                         </DropdownMenuItem>
@@ -176,29 +178,16 @@ export function AgendaList({ agendas }: { agendas: Agenda[] }) {
         router.push("/admin/agenda")
     }
 
-    const handleDelete = async (agendaId: string) => {
-        const result = await deleteAgendaAction(agendaId)
-        if (result.success) {
-            toast.success("Agenda berhasil dihapus")
-            router.refresh()
-        } else {
-            toast.error(result.error || "Gagal menghapus agenda")
-        }
-    }
-
-    const handleBulkDelete = async () => {
-        if (selectedRows.length === 0) return
-        setIsBulkDeleting(true)
-        try {
-            await Promise.all(selectedRows.map(agenda => deleteAgendaAction(agenda.id)))
-            toast.success(`${selectedRows.length} agenda berhasil dihapus`)
-            setShowBulkDeleteDialog(false)
-            router.refresh()
-        } catch (error) {
-            toast.error("Gagal menghapus beberapa agenda")
-        } finally {
-            setIsBulkDeleting(false)
-        }
+    const handleDelete = (agendaId: string) => {
+        startTransition(async () => {
+            const result = await deleteAgendaAction(agendaId)
+            if (result.success) {
+                toast.success("Agenda berhasil dihapus")
+                router.refresh()
+            } else {
+                toast.error(result.error || "Gagal menghapus agenda")
+            }
+        })
     }
 
     const currentDateFilter = searchParams.get("dateFilter") || "all"
@@ -232,32 +221,27 @@ export function AgendaList({ agendas }: { agendas: Agenda[] }) {
                 </div>
             </div>
 
-            {/* Bulk delete button */}
-            {selectedRows.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
-                        {selectedRows.length} agenda dipilih
-                    </span>
-                    <ConfirmDialog
-                        open={showBulkDeleteDialog}
-                        onOpenChange={setShowBulkDeleteDialog}
-                        title="Hapus Agenda Terpilih?"
-                        description={`${selectedRows.length} agenda akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
-                        onConfirm={handleBulkDelete}
-                        confirmText="Hapus"
-                        isLoading={isBulkDeleting}
-                        trigger={
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => setShowBulkDeleteDialog(true)}
-                            >
-                                Hapus Terpilih
-                            </Button>
+            {/* Bulk Action Bar */}
+            <BulkActionBar
+                selectedCount={selectedRows.length}
+                label="agenda"
+                onCancel={() => setSelectedRows([])}
+                onConfirm={() => {
+                    startTransition(async () => {
+                        try {
+                            await Promise.all(selectedRows.map(agenda => deleteAgendaAction(agenda.id)))
+                            toast.success(`${selectedRows.length} agenda berhasil dihapus`)
+                            setSelectedRows([])
+                            router.refresh()
+                        } catch (error) {
+                            toast.error("Gagal menghapus beberapa agenda")
                         }
-                    />
-                </div>
-            )}
+                    })
+                }}
+                isPending={isPending}
+                title="Hapus Agenda Terpilih?"
+                description={`${selectedRows.length} agenda akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+            />
 
             {/* DataTable */}
             <div className="rounded-xl border border-border/60 overflow-hidden">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Edit, Trash2, Building2, Search, X, SlidersHorizontal } from "lucide-react"
@@ -10,6 +10,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Puskesmas, deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -31,8 +32,7 @@ export function PuskesmasList({
     const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
     const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
     const [selectedRows, setSelectedRows] = useState<Puskesmas[]>([])
-    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
     const filteredData = useMemo(() => {
         let result = [...data]
@@ -166,17 +166,13 @@ export function PuskesmasList({
     const currentStatusFilter = searchParams.get("status") || "all"
 
     const handleBulkDelete = async () => {
-        setIsBulkDeleting(true)
         try {
             await Promise.all(selectedRows.map(p => deletePuskesmasAction(p.id)))
             toast.success(`${selectedRows.length} puskesmas berhasil dihapus`)
-            setShowBulkDeleteDialog(false)
             setSelectedRows([])
             router.refresh()
         } catch (error) {
             toast.error("Gagal menghapus beberapa puskesmas")
-        } finally {
-            setIsBulkDeleting(false)
         }
     }
 
@@ -218,32 +214,16 @@ export function PuskesmasList({
                 </div>
             </div>
 
-            {/* Bulk delete section */}
-            {selectedRows.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
-                        {selectedRows.length} puskesmas dipilih
-                    </span>
-                    <ConfirmDialog
-                        open={showBulkDeleteDialog}
-                        onOpenChange={setShowBulkDeleteDialog}
-                        title="Hapus Puskesmas Terpilih?"
-                        description={`${selectedRows.length} puskesmas akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
-                        onConfirm={handleBulkDelete}
-                        confirmText="Hapus"
-                        isLoading={isBulkDeleting}
-                        trigger={
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => setShowBulkDeleteDialog(true)}
-                            >
-                                Hapus Terpilih
-                            </Button>
-                        }
-                    />
-                </div>
-            )}
+            {/* Bulk Action Bar */}
+            <BulkActionBar
+                selectedCount={selectedRows.length}
+                label="puskesmas"
+                onCancel={() => setSelectedRows([])}
+                onConfirm={() => startTransition(handleBulkDelete)}
+                isPending={isPending}
+                title="Hapus Puskesmas Terpilih?"
+                description={`${selectedRows.length} puskesmas akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+            />
 
             {/* DataTable */}
             <div className="rounded-xl border border-border/60 overflow-hidden">

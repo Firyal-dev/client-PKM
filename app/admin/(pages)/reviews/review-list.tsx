@@ -15,14 +15,14 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/components/ui/data-table"
+import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 
 export function ReviewList({ reviews }: { reviews: Reviews[] }) {
     const [globalFilter, setGlobalFilter] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("all")
     const [publishFilter, setPublishFilter] = useState("all")
     const [selectedRows, setSelectedRows] = useState<Reviews[]>([])
-    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
-    const [isBulkDeleting, setIsBulkDeleting] = useState(false)
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -204,45 +204,27 @@ export function ReviewList({ reviews }: { reviews: Reviews[] }) {
                 </div>
             </div>
 
-            {/* Bulk action section */}
-            {selectedRows.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
-                    <span className="text-sm text-red-700 dark:text-red-400 flex-1">
-                        {selectedRows.length} ulasan dipilih
-                    </span>
-                    <ConfirmDialog
-                        open={showBulkDeleteDialog}
-                        onOpenChange={setShowBulkDeleteDialog}
-                        title="Hapus Ulasan Terpilih?"
-                        description={`${selectedRows.length} ulasan akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
-                        onConfirm={async () => {
-                            setIsBulkDeleting(true)
-                            try {
-                                await Promise.all(selectedRows.map(review => toggleReviewPublishAction(review.id, false)))
-                                toast.success(`${selectedRows.length} ulasan berhasil dihapus`)
-                                setShowBulkDeleteDialog(false)
-                                setSelectedRows([])
-                                router.refresh()
-                            } catch (error) {
-                                toast.error("Gagal menghapus beberapa ulasan")
-                            } finally {
-                                setIsBulkDeleting(false)
-                            }
-                        }}
-                        confirmText="Hapus"
-                        isLoading={isBulkDeleting}
-                        trigger={
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => setShowBulkDeleteDialog(true)}
-                            >
-                                Hapus Terpilih
-                            </Button>
+            {/* Bulk Action Bar */}
+            <BulkActionBar
+                selectedCount={selectedRows.length}
+                label="ulasan"
+                onCancel={() => setSelectedRows([])}
+                onConfirm={() => {
+                    startTransition(async () => {
+                        try {
+                            await Promise.all(selectedRows.map(review => toggleReviewPublishAction(review.id, false)))
+                            toast.success(`${selectedRows.length} ulasan berhasil dihapus`)
+                            setSelectedRows([])
+                            router.refresh()
+                        } catch (error) {
+                            toast.error("Gagal menghapus beberapa ulasan")
                         }
-                    />
-                </div>
-            )}
+                    })
+                }}
+                isPending={isPending}
+                title="Hapus Ulasan Terpilih?"
+                description={`${selectedRows.length} ulasan akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+            />
 
             {/* DataTable */}
             <div className="rounded-xl border border-border/60 overflow-hidden">

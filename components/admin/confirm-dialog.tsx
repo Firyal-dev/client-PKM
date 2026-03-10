@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useState, useEffect, useRef } from "react"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
@@ -19,16 +20,57 @@ type ConfirmDialogProps = {
 }
 
 export function ConfirmDialog({
-    trigger, open, onOpenChange, title, description, onConfirm, onCancel,
+    trigger, open: propOpen, onOpenChange, title, description, onConfirm, onCancel,
     isLoading = false, confirmText = "Ya, Lanjutkan", cancelText = "Batal", variant = "destructive"
 }: ConfirmDialogProps) {
-    const isDestructive = variant === "destructive"
+    const isControlled = propOpen !== undefined
+    const [internalOpen, setInternalOpen] = useState(false)
+    const open = isControlled ? propOpen : internalOpen
 
     const handleOpenChange = (isOpen: boolean) => {
         if (!isOpen && onCancel) {
             onCancel()
         }
-        onOpenChange?.(isOpen)
+        if (isControlled) {
+            onOpenChange?.(isOpen)
+        } else {
+            setInternalOpen(isOpen)
+        }
+    }
+
+    const prevLoading = useRef(isLoading)
+    useEffect(() => {
+        if (prevLoading.current && !isLoading && !isControlled && internalOpen) {
+            setInternalOpen(false)
+        }
+        prevLoading.current = isLoading
+    }, [isLoading, isControlled, internalOpen])
+
+    const isDestructive = variant === "destructive"
+
+    const handleConfirm = (e: React.MouseEvent) => {
+        onConfirm()
+
+        if (isControlled) {
+            e.preventDefault()
+            return
+        }
+
+        // For uncontrolled: 
+        // If it starts loading, it will be closed by the useEffect above.
+        // If it doesn't start loading, it should close normally.
+        // We use a small timeout to allow for potential loading state to kick in on next tick.
+        if (!isLoading) {
+            e.preventDefault()
+            // We give it a tiny delay to see if isLoading prop updates in the parent
+            setTimeout(() => {
+                // If it's still not loading, close it. If it started loading, 
+                // the useEffect will handle it later.
+                setInternalOpen(false)
+            }, 10)
+        } else {
+            e.preventDefault()
+        }
     }
 
     return (
@@ -46,7 +88,11 @@ export function ConfirmDialog({
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-5 sm:mt-6 flex flex-col-reverse sm:flex-row gap-2">
                     <AlertDialogCancel className={cn("mt-0 w-full sm:w-auto rounded-lg bg-muted/50 font-semibold")}>{cancelText}</AlertDialogCancel>
-                    <AlertDialogAction disabled={isLoading} onClick={(e) => { e.preventDefault(); onConfirm() }} className={cn("w-full sm:w-auto rounded-lg font-bold", isDestructive ? "bg-red-600 text-white hover:bg-red-700" : "bg-primary text-primary-foreground")}>
+                    <AlertDialogAction
+                        disabled={isLoading}
+                        onClick={handleConfirm}
+                        className={cn("w-full sm:w-auto rounded-lg font-bold", isDestructive ? "bg-red-600 text-white hover:bg-red-700" : "bg-primary text-primary-foreground")}
+                    >
                         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : confirmText}
                     </AlertDialogAction>
                 </AlertDialogFooter>

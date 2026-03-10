@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, ChangeEvent, useEffect } from "react"
+import { useState, ChangeEvent, useEffect, useCallback } from "react"
 
 export function useImagePreview() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -15,13 +15,13 @@ export function useImagePreview() {
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
         }
-    };
+    }, [previewUrl]);
 
-    const resetPreview = () => {
+    const resetPreview = useCallback(() => {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setPreviewUrl(null);
         setSelectedFile(null);
-    };
+    }, [previewUrl]);
 
     useEffect(() => {
         return () => {

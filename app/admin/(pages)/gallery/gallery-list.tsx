@@ -4,6 +4,7 @@ import { useState, useMemo, useTransition } from "react"
 import { Loader2, Trash2, CheckSquare, X } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
+import { BulkActionBar } from "@/components/admin/bulk-action-bar"
 import { SearchFilter } from "@/components/admin/SearchFilter"
 import { Button } from "@/components/ui/button"
 import { GalleryCard } from "@/components/admin/gallery-card"
@@ -110,61 +111,16 @@ export function GalleryList({ gallery }: { gallery: Gallery[] }) {
                 )}
             </div>
 
-            {/* Floating Action Bar */}
-            {selected.length > 0 && (
-                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] animate-in fade-in slide-in-from-bottom-4 duration-200">
-                    <div className="flex items-center gap-2 bg-popover border border-border rounded-2xl shadow-xl shadow-black/20 px-2 py-2">
-                        {/* Count */}
-                        <div className="flex items-center gap-2 px-3 py-1.5">
-                            <div className="w-6 h-6 rounded-lg bg-foreground/10 flex items-center justify-center">
-                                <CheckSquare className="w-3.5 h-3.5 text-foreground/70" />
-                            </div>
-                            <span className="text-sm font-semibold tabular-nums">
-                                {selected.length}
-                                <span className="text-muted-foreground font-normal text-xs ml-1">foto</span>
-                            </span>
-                        </div>
-
-                        <div className="w-px h-6 bg-border" />
-
-                        {/* Cancel */}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-9 px-3 rounded-xl text-muted-foreground hover:text-foreground text-xs font-medium"
-                            onClick={() => setSelected([])}
-                            disabled={isPending}
-                        >
-                            <X className="w-3.5 h-3.5 mr-1.5" />
-                            Batal
-                        </Button>
-
-                        {/* Delete */}
-                        <ConfirmDialog
-                            trigger={
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="h-9 px-4 rounded-xl text-xs font-semibold"
-                                    disabled={isPending}
-                                >
-                                    {isPending ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                                    ) : (
-                                        <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                                    )}
-                                    Hapus
-                                </Button>
-                            }
-                            title="Hapus Foto?"
-                            description={`${selected.length} foto akan dihapus permanen dan tidak bisa dikembalikan.`}
-                            onConfirm={handleDelete}
-                            isLoading={isPending}
-                            confirmText="Hapus"
-                        />
-                    </div>
-                </div>
-            )}
+            {/* Bulk Action Bar */}
+            <BulkActionBar
+                selectedCount={selected.length}
+                label="foto"
+                onCancel={() => setSelected([])}
+                onConfirm={handleDelete}
+                isPending={isPending}
+                title="Hapus Foto?"
+                description={`${selected.length} foto akan dihapus permanen dan tidak bisa dikembalikan.`}
+            />
         </div>
     )
 }

@@ -3,7 +3,7 @@
 import api from '@/services/api'
 import { getAuthToken, requireAuth } from '@/services/auth-token'
 
-import { handleServiceError } from '@/services/utils'
+import { handleServiceError, CACHE_TAGS } from '@/services/utils'
 import { AdminProfileProp } from '@/types/admin-profile-prop'
 
 // Ambil profile admin
@@ -12,7 +12,10 @@ export async function getAdminProfile(): Promise<AdminProfileProp | null> {
     if (!token) return null
 
     try {
-        const res = await api.get('/v1/admin/profile', { headers: { Authorization: `Bearer ${token}` } })
+        const res = await api.get('/v1/admin/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+            next: { tags: [CACHE_TAGS.PROFILE] }
+        })
         return res.data
     } catch { return null }
 }

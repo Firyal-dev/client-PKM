@@ -19,36 +19,35 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
     const { previewUrl, handleFileChange, resetPreview } = useImagePreview()
     const [open, setOpen] = useState(false)
     const [name, setName] = useState(profile.name || "")
-    const hasHandledRef = useRef(false)
 
     const handleOpenChange = (isOpen: boolean) => {
-        if (!isOpen) {
-            hasHandledRef.current = false
-        }
         setOpen(isOpen)
     }
 
     const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value
-        // Filter: hanya huruf dan angka
-        const cleanedValue = inputValue.replace(/[^a-zA-Z0-9]/g, '')
+        const cleanedValue = inputValue.replace(/[^a-zA-Z0-9 ]/g, '')
         setName(cleanedValue)
     }
 
-    const photoSrc = getMediaUrl(profile?.photo, '/profiles') || "/userPlaceholder.jpg"
+    const photoSrc = getMediaUrl(profile?.photo, 'uploads/profiles') || "/userPlaceholder.jpg"
+
+    // Sync name when profile changes from server (revalidateTag)
+    useEffect(() => {
+        if (profile?.name) {
+            setName(profile.name)
+        }
+    }, [profile?.name])
 
     useEffect(() => {
-        if (!isPending && state && !hasHandledRef.current) {
-            hasHandledRef.current = true
-            if (state.success) {
-                toast.success("Profil diperbarui!")
-                resetPreview()
-                setTimeout(() => setOpen(false), 100)
-            } else if (state.error) {
-                toast.error("Gagal: " + state.error)
-            }
+        if (state && !isPending && state.success && open) {
+            toast.success("Profil diperbarui!")
+            resetPreview()
+            setOpen(false)
+        } else if (state && !isPending && state.error && open) {
+            toast.error("Gagal: " + state.error)
         }
-    }, [state, isPending, resetPreview])
+    }, [state, isPending, open, resetPreview])
 
     if (!profile) return null
 
