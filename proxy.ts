@@ -15,8 +15,6 @@ export function proxy(request: NextRequest) {
         tenantSlug = hostWithoutPort.split('.')[0];
     }
 
-    console.log(`[Proxy] Host: ${hostname} | Tenant Slug: ${tenantSlug}`);
-
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-tenant-slug', tenantSlug);
 

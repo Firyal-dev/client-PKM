@@ -12,9 +12,6 @@ export interface Puskesmas {
     id: string
     name: string
     slug: string
-    alamat?: string
-    logo_path?: string
-    primary_color?: string
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
     created_at: string
     updated_at: string
@@ -54,18 +51,24 @@ export async function createPuskesmasAction(_: unknown, formData: FormData) {
         revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal buat puskesmas')
 
-    if (result.success) redirect('/admin/puskesmas')
+    if (result.success) redirect('/admin/puskes')
     return result
 }
 
 // Admin: Update puskesmas
 export async function updatePuskesmasAction(id: string, _: unknown, formData: FormData) {
+    // Convert FormData to JSON object
+    const data: Record<string, any> = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
     const result = await tryAction(async () => {
-        await api.patch(`/v1/puskesmas/${id}`, formData, { headers: await authHeaders() })
+        await api.patch(`/v1/puskesmas/${id}`, data, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal update puskesmas')
 
-    if (result.success) redirect('/admin/puskesmas')
+    if (result.success) redirect('/admin/puskes')
     return result
 }
 

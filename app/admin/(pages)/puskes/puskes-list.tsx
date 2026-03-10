@@ -3,12 +3,11 @@
 import { useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Edit, Trash2, Building2, MapPin, Search, X, SlidersHorizontal } from "lucide-react"
+import { Edit, Trash2, Building2, Search, X, SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
 import { ColumnDef } from "@tanstack/react-table"
 
 import { Puskesmas, deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
-import { getMediaUrl } from "@/lib/getMediaUrl"
 
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { Button } from "@/components/ui/button"
@@ -17,12 +16,11 @@ import { Input } from "@/components/ui/input"
 import { DataTable } from "@/components/ui/data-table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Image from "next/image"
 
-export function PuskesmasList({ 
-    puskesmas, 
-    total 
-}: { 
+export function PuskesmasList({
+    puskesmas,
+    total
+}: {
     puskesmas: Puskesmas[]
     total: number
 }) {
@@ -77,17 +75,7 @@ export function PuskesmasList({
                 return (
                     <div className="flex items-center gap-2">
                         <div className="relative w-8 h-8 rounded overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                            {p.logo_path ? (
-                                <Image
-                                    src={getMediaUrl(p.logo_path) || "/placeholder.jpg"}
-                                    alt={p.name}
-                                    fill
-                                    unoptimized
-                                    className="object-cover"
-                                />
-                            ) : (
-                                <Building2 className="w-4 h-4 text-slate-400" />
-                            )}
+                            <Building2 className="w-4 h-4 text-slate-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{p.name}</p>
@@ -96,17 +84,6 @@ export function PuskesmasList({
                     </div>
                 )
             },
-        },
-        {
-            id: "address",
-            accessorKey: "alamat",
-            header: "Alamat",
-            cell: ({ row }) => (
-                <div className="flex items-start gap-1 text-sm text-muted-foreground max-w-xs">
-                    <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                    <span className="line-clamp-2">{row.original.alamat || "—"}</span>
-                </div>
-            ),
         },
         {
             id: "status",
