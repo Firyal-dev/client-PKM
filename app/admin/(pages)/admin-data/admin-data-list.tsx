@@ -105,6 +105,20 @@ export default function AdminDataList({
             },
         },
         {
+            id: "puskes",
+            header: "Puskesmas",
+            cell: ({ row }) => {
+                const admin = row.original
+                const isOperator = admin.role === "OPERATOR"
+                if (!isOperator) return <span className="text-xs text-muted-foreground">—</span>
+                return (
+                    <span className="text-xs font-medium text-foreground">
+                        {admin.puskes_name || admin.puskesmas_id || 'Belum ditugaskan'}
+                    </span>
+                )
+            },
+        },
+        {
             id: "createdAt",
             accessorKey: "created_at",
             header: "Tanggal Dibuat",
@@ -183,7 +197,7 @@ export default function AdminDataList({
 
     const currentRoleFilter = searchParams.get("role") || "all"
     const hasFilter = currentRoleFilter !== "all" || !!globalFilter
-
+    console.log(admins)
     return (
         <div className="space-y-4">
             {/* Filter row */}

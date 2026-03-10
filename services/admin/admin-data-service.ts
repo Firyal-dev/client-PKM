@@ -39,6 +39,36 @@ export async function getAdminById(id: string): Promise<Admin | null> {
     }
 }
 
+// Get available puskes for operator assignment (puskes with less than 2 operators)
+export async function getAvailablePuskesForOperators(): Promise<{ id: string; name: string; operatorCount: number }[]> {
+    try {
+        const res = await api.get('/v1/admin/available-puskes', {
+            headers: await authHeaders()
+        })
+        return res.data || []
+    } catch (e) {
+        console.error('Error fetching available puskes:', e)
+        return []
+    }
+}
+
+// Get all active puskes for dropdown
+export async function getAllActivePuskes(): Promise<{ id: string; name: string }[]> {
+    try {
+        const res = await api.get('/v1/puskesmas?limit=1000', {
+            headers: await authHeaders()
+        })
+        const data = res.data?.docs || res.data || []
+        // Filter only ACTIVE puskes
+        return data
+            .filter((p: any) => p.status === 'ACTIVE')
+            .map((p: any) => ({ id: p.id, name: p.name }))
+    } catch (e) {
+        console.error('Error fetching puskes:', e)
+        return []
+    }
+}
+
 // Create admin
 export async function createAdmin(formData: FormData) {
     return await tryAction(async () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { UserPlus } from "lucide-react"
 import { toast } from "sonner"
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createAdmin } from "@/services/admin/admin-data-service"
+import { getAllActivePuskes } from "@/services/admin/admin-data-service"
 import { Admin } from "@/types/admin"
 
 interface CreateAdminDialogProps {
@@ -23,12 +24,20 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [nameError, setNameError] = useState("")
     const [passwordError, setPasswordError] = useState("")
+    const [puskesList, setPuskesList] = useState<{ id: string; name: string }[]>([])
 
     // Form state
     const [formName, setFormName] = useState("")
     const [formPassword, setFormPassword] = useState("")
     const [formRole, setFormRole] = useState<"OPERATOR" | "SUPER_ADMIN">("OPERATOR")
     const [formPuskesmasId, setFormPuskesmasId] = useState<string>("")
+
+    // Load puskes list when dialog opens
+    useEffect(() => {
+        if (open && formRole === "OPERATOR") {
+            getAllActivePuskes().then(setPuskesList).catch(() => setPuskesList([]))
+        }
+    }, [open, formRole])
 
     const validateName = (name: string): boolean => {
         const nameRegex = /^[a-zA-Z0-9]+$/
@@ -69,6 +78,12 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
 
         if (!isNameValid || !isPasswordValid) return
 
+        // Validasi: Operator wajib pilih puskes
+        if (formRole === "OPERATOR" && !formPuskesmasId) {
+            toast.error("Pilih puskesmas untuk operator")
+            return
+        }
+
         setIsSubmitting(true)
         try {
             const formData = new FormData()
@@ -105,6 +120,13 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
     const handleOpenChange = (isOpen: boolean) => {
         setOpen(isOpen)
         if (!isOpen) resetForm()
+    }
+
+    const handleRoleChange = (value: string) => {
+        setFormRole(value as "OPERATOR" | "SUPER_ADMIN")
+        if (value === "SUPER_ADMIN") {
+            setFormPuskesmasId("")
+        }
     }
 
     return (
@@ -151,7 +173,7 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
                         <Label htmlFor="role">Role</Label>
                         <Select
                             value={formRole}
-                            onValueChange={(value) => setFormRole(value as "OPERATOR" | "SUPER_ADMIN")}
+                            onValueChange={handleRoleChange}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Pilih role" />
@@ -162,6 +184,29 @@ export function CreateAdminDialog({ children }: CreateAdminDialogProps) {
                             </SelectContent>
                         </Select>
                     </div>
+                    {formRole === "OPERATOR" && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="puskes">Puskesmas</Label>
+                            <Select
+                                value={formPuskesmasId}
+                                onValueChange={setFormPuskesmasId}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih puskesmas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {puskesList.map((puskes) => (
+                                        <SelectItem key={puskes.id} value={puskes.id}>
+                                            {puskes.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Maksimum 2 operator per puskesmas
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>
@@ -190,11 +235,31 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [nameError, setNameError] = useState("")
     const [passwordError, setPasswordError] = useState("")
+    const [puskesList, setPuskesList] = useState<{ id: string; name: string }[]>([])
+    const [confirmPassword, setConfirmPassword] = useState("")
 
     const [formName, setFormName] = useState(admin?.name || "")
     const [formPassword, setFormPassword] = useState("")
     const [formRole, setFormRole] = useState<"OPERATOR" | "SUPER_ADMIN">(admin?.role as "OPERATOR" | "SUPER_ADMIN" || "OPERATOR")
     const [formPuskesmasId, setFormPuskesmasId] = useState(admin?.puskesmas_id || "")
+
+    // Load puskes list when dialog opens
+    useEffect(() => {
+        if (open && formRole === "OPERATOR") {
+            getAllActivePuskes().then(setPuskesList).catch(() => setPuskesList([]))
+        }
+    }, [open, formRole])
+
+    // Reset form when admin changes
+    useEffect(() => {
+        if (admin) {
+            setFormName(admin.name || "")
+            setFormRole(admin.role as "OPERATOR" | "SUPER_ADMIN" || "OPERATOR")
+            setFormPuskesmasId(admin.puskesmas_id || "")
+            setFormPassword("")
+            setConfirmPassword("")
+        }
+    }, [admin])
 
     const validateName = (name: string): boolean => {
         const nameRegex = /^[a-zA-Z0-9]+$/
@@ -235,14 +300,33 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
 
         if (!isNameValid || !isPasswordValid) return
 
+        // Validasi konfirmasi password
+        if (formPassword) {
+            if (!confirmPassword) {
+                toast.error("Konfirmasi password wajib diisi")
+                return
+            }
+            if (formPassword !== confirmPassword) {
+                toast.error("Password dan konfirmasi password tidak cocok")
+                return
+            }
+        }
+
+        // Validasi: Operator wajib pilih puskes
+        if (formRole === "OPERATOR" && !formPuskesmasId) {
+            toast.error("Pilih puskesmas untuk operator")
+            return
+        }
+
         setIsSubmitting(true)
         try {
-            const data: { name: string; role: "OPERATOR" | "SUPER_ADMIN"; password?: string; puskesmas_id?: string } = {
+            const data: { name: string; role: "OPERATOR" | "SUPER_ADMIN"; password?: string; puskesmas_id?: string; password_confirmation?: string } = {
                 name: formName,
                 role: formRole
             }
             if (formPassword) {
                 data.password = formPassword
+                data.password_confirmation = confirmPassword
             }
             if (formRole === "OPERATOR" && formPuskesmasId) {
                 data.puskesmas_id = formPuskesmasId
@@ -259,6 +343,13 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
             }
         } finally {
             setIsSubmitting(false)
+        }
+    }
+
+    const handleRoleChange = (value: string) => {
+        setFormRole(value as "OPERATOR" | "SUPER_ADMIN")
+        if (value === "SUPER_ADMIN") {
+            setFormPuskesmasId("")
         }
     }
 
@@ -297,10 +388,25 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
                         {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
                     </div>
                     <div className="grid gap-2">
+                        <Label htmlFor="edit-confirm-password">
+                            Konfirmasi Password
+                        </Label>
+                        <Input
+                            id="edit-confirm-password"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="••••••••"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            Wajib diisi jika ingin mengubah password
+                        </p>
+                    </div>
+                    <div className="grid gap-2">
                         <Label htmlFor="edit-role">Role</Label>
                         <Select
                             value={formRole}
-                            onValueChange={(value) => setFormRole(value as "OPERATOR" | "SUPER_ADMIN")}
+                            onValueChange={handleRoleChange}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Pilih role" />
@@ -311,6 +417,29 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
                             </SelectContent>
                         </Select>
                     </div>
+                    {formRole === "OPERATOR" && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-puskes">Puskesmas</Label>
+                            <Select
+                                value={formPuskesmasId}
+                                onValueChange={setFormPuskesmasId}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih puskesmas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {puskesList.map((puskes) => (
+                                        <SelectItem key={puskes.id} value={puskes.id}>
+                                            {puskes.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Maksimum 2 operator per puskesmas
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>
