@@ -11,6 +11,7 @@ import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
 import type { Album } from "@/types/album-prop"
 import type { Video } from "@/services/video/video-service"
+import DOMPurify from "isomorphic-dompurify"
 
 interface GalleryPageContentProps {
     initialPhotos: Gallery[]
@@ -230,7 +231,12 @@ function VideosTab({ data }: { data: Video[] }) {
                         {video.embed ? (
                             <div
                                 className="w-full h-full"
-                                dangerouslySetInnerHTML={{ __html: getYouTubeEmbedHtml(video.embed) }}
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(getYouTubeEmbedHtml(video.embed), {
+                                        ADD_TAGS: ["iframe"],
+                                        ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'src', 'width', 'height']
+                                    })
+                                }}
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center">

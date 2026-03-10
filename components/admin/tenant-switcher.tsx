@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown, Building2, Search, X } from "lucide-react"
+import { ChevronsUpDown, Building2, Search, X, Check } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -158,13 +158,19 @@ export function TenantSwitcher({
                                 <DropdownMenuItem
                                     key={team.id}
                                     onClick={() => handleSwitch(team.id)}
-                                    className="gap-2 p-2"
+                                    className={`gap-2 p-2 ${activeTenantId === team.id ? "bg-accent text-accent-foreground font-medium" : ""}`}
                                     disabled={isPending}
                                 >
-                                    <div className="flex size-6 items-center justify-center rounded-md border">
-                                        <Building2 className="size-3.5 shrink-0" />
+                                    <div className={`flex size-6 items-center justify-center rounded-md border ${activeTenantId === team.id ? "border-primary bg-primary text-primary-foreground" : ""}`}>
+                                        {activeTenantId === team.id
+                                            ? <Check className="size-3.5 shrink-0" />
+                                            : <Building2 className="size-3.5 shrink-0" />
+                                        }
                                     </div>
                                     {team.name}
+                                    {activeTenantId === team.id && (
+                                        <Check className="ml-auto size-3.5 text-primary" />
+                                    )}
                                 </DropdownMenuItem>
                             ))
                         )}

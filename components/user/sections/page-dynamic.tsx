@@ -3,6 +3,7 @@ import Breadcrumb from "@/components/user/partials/breadcrumb"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
+import DOMPurify from "isomorphic-dompurify"
 
 interface PageDynamicProps {
     page: Page
@@ -21,6 +22,8 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
             ? page.image
             : `${getBaseUrl().replace('/api', '')}${page.image}`
         : null
+
+    const sanitizedContent = page.dynamic_content ? DOMPurify.sanitize(page.dynamic_content) : ""
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -69,15 +72,8 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
 
                     {page.dynamic_content ? (
                         <div
-                            className="prose prose-slate prose-lg max-w-none
-                prose-headings:font-bold prose-headings:text-slate-800
-                prose-p:text-slate-600 prose-p:leading-relaxed
-                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                prose-img:rounded-xl prose-img:shadow-md
-                prose-ul:text-slate-600 prose-ol:text-slate-600
-                prose-blockquote:border-blue-400 prose-blockquote:bg-blue-50 prose-blockquote:rounded-r-lg prose-blockquote:py-1
-                prose-table:text-sm prose-th:bg-blue-50 prose-th:text-blue-800"
-                            dangerouslySetInnerHTML={{ __html: page.dynamic_content }}
+                            className="prose prose-slate max-w-none"
+                            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                         />
                     ) : (
                         <div className="text-center py-16 text-slate-400">

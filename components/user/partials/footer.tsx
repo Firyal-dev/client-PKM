@@ -13,12 +13,21 @@ export default async function Footer() {
     ])
 
     return (
-        <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 py-12 md:py-16">
-            <div className="max-w-7xl mx-auto px-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                    {/* Map Section */}
-                    <div className="space-y-6">
-                        <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-800">
+        <footer className="bg-slate-900 text-slate-300">
+
+            {/* Top divider */}
+            <div className="h-px bg-slate-800" />
+
+            <div className="max-w-7xl mx-auto px-6 pt-16 pb-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14 pb-14 border-b border-slate-800">
+
+                    {/* ── Col 1: Map + Kontak ── */}
+                    <div className="space-y-5">
+                        <h4 className="text-[11px] font-bold tracking-[0.14em] text-slate-500 uppercase">
+                            Lokasi & Kontak
+                        </h4>
+
+                        <div className="h-[190px] rounded-xl overflow-hidden ring-1 ring-slate-700">
                             {webInfo?.lantitude && webInfo?.longtitude ? (
                                 <iframe
                                     width="100%"
@@ -30,41 +39,43 @@ export default async function Footer() {
                                 />
                             ) : (
                                 <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                                    <div className="text-center p-4">
-                                        <MapPin className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                                        <p className="text-xs text-slate-400 mb-1">Peta Lokasi</p>
-                                        <p className="text-xs text-slate-500 line-clamp-2">{webInfo?.location || 'Alamat belum diatur'}</p>
+                                    <div className="text-center space-y-2">
+                                        <MapPin className="w-6 h-6 text-slate-500 mx-auto" />
+                                        <p className="text-xs text-slate-500 px-4 line-clamp-2">
+                                            {webInfo?.location || 'Alamat belum diatur'}
+                                        </p>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <div className
-                        ="flex items-start gap-3 px-2">
-                            <div className="text-xs space-y-1">
-                                <p className="text-slate-400 italic">&quot;{webInfo?.location || 'Alamat belum diatur'}&quot;</p>
-                            </div>
+                        <div className="space-y-2.5 pt-0.5">
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                                {webInfo?.location || 'Alamat belum diatur'}
+                            </p>
+                            {webInfo?.contact && (
+                                <div className="flex items-center gap-2.5">
+                                    <Phone size={12} className="text-slate-500 flex-shrink-0" />
+                                    <span className="text-xs text-slate-400">{webInfo.contact}</span>
+                                </div>
+                            )}
+                            {webInfo?.email && (
+                                <div className="flex items-center gap-2.5">
+                                    <Mail size={12} className="text-slate-500 flex-shrink-0" />
+                                    <span className="text-xs text-slate-400">{webInfo.email}</span>
+                                </div>
+                            )}
                         </div>
-
-                        {webInfo?.contact && (
-                            <div className="flex items-center gap-2 px-2 text-sm">
-                                <Phone size={14} className="text-blue-500" />
-                                <span className="text-slate-400">{webInfo.contact}</span>
-                            </div>
-                        )}
-                        {webInfo?.email && (
-                            <div className="flex items-center gap-2 px-2 text-sm">
-                                <Mail size={14} className="text-blue-500" />
-                                <span className="text-slate-400">{webInfo.email}</span>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Brand Section */}
-                    <div className="space-y-6">
-                        {/* Logo */}
-                        <Link href="/" className="flex items-center gap-3">
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
+                    {/* ── Col 2: Brand ── */}
+                    <div className="space-y-7">
+                        <h4 className="text-[11px] font-bold tracking-[0.14em] text-slate-500 uppercase">
+                            Tentang Kami
+                        </h4>
+
+                        <Link href="/" className="flex items-center gap-3 group w-fit">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 ring-1 ring-slate-700 flex items-center justify-center flex-shrink-0">
                                 <Image
                                     src={getMediaUrl(webInfo?.logo) || "/puskesmasLogo.png"}
                                     alt="Logo Puskesmas"
@@ -75,63 +86,65 @@ export default async function Footer() {
                                 />
                             </div>
                             <div>
-                                <p className="font-bold text-lg text-white leading-none">
+                                <p className="text-sm font-bold text-white leading-none">
                                     {webInfo?.web_title?.split(' ')[0] || "PUSKESMAS"}
                                 </p>
-                                <p className="text-xs text-slate-400 uppercase tracking-widest mt-1">
+                                <p className="text-[10px] text-slate-500 uppercase tracking-[0.1em] mt-1">
                                     {webInfo?.web_title?.split(' ').slice(1).join(' ') || "Kecamatan Sehat"}
                                 </p>
                             </div>
                         </Link>
 
-                        <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
+                        <p className="text-sm text-slate-400 leading-[1.85] max-w-[280px]">
                             Memberikan pelayanan kesehatan yang bermutu, merata, dan terjangkau bagi seluruh
                             masyarakat di wilayah Kota Bogor.
                         </p>
 
-                        <SocialIcon className="text-slate-400" socialLinks={webInfo?.social_links} />
+                        <SocialIcon className="text-slate-500" socialLinks={webInfo?.social_links} />
                     </div>
 
-                    {/* Stats Section */}
-                    <div className="space-y-5">
-                        <div className="flex items-center gap-2 px-1">
-                            <Users className="w-5 h-5 text-blue-400" />
-                            <h4 className="font-semibold text-white text-sm uppercase tracking-wider">
-                                Statistik Pengunjung
-                            </h4>
+                    {/* ── Col 3: Visitor Stats ── */}
+                    <div className="space-y-7">
+                        <h4 className="text-[11px] font-bold tracking-[0.14em] text-slate-500 uppercase">
+                            Statistik Pengunjung
+                        </h4>
+
+                        <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-slate-400" />
+                            <span className="text-sm font-medium text-slate-300">Pengunjung Website</span>
                         </div>
 
-                        <div className="bg-slate-800/50 border border-white/5 rounded-2xl p-5 space-y-3">
+                        <div className="rounded-xl border border-slate-800 overflow-hidden">
                             {[
                                 { label: 'Hari Ini', value: stats.today },
                                 { label: 'Bulan Ini', value: stats.thisMonth },
                                 { label: 'Tahun Ini', value: stats.thisYear },
                             ].map((stat, idx) => (
-                                <div key={idx} className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-400">
-                                        {stat.label}
-                                    </span>
-                                    <span className="font-medium text-white tabular-nums">
+                                <div
+                                    key={idx}
+                                    className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-slate-800/30"
+                                >
+                                    <span className="text-xs text-slate-400">{stat.label}</span>
+                                    <span className="text-sm font-semibold text-slate-200 tabular-nums">
                                         {stat.value.toLocaleString('id-ID')}
                                     </span>
                                 </div>
                             ))}
 
-                            <div className="pt-3 mt-3 border-t border-slate-700/50 flex items-center justify-between">
-                                <span className="text-sm font-semibold text-emerald-400 uppercase tracking-wider">
-                                    Total
-                                </span>
-                                <span className="text-lg font-bold text-emerald-400 tabular-nums">
+                            <div className="flex items-center justify-between px-4 py-4 bg-slate-800">
+                                <span className="text-xs font-bold tracking-widest text-slate-300 uppercase">Total</span>
+                                <span className="text-lg font-bold text-white tabular-nums">
                                     {stats.total.toLocaleString('id-ID')}
                                 </span>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-                {/* Footer Bottom */}
-                <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 uppercase tracking-widest px-1">
-                    <p>© {new Date().getFullYear()} PEMERINTAH KOTA BOGOR</p>
+                {/* ── Footer Bottom ── */}
+                <div className="py-6 flex flex-col md:flex-row justify-between items-center gap-2 text-[11px] text-slate-600 tracking-widest uppercase">
+                    <p>© {new Date().getFullYear()} Pemerintah Kota Bogor</p>
                 </div>
             </div>
         </footer>

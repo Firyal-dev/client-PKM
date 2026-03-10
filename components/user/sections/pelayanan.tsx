@@ -20,7 +20,7 @@ export default function Pelayanan({ data }: PelayananProps) {
     const isEmpty = !data || data.length === 0
 
     return (
-        <section className="relative z-10 -mt-16" id="pelayanan">
+        <section className="relative z-10 -mt-30" id="pelayanan">
             <div className="container mx-auto px-6 md:px-12 lg:px-16">
                 <Card className="border-slate-100 shadow-lg shadow-slate-200/60 py-0 overflow-hidden gap-0">
 

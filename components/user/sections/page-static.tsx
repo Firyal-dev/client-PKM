@@ -1,6 +1,7 @@
 import Breadcrumb from "@/components/user/partials/breadcrumb"
 import { StaticPage } from "@/services/static-page/static-page-service"
 import { Menu } from "@/services/menu/menu-service"
+import DOMPurify from "isomorphic-dompurify"
 
 interface PageStaticProps {
     page: StaticPage
@@ -9,6 +10,7 @@ interface PageStaticProps {
 
 export function PageStatic({ page, menu }: PageStaticProps) {
     const breadcrumbItems = [{ label: menu.title }]
+    const sanitizedContent = page.static_content ? DOMPurify.sanitize(page.static_content) : ""
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -39,7 +41,7 @@ export function PageStatic({ page, menu }: PageStaticProps) {
                 prose-ul:text-slate-600 prose-ol:text-slate-600
                 prose-blockquote:border-green-400 prose-blockquote:bg-green-50 prose-blockquote:rounded-r-lg prose-blockquote:py-1
                 prose-table:text-sm prose-th:bg-green-50 prose-th:text-green-800"
-                            dangerouslySetInnerHTML={{ __html: page.static_content }}
+                            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                         />
                     ) : (
                         <div className="text-center py-16 text-slate-400">

@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/user/partials/breadcrumb"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
+import DOMPurify from "isomorphic-dompurify"
 
 interface PageDokumenProps {
     page: Page
@@ -20,6 +21,8 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
             ? page.file
             : `${getBaseUrl().replace('/api', '')}${page.file}`
         : null
+
+    const sanitizedContent = page.dynamic_content ? DOMPurify.sanitize(page.dynamic_content) : ""
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -117,7 +120,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                         <h2 className="text-lg font-semibold text-slate-800 mb-4">Keterangan</h2>
                         <div
                             className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: page.dynamic_content }}
+                            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                         />
                     </div>
                 )}
