@@ -23,7 +23,8 @@ export async function getPublicReviews(page = 1, limit = 10) {
 // Publik: Buat review
 export async function createReviewAction(data: Omit<Reviews, 'id' | 'created_at'>) {
     return tryAction(async () => {
-        await api.post('/v1/reviews', data)
+        const tenantHeaders = await getTenantHeader();
+        await api.post('/v1/reviews', data, { headers: tenantHeaders })
         revalidateTag(CACHE_TAGS.REVIEW, 'max')
         return { message: 'Ulasan dikirim!' }
     }, 'Gagal buat ulasan')

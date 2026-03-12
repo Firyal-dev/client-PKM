@@ -2,7 +2,7 @@
 import { useActionState, useState, useRef } from "react"
 import { MessageSquareWarning } from "lucide-react"
 import { toast } from "sonner"
-import ReCAPTCHA from "react-google-recaptcha"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -39,14 +39,20 @@ export function FloatingReview({ onSubmit }: FloatingReviewProps) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [category, setCategory] = useState<ReviewCategory>(ReviewCategory.PELAYANAN)
-    const recaptchaRef = useRef<ReCAPTCHA>(null)
-    const [captchaValue, setCaptchaValue] = useState<string | null>(null)
+    const { executeRecaptcha } = useGoogleReCaptcha()
 
     // Action function untuk handle submit
     async function submitReview(prevState: FormState | null, formData: FormData): Promise<FormState> {
+        if (!executeRecaptcha) {
+            toast.error("Sistem reCAPTCHA masih memuat. Silakan coba lagi.");
+            return { error: "reCAPTCHA belum siap" };
+        }
+
+        const captchaValue = await executeRecaptcha("review_submit");
+
         if (!captchaValue) {
-            toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
-            return { error: "reCAPTCHA belum dicentang" }
+            toast.error("Gagal verifikasi reCAPTCHA.");
+            return { error: "Gagal verifikasi reCAPTCHA" }
         }
 
         const username = formData.get("username") as string || "Anonim"
@@ -78,8 +84,7 @@ export function FloatingReview({ onSubmit }: FloatingReviewProps) {
             toast.success("Terima kasih atas masukan Anda!")
             setIsDialogOpen(false)
             setCategory(ReviewCategory.PELAYANAN) // Reset category
-            setCaptchaValue(null)
-            recaptchaRef.current?.reset()
+            setCategory(ReviewCategory.PELAYANAN) // Reset category
             return { success: true }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "Gagal mengirim masukan."
@@ -164,13 +169,7 @@ export function FloatingReview({ onSubmit }: FloatingReviewProps) {
                             />
                         </div>
 
-                        <div className="flex justify-center">
-                            <ReCAPTCHA
-                                ref={recaptchaRef}
-                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
-                                onChange={(value) => setCaptchaValue(value)}
-                            />
-                        </div>
+
 
                         <DialogFooter>
                             <Button

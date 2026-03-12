@@ -2,7 +2,7 @@
 
 import api from '@/services/api'
 import { buildParams } from '@/services/helpers'
-import { authHeaders } from '@/services/server-helpers'
+import { authHeaders, getTenantHeader } from '@/services/server-helpers'
 import { tryAction, handleServiceError } from '@/services/utils'
 
 export interface Consultation {
@@ -21,7 +21,8 @@ export interface Consultation {
 // Publik: Buat konsultasi
 export async function createConsultationAction(data: Omit<Consultation, 'id' | 'is_answer' | 'is_publish' | 'created_at' | 'updated_at' | 'answer'>) {
     return tryAction(async () => {
-        await api.post('/v1/consultation', data)
+        const tenantHeaders = await getTenantHeader()
+        await api.post('/v1/consultation', data, { headers: tenantHeaders })
         return { message: 'Konsultasi terkirim!' }
     }, 'Gagal mengirim konsultasi')
 }

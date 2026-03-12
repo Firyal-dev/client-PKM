@@ -12,9 +12,20 @@ export interface Puskesmas {
     id: string
     name: string
     slug: string
-    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'MAINTENANCE'
     created_at: string
     updated_at: string
+    // Status tracking fields
+    suspended_reason?: string
+    suspended_at?: string
+    suspended_by?: string
+    deactivated_at?: string
+    deactivated_by?: string
+    deactivated_reason?: string
+    activated_at?: string
+    activated_by?: string
+    maintenance_started_at?: string
+    maintenance_message?: string
 }
 
 // Admin: Ambil semua puskesmas (paginated)
@@ -46,8 +57,14 @@ export async function getAdminPuskesmasById(id: string): Promise<Puskesmas | nul
 
 // Admin: Buat puskesmas
 export async function createPuskesmasAction(_: unknown, formData: FormData) {
+    // Convert FormData to JSON object
+    const data: Record<string, any> = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
     const result = await tryAction(async () => {
-        await api.post('/v1/puskesmas', formData, { headers: await authHeaders() })
+        await api.post('/v1/puskesmas', data, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal buat puskesmas')
 
@@ -79,4 +96,61 @@ export async function deletePuskesmasAction(id: string) {
         revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
         return { message: 'Puskesmas berhasil dihapus!' }
     }, 'Gagal hapus puskesmas')
+}
+
+// === Tenant Status Management Actions ===
+
+/**
+ * Activate a puskesmas (Super Admin only)
+ */
+export async function activatePuskesmasAction(id: string) {
+    return tryAction(async () => {
+        await api.patch(`/v1/puskesmas/${id}/activate`, {}, { headers: await authHeaders() })
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
+        return { message: 'Puskesmas berhasil diaktifkan!' }
+    }, 'Gagal aktivasi puskesmas')
+}
+
+/**
+ * Deactivate a puskesmas (Super Admin only)
+ */
+export async function deactivatePuskesmasAction(id: string, reason?: string) {
+    return tryAction(async () => {
+        await api.patch(`/v1/puskesmas/${id}/deactivate`, { reason }, { headers: await authHeaders() })
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
+        return { message: 'Puskesmas berhasil dinonaktifkan!' }
+    }, 'Gagal nonaktifkan puskesmas')
+}
+
+/**
+ * Suspend a puskesmas (Super Admin only)
+ */
+export async function suspendPuskesmasAction(id: string, reason: string) {
+    return tryAction(async () => {
+        await api.patch(`/v1/puskesmas/${id}/suspend`, { reason }, { headers: await authHeaders() })
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
+        return { message: 'Puskesmas berhasil ditangguhkan!' }
+    }, 'Gagal tangguhkan puskesmas')
+}
+
+/**
+ * Set puskesmas to maintenance mode (Super Admin only)
+ */
+export async function setMaintenancePuskesmasAction(id: string, message?: string) {
+    return tryAction(async () => {
+        await api.patch(`/v1/puskesmas/${id}/maintenance`, { message }, { headers: await authHeaders() })
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
+        return { message: 'Puskesmas masuk mode maintenance!' }
+    }, 'Gagal setting maintenance')
+}
+
+/**
+ * Remove maintenance mode (Super Admin only)
+ */
+export async function removeMaintenancePuskesmasAction(id: string) {
+    return tryAction(async () => {
+        await api.patch(`/v1/puskesmas/${id}/maintenance/remove`, {}, { headers: await authHeaders() })
+        revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
+        return { message: 'Mode maintenance dihapus!' }
+    }, 'Gagal hapus maintenance')
 }

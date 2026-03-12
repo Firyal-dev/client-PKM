@@ -1,165 +1,277 @@
 'use client'
 
-import { useActionState, useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
+import { useEffect, useActionState, useState } from "react"
+import { Loader2, Save, Building2 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog"
+
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createPuskesmasAction, updatePuskesmasAction, Puskesmas } from '@/services/puskesmas/puskesmas-service'
+import { Label } from "@/components/ui/label"
 
-export function CreatePuskesDialog() {
-    const [open, setOpen] = useState(false)
-    const [state, formAction, isPending] = useActionState(createPuskesmasAction, null)
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
 
-    const [status, setStatus] = useState<string>("ACTIVE")
+import { Puskesmas, createPuskesmasAction, updatePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
+
+interface PuskesDialogProps {
+    initialData?: Puskesmas
+    action: (prevState: any, formData: FormData) => Promise<any>
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+}
+
+export function PuskesDialog({ initialData, action, open: controlledOpen, onOpenChange: controlledOnOpenChange }: PuskesDialogProps) {
+
+    const router = useRouter()
+
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+    const isControlled = controlledOpen !== undefined
+    const open = isControlled ? controlledOpen : uncontrolledOpen
+    const setOpen = isControlled ? controlledOnOpenChange! : setUncontrolledOpen
+
+    const [status, setStatus] = useState<string>(
+        initialData?.status || "ACTIVE"
+    )
+
+    const [state, formAction, isPending] = useActionState(action, null)
 
     useEffect(() => {
+
         if (state?.success) {
+
+            toast.success(
+                initialData
+                    ? "Puskesmas berhasil diperbarui"
+                    : "Puskesmas berhasil dibuat"
+            )
+
             setOpen(false)
-            toast.success("Puskesmas baru berhasil dibuat")
+
+            router.refresh()
+
         } else if (state?.error) {
+
             toast.error(state.error)
+
         }
-    }, [state])
+
+    }, [state, initialData, router])
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
+
             <DialogTrigger asChild>
                 <Button>
-                    Tambah Puskesmas
+                    {initialData ? "Edit Puskesmas" : "Tambah Puskesmas"}
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[425px] rounded-2xl">
+            <DialogContent className="sm:max-w-[500px] rounded-2xl">
+
                 <form action={formAction}>
+
                     <DialogHeader>
-                        <DialogTitle className="text-xl">Tambah Puskesmas</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Building2 className="w-5 h-5" />
+                            {initialData
+                                ? "Ubah Puskesmas"
+                                : "Tambah Puskesmas"}
+                        </DialogTitle>
+
                         <DialogDescription>
-                            Masukkan informasi dasar puskesmas baru.
+                            {initialData
+                                ? "Perbarui informasi dasar puskesmas."
+                                : "Masukkan informasi dasar puskesmas baru."}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="py-6 space-y-4">
-                        <FieldGroup>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="c_name" className="text-sm font-semibold">Nama Puskesmas</FieldLabel>
-                                <Input id="c_name" name="name" placeholder="Contoh: Puskesmas Sehat Selalu" required autoComplete="off" className="h-11 bg-slate-50/50 focus-visible:ring-primary/20" />
-                            </Field>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="c_slug" className="text-sm font-semibold">Slug (URL)</FieldLabel>
-                                <Input id="c_slug" name="slug" placeholder="Contoh: sehat-selalu" required autoComplete="off" className="h-11 bg-slate-50/50 focus-visible:ring-primary/20" />
-                                <p className="text-xs text-muted-foreground">Digunakan untuk URL (contoh: domain.com/puskes/sehat-selalu)</p>
-                            </Field>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="c_status" className="text-sm font-semibold">Status</FieldLabel>
-                                <input type="hidden" name="status" value={status} />
-                                <Select value={status} onValueChange={setStatus}>
-                                    <SelectTrigger className="h-11 bg-slate-50/50 focus-visible:ring-primary/20">
-                                        <SelectValue placeholder="Pilih status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ACTIVE">Aktif</SelectItem>
-                                        <SelectItem value="INACTIVE">Tidak Aktif</SelectItem>
-                                        <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Field>
-                            {state?.error && (
-                                <p className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">
-                                    {state.error}
-                                </p>
-                            )}
-                        </FieldGroup>
+
+                    <div className="space-y-4 py-6">
+
+                        {initialData?.id && (
+                            <input
+                                type="hidden"
+                                name="id"
+                                value={initialData.id}
+                            />
+                        )}
+
+                        {/* Nama */}
+                        <div className="space-y-2">
+
+                            <Label htmlFor="name">
+                                Nama Puskesmas
+                            </Label>
+
+                            <Input
+                                id="name"
+                                name="name"
+                                placeholder="Contoh: Puskesmas Sehat Selalu"
+                                defaultValue={initialData?.name}
+                                required
+                                className="h-11"
+                            />
+
+                        </div>
+
+
+                        {/* Slug */}
+                        <div className="space-y-2">
+
+                            <Label htmlFor="slug">
+                                Slug (URL)
+                            </Label>
+
+                            <Input
+                                id="slug"
+                                name="slug"
+                                placeholder="Contoh: sehat-selalu"
+                                defaultValue={initialData?.slug}
+                                required
+                                className="h-11"
+                            />
+
+                            <p className="text-xs text-muted-foreground">
+                                Digunakan untuk URL akses website
+                                (contoh: domain.com/puskes/sehat-selalu)
+                            </p>
+
+                        </div>
+
+
+                        {/* Status */}
+                        <div className="space-y-2">
+
+                            <Label>Status</Label>
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value={status}
+                            />
+
+                            <Select
+                                value={status}
+                                onValueChange={setStatus}
+                            >
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="Pilih status" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+
+                                    <SelectItem value="ACTIVE">
+                                        Aktif
+                                    </SelectItem>
+
+                                    <SelectItem value="INACTIVE">
+                                        Tidak Aktif
+                                    </SelectItem>
+
+                                    <SelectItem value="SUSPENDED">
+                                        Ditangguhkan
+                                    </SelectItem>
+
+                                    <SelectItem value="MAINTENANCE">
+                                        Maintenance
+                                    </SelectItem>
+
+                                </SelectContent>
+                            </Select>
+
+                        </div>
+
+
+                        {state?.error && (
+                            <p className="text-xs text-destructive">
+                                {state.error}
+                            </p>
+                        )}
+
                     </div>
 
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="rounded-xl">Batal</Button>
-                        <Button type="submit" disabled={isPending} className="rounded-xl min-w-[120px]">
-                            {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</> : "Simpan"}
+
+                    <DialogFooter>
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setOpen(false)}
+                        >
+                            Batal
                         </Button>
+
+                        <Button
+                            type="submit"
+                            disabled={isPending}
+                        >
+
+                            {isPending ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    {initialData ? "Perbarui" : "Simpan"}
+                                </>
+                            )}
+
+                        </Button>
+
                     </DialogFooter>
+
                 </form>
+
             </DialogContent>
         </Dialog>
     )
 }
 
-export function UpdatePuskesDialog({ puskesmas, open, onOpenChange }: { puskesmas: Puskesmas, open: boolean, onOpenChange: (open: boolean) => void }) {
+export function CreatePuskesDialog() {
+    return (
+        <PuskesDialog
+            action={createPuskesmasAction}
+        />
+    )
+}
+
+export function UpdatePuskesDialog({
+    puskesmas,
+    open,
+    onOpenChange
+}: {
+    puskesmas: Puskesmas,
+    open: boolean,
+    onOpenChange: (open: boolean) => void
+}) {
+    // Wrap the action to pass the ID
     const updateAction = updatePuskesmasAction.bind(null, puskesmas.id)
-    const [state, formAction, isPending] = useActionState(updateAction as unknown as (state: any, payload: FormData) => Promise<any>, null)
-
-    // We update the local status state safely using useEffect, so it reflects the selected row 
-    const [status, setStatus] = useState<string>(puskesmas.status)
-
-    useEffect(() => {
-        setStatus(puskesmas.status)
-    }, [puskesmas])
-
-    useEffect(() => {
-        if (state?.success) {
-            onOpenChange(false)
-            toast.success("Data puskesmas diperbarui")
-        } else if (state?.error) {
-            toast.error(state.error)
-        }
-    }, [state, onOpenChange])
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] rounded-2xl">
-                <form action={formAction}>
-                    <DialogHeader>
-                        <DialogTitle className="text-xl">Ubah Puskesmas</DialogTitle>
-                        <DialogDescription>
-                            Perbarui informasi dasar puskesmas.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="py-6 space-y-4">
-                        <FieldGroup>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="u_name" className="text-sm font-semibold">Nama Puskesmas</FieldLabel>
-                                <Input id="u_name" name="name" defaultValue={puskesmas.name} required autoComplete="off" className="h-11 bg-slate-50/50 focus-visible:ring-primary/20" />
-                            </Field>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="u_slug" className="text-sm font-semibold">Slug (URL)</FieldLabel>
-                                <Input id="u_slug" name="slug" defaultValue={puskesmas.slug} required autoComplete="off" className="h-11 bg-slate-50/50 focus-visible:ring-primary/20" />
-                            </Field>
-                            <Field className="space-y-2">
-                                <FieldLabel htmlFor="u_status" className="text-sm font-semibold">Status</FieldLabel>
-                                <input type="hidden" name="status" value={status} />
-                                <Select value={status} onValueChange={setStatus}>
-                                    <SelectTrigger className="h-11 bg-slate-50/50 focus-visible:ring-primary/20">
-                                        <SelectValue placeholder="Pilih status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ACTIVE">Aktif</SelectItem>
-                                        <SelectItem value="INACTIVE">Tidak Aktif</SelectItem>
-                                        <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Field>
-                            {state?.error && (
-                                <p className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">
-                                    {state.error}
-                                </p>
-                            )}
-                        </FieldGroup>
-                    </div>
-
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl">Batal</Button>
-                        <Button type="submit" disabled={isPending} className="rounded-xl min-w-[120px]">
-                            {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</> : "Perbarui"}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <PuskesDialog
+            initialData={puskesmas}
+            action={updateAction}
+            open={open}
+            onOpenChange={onOpenChange}
+        />
     )
 }

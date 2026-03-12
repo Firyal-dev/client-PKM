@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     description: "Sistem Informasi Manajemen Puskesmas",
 };
 
+import { RecaptchaProvider } from '@/components/recaptcha-provider';
+
 export default function Layout({
     children,
 }: {
@@ -30,9 +32,11 @@ export default function Layout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${jakarta.variable} ${inter.variable} font-sans antialiased`}>
-                {children}
-                <Toaster />
-                <VisitorTracker />
+                <RecaptchaProvider>
+                    {children}
+                    <Toaster />
+                    <VisitorTracker />
+                </RecaptchaProvider>
             </body>
         </html>
     );
