@@ -33,16 +33,18 @@ export default async function ActivityLogsPage({ searchParams }: PageProps) {
   const response = await getActivityLogs(filters)
 
   return (
-    <div className="space-y-6">
+    <div className="px-5 pb-10">
       <PageHeader
         title="Activity Logs"
         description="Monitor system and user activities"
       />
       
-      <ActivityLogList 
-        initialLogs={response.data}
-        initialMeta={response.meta}
-      />
+      <div className="mt-6 rounded-2xl border border-border/60 bg-muted/30 p-5 min-h-[500px]">
+        <ActivityLogList 
+          initialLogs={response.data}
+          initialMeta={response.meta}
+        />
+      </div>
     </div>
   )
 }

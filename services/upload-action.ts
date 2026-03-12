@@ -10,6 +10,8 @@ export async function uploadImageAction(formData: FormData) {
 
     const url = `${baseUrl}/api/v1/admin/upload/editor`
     const headers = await authHeaders()
+    // Remove Content-Type so fetch can set it automatically with boundary for FormData
+    delete (headers as any)['Content-Type']
 
     const res = await fetch(url, {
       method: 'POST',

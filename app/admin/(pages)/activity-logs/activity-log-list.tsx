@@ -2,37 +2,35 @@
 
 import { useState, useMemo, useTransition } from "react"
 import {
-    Search, X, RefreshCw, Download, Eye,
-    Clock, User, Activity, Layers, MapPin, CheckCircle, XCircle, AlertCircle
+    RefreshCw, Download, Eye,
+    Clock, User, MapPin, CheckCircle, XCircle
 } from "lucide-react"
-import { format, parseISO } from "date-fns"
+import { format, parseISO, isValid } from "date-fns"
 import { id } from "date-fns/locale"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table"
-import {
-    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from "@/components/ui/dialog"
-import {
-    Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious
-} from "@/components/ui/pagination"
+import { ColumnDef } from "@tanstack/react-table"
+import { DataTable } from "@/components/ui/data-table"
+import { SearchFilter } from "@/components/admin/SearchFilter"
+import { PaginationControl } from "@/components/pagination-control"
 
 import { ActivityLog, ActivityLogAction } from "@/types/activity-log-prop"
 import { exportToCSV, exportToJSON } from "@/utils/activity-log-export"
+import { cn } from "@/lib/utils"
 
 const ACTION_COLORS: Record<ActivityLogAction, string> = {
-    CREATE: "bg-green-100 text-green-800 border-green-200",
-    UPDATE: "bg-blue-100 text-blue-800 border-blue-200",
-    DELETE: "bg-red-100 text-red-800 border-red-200",
-    LOGIN: "bg-purple-100 text-purple-800 border-purple-200",
-    LOGOUT: "bg-orange-100 text-orange-800 border-orange-200",
-    SWITCH_CONTEXT: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    CREATE: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    UPDATE: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
+    DELETE: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+    LOGIN: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    LOGOUT: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    SWITCH_CONTEXT: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
 }
 
 const MODULE_ICONS: Record<string, string> = {
@@ -40,7 +38,7 @@ const MODULE_ICONS: Record<string, string> = {
     BANNER: "🖼️",
     AGENDA: "📅",
     MENU: "📋",
-    GALLERY: "🖼️",
+    GALLERY: "📸",
     VIDEO: "🎬",
     ALBUM: "📁",
     USER: "👤",
@@ -56,9 +54,9 @@ interface ActivityLogListProps {
 }
 
 export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListProps) {
+    const router = useRouter()
     const [isPending, startTransition] = useTransition()
-    const [logs, setLogs] = useState(initialLogs)
-    const [meta, setMeta] = useState(initialMeta)
+    const [logs] = useState(initialLogs)
 
     // Filter states
     const [searchQuery, setSearchQuery] = useState("")
@@ -73,9 +71,6 @@ export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListPro
     // Detail modal
     const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null)
     const [isDetailOpen, setIsDetailOpen] = useState(false)
-
-    // Derived filters
-    const hasActiveFilter = searchQuery || actionFilter !== "all" || moduleFilter !== "all" || statusFilter !== "all" || dateRange.start || dateRange.end
 
     // Filter logs locally for search
     const filteredLogs = useMemo(() => {
@@ -92,8 +87,130 @@ export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListPro
             )
         }
 
+        if (actionFilter !== "all") result = result.filter(log => log.action === actionFilter)
+        if (moduleFilter !== "all") result = result.filter(log => log.module === moduleFilter)
+        if (statusFilter !== "all") {
+            result = result.filter(log => {
+                const isFailed = log.status_code && log.status_code >= 400
+                return statusFilter === "failed" ? isFailed : !isFailed
+            })
+        }
+
         return result
-    }, [logs, searchQuery])
+    }, [logs, searchQuery, actionFilter, moduleFilter, statusFilter])
+
+    const columns: ColumnDef<ActivityLog>[] = useMemo(() => [
+        {
+            accessorKey: "created_at",
+            header: "Waktu",
+            cell: ({ row }) => {
+                const date = row.original.created_at ? parseISO(row.original.created_at) : null
+                if (!date || !isValid(date)) return <span className="text-muted-foreground text-xs">—</span>
+                return (
+                    <div className="flex flex-col min-w-[100px]">
+                        <span className="text-xs font-medium text-foreground">
+                            {format(date, "dd MMM yyyy", { locale: id })}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                            {format(date, "HH:mm:ss")}
+                        </span>
+                    </div>
+                )
+            }
+        },
+        {
+            accessorKey: "admin_name",
+            header: "User",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2 max-w-[150px]">
+                    <User className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-sm font-medium truncate text-foreground/80">
+                        {row.getValue("admin_name") || 'System'}
+                    </span>
+                </div>
+            )
+        },
+        {
+            accessorKey: "action",
+            header: "Aksi",
+            cell: ({ row }) => {
+                const action = row.getValue("action") as ActivityLogAction
+                return (
+                    <span className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                        ACTION_COLORS[action] || "bg-muted text-muted-foreground"
+                    )}>
+                        {action}
+                    </span>
+                )
+            }
+        },
+        {
+            accessorKey: "module",
+            header: "Modul",
+            cell: ({ row }) => {
+                const module = row.getValue("module") as string
+                return (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-sm">{MODULE_ICONS[module] || '📦'}</span>
+                        <span className="text-xs text-muted-foreground">
+                            {module || '-'}
+                        </span>
+                    </div>
+                )
+            }
+        },
+        {
+            id: "route",
+            header: "Endpoint",
+            cell: ({ row }) => (
+                <div className="max-w-[200px] truncate">
+                    <span className="text-[10px] font-bold text-foreground mr-1">{row.original.method}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{row.original.route || '-'}</span>
+                </div>
+            )
+        },
+        {
+            id: "status",
+            header: "Status",
+            cell: ({ row }) => {
+                const statusCode = row.original.status_code
+                const isError = statusCode && statusCode >= 400
+                return (
+                    <div className="flex items-center gap-1">
+                        {isError ? (
+                            <>
+                                <XCircle className="w-3 h-3 text-rose-500" />
+                                <span className="text-[10px] font-bold text-rose-600">{statusCode}</span>
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle className="w-3 h-3 text-emerald-500" />
+                                <span className="text-[10px] font-bold text-emerald-600">OK</span>
+                            </>
+                        )}
+                    </div>
+                )
+            }
+        },
+        {
+            id: "actions",
+            header: "Aksi",
+            cell: ({ row }) => (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        openDetail(row.original)
+                    }}
+                >
+                    <Eye className="w-4 h-4" />
+                </Button>
+            )
+        }
+    ], [])
 
     const handleReset = () => {
         setSearchQuery("")
@@ -101,12 +218,12 @@ export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListPro
         setModuleFilter("all")
         setStatusFilter("all")
         setDateRange({ start: "", end: "" })
+        router.refresh()
     }
 
     const handleRefresh = () => {
         startTransition(() => {
-            // In a real app, this would refetch from the server
-            window.location.reload()
+            router.refresh()
         })
     }
 
@@ -126,446 +243,210 @@ export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListPro
         setIsDetailOpen(true)
     }
 
-    // Calculate pagination
-    const totalPages = Math.ceil(meta.total / meta.limit)
-
     return (
         <div className="space-y-4">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500 rounded-lg">
-                                <Activity className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-blue-600">Total Logs</p>
-                                <p className="text-2xl font-bold text-blue-900">{meta.total}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+            {/* Toolbar */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+                <SearchFilter
+                    searchValue={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    filters={[
+                        {
+                            value: actionFilter,
+                            onChange: setActionFilter,
+                            options: [
+                                { value: "all", label: "Semua Aksi" },
+                                { value: "CREATE", label: "Create" },
+                                { value: "UPDATE", label: "Update" },
+                                { value: "DELETE", label: "Delete" },
+                                { value: "LOGIN", label: "Login" },
+                                { value: "LOGOUT", label: "Logout" },
+                                { value: "SWITCH_CONTEXT", label: "Switch" },
+                            ],
+                            placeholder: "Filter Aksi"
+                        },
+                        {
+                            value: moduleFilter,
+                            onChange: setModuleFilter,
+                            options: [
+                                { value: "all", label: "Semua Modul" },
+                                ...Object.keys(MODULE_ICONS).map(mod => ({ value: mod, label: mod }))
+                            ],
+                            placeholder: "Filter Modul"
+                        }
+                    ]}
+                    onReset={handleReset}
+                    hasActiveFilter={!!searchQuery || actionFilter !== "all" || moduleFilter !== "all" || statusFilter !== "all" || !!dateRange.start}
+                    searchPlaceholder="Cari log admin..."
+                />
 
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-500 rounded-lg">
-                                <CheckCircle className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-green-600">Success</p>
-                                <p className="text-2xl font-bold text-green-900">
-                                    {logs.filter(l => !l.status_code || l.status_code < 400).length}
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-red-500 rounded-lg">
-                                <XCircle className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-red-600">Failed</p>
-                                <p className="text-2xl font-bold text-red-900">
-                                    {logs.filter(l => l.status_code && l.status_code >= 400).length}
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-500 rounded-lg">
-                                <User className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-purple-600">Active Users</p>
-                                <p className="text-2xl font-bold text-purple-900">
-                                    {new Set(logs.filter(l => l.admin_id).map(l => l.admin_id)).size}
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center gap-2">
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-9 w-9 rounded-xl border-border/60"
+                        onClick={handleRefresh}
+                        disabled={isPending}
+                        title="Segarkan"
+                    >
+                        <RefreshCw className={cn("w-4 h-4 text-muted-foreground", isPending && "animate-spin")} />
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-9 rounded-xl gap-2 text-xs border-border/60"
+                        onClick={() => handleExport('csv')}
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        CSV
+                    </Button>
+                </div>
             </div>
 
-            {/* Filters */}
-            <Card>
-                <CardHeader className="pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Search className="w-5 h-5" />
-                        Filter Logs
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-wrap items-end gap-3">
-                        {/* Search */}
-                        <div className="relative flex-1 min-w-[200px] max-w-xs">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search user, action, module..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 h-10"
-                            />
-                        </div>
+            {/* Sub-Filters */}
+            <div className="flex items-center gap-3 flex-wrap bg-muted/50 p-3 rounded-xl border border-border/40">
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Status</span>
+                    <select 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="bg-background border border-border/60 rounded-lg text-[11px] font-medium py-1 px-2 focus:ring-1 focus:ring-primary/20 outline-none cursor-pointer min-w-[100px]"
+                    >
+                        <option value="all">Semua Status</option>
+                        <option value="success">OK (200)</option>
+                        <option value="failed">Error (4xx/5xx)</option>
+                    </select>
+                </div>
 
-                        {/* Action Filter */}
-                        <Select value={actionFilter} onValueChange={setActionFilter}>
-                            <SelectTrigger className="w-[160px] h-10">
-                                <SelectValue placeholder="Action" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Actions</SelectItem>
-                                <SelectItem value="CREATE">Create</SelectItem>
-                                <SelectItem value="UPDATE">Update</SelectItem>
-                                <SelectItem value="DELETE">Delete</SelectItem>
-                                <SelectItem value="LOGIN">Login</SelectItem>
-                                <SelectItem value="LOGOUT">Logout</SelectItem>
-                                <SelectItem value="SWITCH_CONTEXT">Switch Context</SelectItem>
-                            </SelectContent>
-                        </Select>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Rentang Waktu</span>
+                    <Input
+                        type="date"
+                        value={dateRange.start}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                        className="h-7 text-[11px] w-[130px] rounded-lg border-border/60"
+                    />
+                    <span className="text-muted-foreground/30">—</span>
+                    <Input
+                        type="date"
+                        value={dateRange.end}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                        className="h-7 text-[11px] w-[130px] rounded-lg border-border/60"
+                    />
+                </div>
 
-                        {/* Module Filter */}
-                        <Select value={moduleFilter} onValueChange={setModuleFilter}>
-                            <SelectTrigger className="w-[160px] h-10">
-                                <SelectValue placeholder="Module" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Modules</SelectItem>
-                                <SelectItem value="AUTH">Auth</SelectItem>
-                                <SelectItem value="BANNER">Banner</SelectItem>
-                                <SelectItem value="AGENDA">Agenda</SelectItem>
-                                <SelectItem value="MENU">Menu</SelectItem>
-                                <SelectItem value="GALLERY">Gallery</SelectItem>
-                                <SelectItem value="VIDEO">Video</SelectItem>
-                                <SelectItem value="ALBUM">Album</SelectItem>
-                            </SelectContent>
-                        </Select>
+                <div className="ml-auto text-xs text-muted-foreground font-medium">
+                    {initialMeta.total} entri log
+                </div>
+            </div>
 
-                        {/* Status Filter */}
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[160px] h-10">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="success">Success</SelectItem>
-                                <SelectItem value="failed">Failed</SelectItem>
-                            </SelectContent>
-                        </Select>
+            {/* DataTable */}
+            <div className="rounded-xl border border-border/60 overflow-hidden bg-background">
+                <DataTable
+                    columns={columns}
+                    data={filteredLogs}
+                    hidePagination={true}
+                />
+            </div>
 
-                        {/* Date Start */}
-                        <Input
-                            type="date"
-                            value={dateRange.start}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                            className="w-[150px] h-10"
-                            placeholder="Start Date"
-                        />
-
-                        {/* Date End */}
-                        <Input
-                            type="date"
-                            value={dateRange.end}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                            className="w-[150px] h-10"
-                            placeholder="End Date"
-                        />
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleReset}
-                                disabled={!hasActiveFilter}
-                            >
-                                <X className="w-4 h-4 mr-1" />
-                                Reset
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleRefresh}
-                                disabled={isPending}
-                            >
-                                <RefreshCw className={`w-4 h-4 mr-1 ${isPending ? 'animate-spin' : ''}`} />
-                                Refresh
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleExport('csv')}
-                            >
-                                <Download className="w-4 h-4 mr-1" />
-                                CSV
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleExport('json')}
-                            >
-                                <Download className="w-4 h-4 mr-1" />
-                                JSON
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Table */}
-            <Card>
-                <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="bg-muted/50">
-                                    <TableHead className="w-[180px]">Timestamp</TableHead>
-                                    <TableHead className="w-[150px]">User</TableHead>
-                                    <TableHead className="w-[100px]">Action</TableHead>
-                                    <TableHead className="w-[120px]">Module</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead className="w-[130px]">IP Address</TableHead>
-                                    <TableHead className="w-[100px]">Status</TableHead>
-                                    <TableHead className="w-[80px]">Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredLogs.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <AlertCircle className="w-8 h-8" />
-                                                <p>No activity logs found</p>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredLogs.map((log) => (
-                                        <TableRow
-                                            key={log.id}
-                                            className="cursor-pointer hover:bg-muted/50"
-                                            onClick={() => openDetail(log)}
-                                        >
-                                            <TableCell className="whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="w-4 h-4 text-muted-foreground" />
-                                                    <span className="text-sm">
-                                                        {log.created_at
-                                                            ? format(parseISO(log.created_at), "dd MMM yyyy, HH:mm", { locale: id })
-                                                            : '-'}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <User className="w-4 h-4 text-muted-foreground" />
-                                                    <span className="text-sm truncate max-w-[130px]">
-                                                        {log.admin_name || 'System'}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant="outline"
-                                                    className={`${ACTION_COLORS[log.action as ActivityLogAction] || 'bg-gray-100'} border`}
-                                                >
-                                                    {log.action}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-1">
-                                                    <span>{MODULE_ICONS[log.module || ''] || '📦'}</span>
-                                                    <span className="text-sm">{log.module || '-'}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <span className="text-sm truncate max-w-[200px] block">
-                                                    {log.route || log.module ? `${log.method || ''} ${log.route || log.module}` : '-'}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-1">
-                                                    <MapPin className="w-3 h-3 text-muted-foreground" />
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {log.ip_address || '-'}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {log.status_code && log.status_code >= 400 ? (
-                                                    <Badge variant="destructive" className="bg-red-100 text-red-800">
-                                                        <XCircle className="w-3 h-3 mr-1" />
-                                                        Failed
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge className="bg-green-100 text-green-800">
-                                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                                        Success
-                                                    </Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        openDetail(log)
-                                                    }}
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="border-t px-6 py-4">
-                            <Pagination>
-                                <PaginationContent>
-                                    <PaginationItem>
-                                        <PaginationPrevious href={`?page=${Math.max(1, meta.page - 1)}`} />
-                                    </PaginationItem>
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const page = i + 1
-                                        return (
-                                            <PaginationItem key={page}>
-                                                <PaginationLink href={`?page=${page}`} isActive={page === meta.page}>
-                                                    {page}
-                                                </PaginationLink>
-                                            </PaginationItem>
-                                        )
-                                    })}
-                                    <PaginationItem>
-                                        <PaginationNext href={`?page=${Math.min(totalPages, meta.page + 1)}`} />
-                                    </PaginationItem>
-                                </PaginationContent>
-                            </Pagination>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            {/* Pagination */}
+            {initialMeta.total > initialMeta.limit && (
+                <div className="flex justify-center pt-2">
+                    <PaginationControl 
+                        totalPages={Math.ceil(initialMeta.total / initialMeta.limit)} 
+                        currentPage={initialMeta.page} 
+                    />
+                </div>
+            )}
 
             {/* Detail Modal */}
             <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Eye className="w-5 h-5" />
-                            Activity Log Details
-                        </DialogTitle>
-                        <DialogDescription>
-                            Detailed information about this activity
-                        </DialogDescription>
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-6 rounded-2xl border-border/60 shadow-lg">
+                    <DialogHeader className="pb-4 border-b">
+                        <DialogTitle className="text-lg font-bold">Detail Log Aktivitas</DialogTitle>
+                        <DialogDescription className="text-xs">Informasi lengkap penggunaan sistem</DialogDescription>
                     </DialogHeader>
 
-                    {selectedLog && (
-                        <div className="space-y-4 mt-4">
-                            {/* Header Info */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Timestamp</p>
-                                    <p className="text-sm">
-                                        {selectedLog.created_at
-                                            ? format(parseISO(selectedLog.created_at), "dd MMMM yyyy, HH:mm:ss", { locale: id })
-                                            : '-'}
-                                    </p>
+                    <div className="flex-1 overflow-y-auto mt-4 space-y-6 pr-2">
+                        {selectedLog && (
+                            <div className="space-y-6">
+                                {/* Info Cards */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Waktu</p>
+                                        <p className="text-xs font-semibold">
+                                            {selectedLog.created_at
+                                                ? format(parseISO(selectedLog.created_at), "dd MMMM yyyy, HH:mm:ss", { locale: id })
+                                                : '-'}
+                                        </p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">User</p>
+                                        <p className="text-xs font-semibold">{selectedLog.admin_name || 'System'}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Aksi / Modul</p>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <Badge variant="outline" className={cn("text-[10px] py-0", ACTION_COLORS[selectedLog.action as ActivityLogAction])}>
+                                                {selectedLog.action}
+                                            </Badge>
+                                            <span className="text-[10px] font-bold text-foreground/60">{selectedLog.module || '-'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-muted/30 border border-border/40">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Status</p>
+                                        {selectedLog.status_code && selectedLog.status_code >= 400 ? (
+                                            <span className="text-xs font-bold text-rose-600">GAGAL ({selectedLog.status_code})</span>
+                                        ) : (
+                                            <span className="text-xs font-bold text-emerald-600">BERHASIL (200)</span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">User</p>
-                                    <p className="text-sm">{selectedLog.admin_name || 'System'}</p>
+
+                                {/* Network Info */}
+                                <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 space-y-2">
+                                    <div className="flex items-center justify-between opacity-50 text-[9px] font-bold uppercase tracking-widest">
+                                        <span>Infrastructure</span>
+                                        <span>{selectedLog.ip_address || '-'}</span>
+                                    </div>
+                                    <div className="flex items-start gap-3 font-mono text-xs">
+                                        <span className="text-sky-400 font-bold">{selectedLog.method || 'GET'}</span>
+                                        <span className="opacity-80 break-all">{selectedLog.route || '-'}</span>
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Action</p>
-                                    <Badge
-                                        variant="outline"
-                                        className={ACTION_COLORS[selectedLog.action as ActivityLogAction]}
-                                    >
-                                        {selectedLog.action}
-                                    </Badge>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Module</p>
-                                    <p className="text-sm">{selectedLog.module || '-'}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Status</p>
-                                    {selectedLog.status_code && selectedLog.status_code >= 400 ? (
-                                        <Badge variant="destructive">Failed ({selectedLog.status_code})</Badge>
-                                    ) : (
-                                        <Badge className="bg-green-100 text-green-800">Success</Badge>
+
+                                {/* Payloads */}
+                                <div className="space-y-4">
+                                    {selectedLog.payload_before && Object.keys(selectedLog.payload_before).length > 0 && (
+                                        <div className="space-y-1.5">
+                                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">State Sebelum</h4>
+                                            <pre className="bg-muted/50 p-4 rounded-xl text-[10px] font-mono border border-border/40 overflow-auto max-h-40">
+                                                {JSON.stringify(selectedLog.payload_before, null, 2)}
+                                            </pre>
+                                        </div>
+                                    )}
+                                    {selectedLog.payload_after && Object.keys(selectedLog.payload_after).length > 0 && (
+                                        <div className="space-y-1.5">
+                                            <h4 className="text-[10px] font-bold text-primary/80 uppercase tracking-wider">State Sesudah</h4>
+                                            <pre className="bg-primary/5 p-4 rounded-xl text-[10px] font-mono border border-primary/10 overflow-auto max-h-40">
+                                                {JSON.stringify(selectedLog.payload_after, null, 2)}
+                                            </pre>
+                                        </div>
                                     )}
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Entity ID</p>
-                                    <p className="text-sm font-mono text-xs">{selectedLog.entity_id || '-'}</p>
-                                </div>
+
+                                {/* User Agent */}
+                                {selectedLog.user_agent && (
+                                    <div className="pt-4 border-t border-border/40">
+                                        <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">User Agent</h4>
+                                        <p className="text-[10px] font-mono text-muted-foreground bg-muted/30 p-3 rounded-lg leading-relaxed border border-border/20">
+                                            {selectedLog.user_agent}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
-
-                            {/* Request Info */}
-                            <div className="space-y-2">
-                                <h4 className="font-medium text-sm">Request Information</h4>
-                                <div className="grid grid-cols-2 gap-2 text-sm bg-muted/50 p-3 rounded-lg">
-                                    <div>
-                                        <span className="text-muted-foreground">Method:</span> {selectedLog.method || '-'}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">Route:</span> {selectedLog.route || '-'}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">IP Address:</span> {selectedLog.ip_address || '-'}
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground">User Agent:</span> {selectedLog.user_agent ? 'Available' : '-'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Payload Before */}
-                            {selectedLog.payload_before && Object.keys(selectedLog.payload_before).length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="font-medium text-sm">Before (Payload)</h4>
-                                    <pre className="bg-muted/50 p-3 rounded-lg text-xs overflow-x-auto max-h-40">
-                                        {JSON.stringify(selectedLog.payload_before, null, 2)}
-                                    </pre>
-                                </div>
-                            )}
-
-                            {/* Payload After */}
-                            {selectedLog.payload_after && Object.keys(selectedLog.payload_after).length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="font-medium text-sm">After (Payload)</h4>
-                                    <pre className="bg-muted/50 p-3 rounded-lg text-xs overflow-x-auto max-h-40">
-                                        {JSON.stringify(selectedLog.payload_after, null, 2)}
-                                    </pre>
-                                </div>
-                            )}
-
-                            {/* User Agent */}
-                            {selectedLog.user_agent && (
-                                <div className="space-y-2">
-                                    <h4 className="font-medium text-sm">User Agent</h4>
-                                    <p className="text-xs bg-muted/50 p-3 rounded-lg break-all">
-                                        {selectedLog.user_agent}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

@@ -30,13 +30,15 @@ export function SegmentedControl<T extends string>({
         className
       )}
     >
-      <div
-        className="absolute top-1 bottom-1 rounded-md bg-background shadow transition-transform duration-300 ease-in-out"
-        style={{
-          width: `${100 / options.length}%`,
-          transform: `translateX(${activeIndex * 100}%)`,
-        }}
-      />
+      <div className="absolute inset-0 p-1 pointer-events-none">
+        <div
+          className="h-full rounded-md bg-background shadow transition-transform duration-300 ease-in-out"
+          style={{
+            width: `${100 / options.length}%`,
+            transform: `translateX(${activeIndex * 100}%)`,
+          }}
+        />
+      </div>
 
       {options.map((option) => (
         <button

@@ -62,38 +62,52 @@ export default async function Sambutan() {
                         </div>
                     </div>
 
-                    {/* Right — Content */}
-                    <div>
-
-                        <Quote
-                            className="text-blue-100 w-10 h-10 mb-4 -ml-1 fill-blue-100 stroke-blue-200"
-                            strokeWidth={0.75}
-                        />
-
-                        {sanitizedContent ? (
-                            <div
-                                className="prose prose-slate prose-sm md:prose-base max-w-none leading-relaxed
-                                    prose-headings:font-bold prose-headings:text-slate-800
-                                    prose-p:text-slate-600 prose-p:my-3
-                                    prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                                    prose-strong:text-slate-700
-                                    prose-blockquote:border-blue-300 prose-blockquote:bg-blue-50/60 prose-blockquote:rounded-r-lg prose-blockquote:not-italic"
-                                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-                            />
-                        ) : (
-                            <p className="text-slate-500 text-sm italic">Sambutan belum tersedia.</p>
-                        )}
-
-                        {/* Signature */}
-                        <div className="mt-8 pt-6 border-t border-slate-100 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                                {kepalaNama.charAt(0)}
+                    {/* Right — Content Card */}
+                    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col overflow-hidden max-h-[540px]">
+                        
+                        {/* Header Badge inside Card */}
+                        <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Quote className="w-4 h-4 text-blue-500 fill-blue-500/10" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pesan Utama</span>
                             </div>
-                            <div>
-                                <p className="text-[10px] text-slate-400 mb-0.5 tracking-wide font-medium uppercase">Hormat kami,</p>
-                                <p className="font-bold text-slate-800 text-sm">{kepalaNama}</p>
-                                <p className="text-[11px] text-blue-600 font-medium mt-0.5">Kepala Puskesmas</p>
+                        </div>
+
+                        {/* Scrollable Greeting Area */}
+                        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+                            {sanitizedContent ? (
+                                <div
+                                    className="prose prose-blue prose-sm md:prose-base max-w-none leading-relaxed text-slate-600
+                                        prose-headings:font-bold prose-headings:text-slate-800
+                                        prose-p:my-4
+                                        prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                                        prose-strong:text-slate-800
+                                        prose-blockquote:border-blue-300 prose-blockquote:bg-blue-50/60 prose-blockquote:rounded-r-xl prose-blockquote:not-italic"
+                                    dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+                                />
+                            ) : (
+                                <div className="text-center py-20 text-slate-300">
+                                    <Quote className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p className="font-bold uppercase tracking-widest text-[10px]">Sambutan belum tersedia</p>
+                                </div>
+                            )}
+
+                            {/* Signature at bottom of scroll */}
+                            <div className="mt-12 pt-8 border-t border-slate-100 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-blue-200">
+                                    {kepalaNama.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 mb-0.5 tracking-[0.1em] font-bold uppercase">Tertanda,</p>
+                                    <p className="font-black text-slate-900 text-sm md:text-base">{kepalaNama}</p>
+                                    <p className="text-[11px] text-blue-600 font-bold mt-0.5">Kepala Puskesmas</p>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Footer Accent Strip */}
+                        <div className="h-1 bg-slate-100">
+                            <div className="h-full bg-blue-600 w-16 rounded-full" />
                         </div>
                     </div>
                 </div>

@@ -56,10 +56,19 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
         try {
             const response = await uploadImageAction(formData)
-            const uploadData = response.data
 
-            if (uploadData?.success === 1 && uploadData.file?.url) {
-                let imageUrl = uploadData.file.url
+            if (!response.success) {
+                toast.error(response.error || "Gagal upload gambar")
+                return
+            }
+
+            const uploadData = response.data as any
+            // Dukung format success: 1 (EditorJS style) atau success: true
+            const isSuccess = uploadData?.success === 1 || uploadData?.success === true || uploadData?.uploaded === true
+            const imageUrlFromData = uploadData?.file?.url || uploadData?.url
+
+            if (isSuccess && imageUrlFromData) {
+                let imageUrl = imageUrlFromData
                 if (imageUrl.startsWith('/')) {
                     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'
                     const backendOrigin = apiUrl.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '')
@@ -68,7 +77,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
                 editor.chain().focus().setImage({ src: imageUrl }).run()
                 toast.success("Gambar berhasil diupload")
             } else {
-                toast.error("Gagal mendapatkan URL gambar")
+                toast.error("Gagal mendapatkan URL gambar dari server")
             }
         } catch (error: any) {
             toast.error(error.message || "Terjadi kesalahan saat upload")
