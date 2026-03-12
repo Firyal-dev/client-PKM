@@ -27,18 +27,23 @@ import {
     SelectValue
 } from "@/components/ui/select"
 
-import { Puskesmas } from "@/services/puskesmas/puskesmas-service"
+import { Puskesmas, createPuskesmasAction, updatePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
 
 interface PuskesDialogProps {
     initialData?: Puskesmas
     action: (prevState: any, formData: FormData) => Promise<any>
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
 }
 
-export function PuskesDialog({ initialData, action }: PuskesDialogProps) {
+export function PuskesDialog({ initialData, action, open: controlledOpen, onOpenChange: controlledOnOpenChange }: PuskesDialogProps) {
 
     const router = useRouter()
 
-    const [open, setOpen] = useState(false)
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+    const isControlled = controlledOpen !== undefined
+    const open = isControlled ? controlledOpen : uncontrolledOpen
+    const setOpen = isControlled ? controlledOnOpenChange! : setUncontrolledOpen
 
     const [status, setStatus] = useState<string>(
         initialData?.status || "ACTIVE"
@@ -238,5 +243,35 @@ export function PuskesDialog({ initialData, action }: PuskesDialogProps) {
 
             </DialogContent>
         </Dialog>
+    )
+}
+
+export function CreatePuskesDialog() {
+    return (
+        <PuskesDialog
+            action={createPuskesmasAction}
+        />
+    )
+}
+
+export function UpdatePuskesDialog({
+    puskesmas,
+    open,
+    onOpenChange
+}: {
+    puskesmas: Puskesmas,
+    open: boolean,
+    onOpenChange: (open: boolean) => void
+}) {
+    // Wrap the action to pass the ID
+    const updateAction = updatePuskesmasAction.bind(null, puskesmas.id)
+
+    return (
+        <PuskesDialog
+            initialData={puskesmas}
+            action={updateAction}
+            open={open}
+            onOpenChange={onOpenChange}
+        />
     )
 }

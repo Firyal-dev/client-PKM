@@ -2,7 +2,7 @@
 import { useActionState, useState, useRef } from "react"
 import { MessageCircleQuestion } from "lucide-react"
 import { toast } from "sonner"
-import ReCAPTCHA from "react-google-recaptcha"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,14 +30,20 @@ interface FloatingConsultationProps {
 export function FloatingConsultation({ onSubmit }: FloatingConsultationProps) {
     const { closeMenu } = useFloatingMenu()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const recaptchaRef = useRef<ReCAPTCHA>(null)
-    const [captchaValue, setCaptchaValue] = useState<string | null>(null)
+    const { executeRecaptcha } = useGoogleReCaptcha()
 
     // Action function untuk handle submit
     async function submitConsultation(prevState: FormState | null, formData: FormData): Promise<FormState> {
+        if (!executeRecaptcha) {
+            toast.error("Sistem reCAPTCHA masih memuat. Silakan coba lagi.");
+            return { error: "reCAPTCHA belum siap" };
+        }
+
+        const captchaValue = await executeRecaptcha("consultation_submit");
+
         if (!captchaValue) {
-            toast.error("Mohon centang reCAPTCHA untuk membuktikan Anda bukan robot.")
-            return { error: "reCAPTCHA belum dicentang" }
+            toast.error("Gagal verifikasi reCAPTCHA.");
+            return { error: "Gagal verifikasi reCAPTCHA" }
         }
 
         const username = formData.get("username") as string
@@ -90,8 +96,7 @@ export function FloatingConsultation({ onSubmit }: FloatingConsultationProps) {
 
             toast.success("Konsultasi Anda telah terkirim! Tim kami akan segera merespons melalui email Anda.")
             setIsDialogOpen(false)
-            setCaptchaValue(null)
-            recaptchaRef.current?.reset()
+
             return { success: true }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "Gagal mengirim konsultasi."
@@ -175,13 +180,7 @@ export function FloatingConsultation({ onSubmit }: FloatingConsultationProps) {
                             />
                         </div>
 
-                        <div className="flex justify-center">
-                            <ReCAPTCHA
-                                ref={recaptchaRef}
-                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
-                                onChange={(value) => setCaptchaValue(value)}
-                            />
-                        </div>
+
 
                         <DialogFooter>
                             <Button

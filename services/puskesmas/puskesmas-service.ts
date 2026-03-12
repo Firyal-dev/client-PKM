@@ -57,8 +57,14 @@ export async function getAdminPuskesmasById(id: string): Promise<Puskesmas | nul
 
 // Admin: Buat puskesmas
 export async function createPuskesmasAction(_: unknown, formData: FormData) {
+    // Convert FormData to JSON object
+    const data: Record<string, any> = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
     const result = await tryAction(async () => {
-        await api.post('/v1/puskesmas', formData, { headers: await authHeaders() })
+        await api.post('/v1/puskesmas', data, { headers: await authHeaders() })
         revalidateTag(CACHE_TAGS.PUSKESMAS, 'max')
     }, 'Gagal buat puskesmas')
 
