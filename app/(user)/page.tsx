@@ -23,12 +23,12 @@ export const metadata: Metadata = {
 function getPelayananMenus(menus: Menu[]): Menu[] {
     // Find menu with slug "/pelayanan"
     const pelayananMenu = menus.find(m => m.slug === 'pelayanan' && m.status === 1);
-    
+
     if (!pelayananMenu) return [];
-    
+
     // Get children from the menu
     const children = pelayananMenu.children || [];
-    
+
     // Filter active and sort by order, max 6
     return children
         .filter(m => m.status === 1)

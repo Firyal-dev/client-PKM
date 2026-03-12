@@ -40,11 +40,9 @@ export function SearchFilter({
       </div>
       {filters.map((filter, index) => (
         <Select key={index} value={filter.value || "all"} onValueChange={filter.onChange}>
-          <SelectTrigger className="w-[155px] h-9 rounded-xl border-border/60 text-sm">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-              <SelectValue placeholder={filter.placeholder} />
-            </div>
+          <SelectTrigger className="w-[150px] shrink-0 h-9 rounded-xl border-border/60 text-sm gap-2">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <SelectValue placeholder={filter.placeholder} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             {filter.options.map((option) => (

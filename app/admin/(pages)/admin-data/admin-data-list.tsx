@@ -76,7 +76,7 @@ export default function AdminDataList({
                     <div className="flex items-center gap-3">
                         <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted shrink-0 border border-border/50">
                             <Image
-                                src={admin.photo ? getMediaUrl(admin.photo) || "/userPlaceholder.jpg" : "/userPlaceholder.jpg"}
+                                src={admin.photo ? getMediaUrl(admin.photo, 'uploads/profiles') || "/userPlaceholder.jpg" : "/userPlaceholder.jpg"}
                                 alt={admin.name}
                                 fill
                                 className="object-cover"

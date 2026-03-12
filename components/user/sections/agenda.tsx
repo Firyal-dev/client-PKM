@@ -38,10 +38,25 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
 
     return (
         <section className="py-16 md:py-24 bg-white" id="agenda">
-            <div className="container mx-auto px-6 md:px-12 lg:px-16">
-                <HeaderSection />
+            <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16">
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <span className="block w-6 h-px bg-blue-400" />
+                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">Agenda Kegiatan</span>
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Jadwal &amp; Agenda Puskesmas</h2>
+                        <p className="text-sm text-slate-500">Informasi jadwal pelayanan luar gedung dan kegiatan puskesmas.</p>
+                    </div>
+                    <Link href="/agenda" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0">
+                        Lihat Semua
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     <aside className="lg:col-span-5 xl:col-span-4">
                         <CalendarCard
                             date={date}
@@ -89,25 +104,6 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
     )
 }
 
-function HeaderSection() {
-    return (
-        <div className="flex flex-col items-center text-center mb-12 space-y-3">
-            <div className="flex items-center gap-2">
-                <span className="block w-6 h-px bg-blue-400" />
-                <span className="text-[11px] font-bold tracking-[0.14em] text-blue-500 uppercase">
-                    Agenda Kegiatan
-                </span>
-                <span className="block w-6 h-px bg-blue-400" />
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-                Jadwal & Agenda Puskesmas
-            </h2>
-            <p className="max-w-lg text-sm text-slate-500 leading-relaxed">
-                Informasi jadwal pelayanan luar gedung dan kegiatan puskesmas lainnya.
-            </p>
-        </div>
-    )
-}
 
 interface CalendarCardProps {
     date?: Date

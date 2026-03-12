@@ -97,11 +97,6 @@ export const sidebarData = {
                     url: "/admin/agenda",
                     icon: ClipboardList,
                 },
-                {
-                    title: "Pengunjung",
-                    url: "/admin/visitors",
-                    icon: Users,
-                }
             ]
         },
     ],

@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { ImageOff, ArrowLeft, Expand } from "lucide-react"
 import { EmptyState } from "@/components/ui/empty-user"
-import Breadcrumb from "@/components/user/partials/breadcrumb"
+import HeroHeader from "@/components/user/partials/hero-header"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
 import type { Album } from "@/types/album-prop"
@@ -24,30 +24,20 @@ export default function AlbumDetailPageContent({
     ]
 
     return (
-        <div className="min-h-screen bg-slate-50/50">
-            {/* Hero Header */}
-            <div className="bg-gradient-to-br from-blue-700 to-blue-500 text-white">
-                <div className="container mx-auto px-4 py-12 md:py-16">
-                    <Breadcrumb items={breadcrumbItems} />
-                    <div className="mt-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div className="space-y-3">
-                            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
-                                {album.album_title}
-                            </h1>
-                            <p className="text-blue-100 max-w-2xl text-lg">
-                                {album.description || "Kumpulan dokumentasi foto kegiatan puskemas dalam album ini."}
-                            </p>
-                        </div>
-                        <div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 shrink-0">
-                            <p className="text-xs font-bold uppercase tracking-widest text-blue-100 mb-1 opacity-70">Total Foto</p>
-                            <p className="text-2xl font-black text-white">{photos.length} item</p>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-slate-50">
+            <HeroHeader
+                items={breadcrumbItems}
+                title={album.album_title}
+                description={album.description || "Kumpulan dokumentasi foto kegiatan puskemas dalam album ini."}
+            >
+                <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-center">
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider mb-1">Total Foto</p>
+                    <p className="text-2xl font-bold text-white">{photos.length}</p>
                 </div>
-            </div>
+            </HeroHeader>
 
             {/* Content Area */}
-            <div className="container mx-auto px-4 py-12">
+            <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 py-10">
                 {photos.length === 0 ? (
                     <EmptyState
                         title="Album masih kosong"

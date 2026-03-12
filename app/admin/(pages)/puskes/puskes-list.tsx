@@ -1,21 +1,18 @@
 'use client'
 
-import { useState, useMemo, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { Edit, Trash2, Building2, Search, X, SlidersHorizontal } from "lucide-react"
-import { toast } from "sonner"
-import { ColumnDef } from "@tanstack/react-table"
-
-import { Puskesmas, deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
-
-import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { BulkActionBar } from "@/components/admin/bulk-action-bar"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Puskesmas, deletePuskesmasAction } from "@/services/puskesmas/puskesmas-service"
+import { Building2, Edit, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useMemo, useState, useTransition } from "react"
+import { toast } from "sonner"
+import { UpdatePuskesDialog } from "./puskes-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function PuskesmasList({
@@ -33,6 +30,7 @@ export function PuskesmasList({
     const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
     const [selectedRows, setSelectedRows] = useState<Puskesmas[]>([])
     const [isPending, startTransition] = useTransition()
+    const [editPuskes, setEditPuskes] = useState<Puskesmas | null>(null)
 
     const filteredData = useMemo(() => {
         let result = [...data]
@@ -57,7 +55,7 @@ export function PuskesmasList({
         }
     }
 
-    const columns: ColumnDef<Puskesmas>[] = useMemo(() => [
+    const columns: import("@tanstack/react-table").ColumnDef<Puskesmas>[] = useMemo(() => [
         {
             id: "index",
             header: "#",
@@ -99,14 +97,12 @@ export function PuskesmasList({
                 return (
                     <div className="text-right flex items-center justify-end gap-1">
                         <Button
-                            asChild
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                            onClick={() => setEditPuskes(p)}
                         >
-                            <Link href={`/admin/puskes/${p.id}`}>
-                                <Edit className="h-3.5 w-3.5" />
-                            </Link>
+                            <Edit className="h-3.5 w-3.5" />
                         </Button>
 
                         <ConfirmDialog
@@ -178,6 +174,14 @@ export function PuskesmasList({
 
     return (
         <div className="space-y-4">
+            {editPuskes && (
+                <UpdatePuskesDialog
+                    puskesmas={editPuskes}
+                    open={!!editPuskes}
+                    onOpenChange={(open) => !open && setEditPuskes(null)}
+                />
+            )}
+
             {/* Filter row */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 flex-1 flex-wrap">

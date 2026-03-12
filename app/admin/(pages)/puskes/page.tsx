@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { PuskesmasList } from "./puskes-list"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Building2 } from "lucide-react"
+import { CreatePuskesDialog } from "./puskes-dialog"
 
 export default async function PuskesmasPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const profile = await getAdminProfile()
@@ -23,9 +24,9 @@ export default async function PuskesmasPage({ searchParams }: { searchParams: Pr
             <PageHeader
                 title="Kelola Puskesmas"
                 description="Kelola data puskes yang terdaftar dalam sistem"
-                linkHref="/admin/puskes/create-puskes"
-                linkLabel="Tambah Puskesmas"
-            />
+            >
+                <CreatePuskesDialog />
+            </PageHeader>
 
             <div className="rounded-xl bg-muted/50 border border-border mt-6 p-5 min-h-[500px] flex flex-col">
                 {data.length === 0 ? (

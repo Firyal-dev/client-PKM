@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import Breadcrumb from "@/components/user/partials/breadcrumb"
+import HeroHeader from "@/components/user/partials/hero-header"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
@@ -120,20 +120,13 @@ export function PageDokumenList({ pages, menu, totalPages, currentPage, total }:
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Hero Header */}
-            <div className="bg-gradient-to-br from-blue-700 to-blue-500 text-white">
-                <div className="max-w-5xl mx-auto px-4 py-12">
-                    <Breadcrumb items={breadcrumbItems} />
-                    <h1 className="text-3xl md:text-4xl font-bold mt-4 leading-tight">
-                        {menu.title}
-                    </h1>
-                    <p className="mt-2 text-blue-100 text-sm">
-                        Total {total} dokumen tersedia
-                    </p>
-                </div>
-            </div>
+            <HeroHeader
+                items={breadcrumbItems}
+                title={menu.title}
+                description={`${total} dokumen publik tersedia`}
+            />
 
-            <div className="max-w-5xl mx-auto px-4 py-10">
+            <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 py-10">
                 {pages.length > 0 ? (
                     <>
                         <div className="space-y-4">

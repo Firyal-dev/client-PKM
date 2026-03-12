@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { Quote } from "lucide-react"
+import Link from "next/link"
+import { Quote, ArrowRight } from "lucide-react"
 import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
@@ -13,79 +14,86 @@ export default async function Sambutan() {
     const sanitizedContent = DOMPurify.sanitize(SambutanKonten)
 
     return (
-        <section
-            className="relative py-12 md:py-20 overflow-hidden bg-white"
-            id="sambutan"
-        >
-            <div className="relative container mx-auto px-6 md:px-12 lg:px-20">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-16 lg:gap-24 items-start">
+        <section className="relative py-16 md:py-24 bg-white overflow-hidden" id="sambutan">
+            {/* Subtle background accent */}
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-blue-50/70 -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-slate-50/80 translate-y-1/2 -translate-x-1/3 blur-2xl pointer-events-none" />
 
-                        {/* Left — Foto + identity card */}
-                        <div className="flex flex-col items-center lg:items-start lg:sticky lg:top-28">
+            <div className="relative max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16">
 
-                            {/* Photo */}
-                            <div className="relative w-[200px] lg:w-full max-w-[260px]">
-                                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-3xl bg-blue-100" />
-                                <div className="absolute inset-0 translate-x-2 translate-y-2 rounded-3xl bg-blue-50" />
-                                <div className="relative aspect-[3/4] rounded-3xl overflow-hidden shadow-xl ring-1 ring-slate-200">
-                                    <Image
-                                        src={kepalaFoto || "/userPlaceholder.jpg"}
-                                        alt={kepalaNama}
-                                        fill
-                                        className="object-cover"
-                                        priority
-                                        unoptimized
-                                    />
-                                    <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black/50 to-transparent" />
-                                </div>
+                {/* Section Label */}
+                <div className="flex items-center gap-3 mb-12">
+                    <span className="block w-8 h-px bg-blue-400" />
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-blue-500 uppercase">Kata Sambutan</span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-12 lg:gap-20 items-start">
+
+                    {/* Left — Photo + identity */}
+                    <div className="flex flex-row lg:flex-col items-start gap-5 lg:sticky lg:top-28">
+
+                        {/* Photo */}
+                        <div className="relative w-36 md:w-48 lg:w-full max-w-[220px] flex-shrink-0">
+                            {/* Decorative frame */}
+                            <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl bg-blue-100" />
+                            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-200/80">
+                                <Image
+                                    src={kepalaFoto || "/userPlaceholder.jpg"}
+                                    alt={kepalaNama}
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                    unoptimized
+                                />
+                                <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-blue-950/60 to-transparent" />
                             </div>
+                        </div>
 
-                            {/* Name card */}
-                            <div className="relative w-[200px] lg:w-full max-w-[260px] mt-6 px-6 py-5 bg-blue-700 rounded-2xl shadow-lg">
-                                <p className="text-[10px] font-bold tracking-[0.15em] text-blue-300 uppercase mb-1.5">
+                        {/* Identity card */}
+                        <div className="flex-1 lg:w-full">
+                            <div className="bg-blue-700 rounded-xl px-5 py-4 shadow-md">
+                                <p className="text-[9px] font-bold tracking-[0.18em] text-blue-300 uppercase mb-1.5">
                                     Kepala Puskesmas
                                 </p>
-                                <p className="text-white font-bold text-[15px] leading-snug">
+                                <p className="text-white font-bold text-sm leading-snug">
                                     {kepalaNama}
                                 </p>
                             </div>
-
                         </div>
+                    </div>
 
-                        {/* Right — Sambutan content */}
-                        <div className="flex flex-col pt-1 lg:pt-2">
+                    {/* Right — Content */}
+                    <div>
 
-                            <Quote
-                                className="text-blue-100 w-14 h-14 mb-1 -ml-1 fill-blue-100 stroke-blue-200"
-                                strokeWidth={0.75}
-                            />
+                        <Quote
+                            className="text-blue-100 w-10 h-10 mb-4 -ml-1 fill-blue-100 stroke-blue-200"
+                            strokeWidth={0.75}
+                        />
 
+                        {sanitizedContent ? (
                             <div
-                                className="prose prose-slate prose-[15px] max-w-none leading-[1.9]
-                                    prose-headings:font-bold prose-headings:text-slate-800 prose-headings:tracking-tight
-                                    prose-p:text-slate-600 prose-p:my-4
+                                className="prose prose-slate prose-sm md:prose-base max-w-none leading-relaxed
+                                    prose-headings:font-bold prose-headings:text-slate-800
+                                    prose-p:text-slate-600 prose-p:my-3
                                     prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                                    prose-img:rounded-2xl prose-img:shadow-md
-                                    prose-blockquote:border-blue-400 prose-blockquote:bg-blue-50
-                                    prose-blockquote:rounded-r-xl prose-blockquote:py-1 prose-blockquote:not-italic
-                                    prose-table:text-sm prose-th:bg-blue-50 prose-th:text-blue-800
-                                    prose-strong:text-slate-700"
+                                    prose-strong:text-slate-700
+                                    prose-blockquote:border-blue-300 prose-blockquote:bg-blue-50/60 prose-blockquote:rounded-r-lg prose-blockquote:not-italic"
                                 dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                             />
+                        ) : (
+                            <p className="text-slate-500 text-sm italic">Sambutan belum tersedia.</p>
+                        )}
 
-                            {/* Signature */}
-                            <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-8">
-                                <div className="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                    {kepalaNama.charAt(0)}
-                                </div>
-                                <div>
-                                    <p className="text-xs text-slate-400 mb-0.5 tracking-wide">Hormat kami,</p>
-                                    <p className="font-bold text-slate-800 text-sm">{kepalaNama}</p>
-                                    <p className="text-[11px] text-blue-600 font-semibold tracking-wide mt-0.5">Kepala Puskesmas</p>
-                                </div>
+                        {/* Signature */}
+                        <div className="mt-8 pt-6 border-t border-slate-100 flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+                                {kepalaNama.charAt(0)}
                             </div>
-
+                            <div>
+                                <p className="text-[10px] text-slate-400 mb-0.5 tracking-wide font-medium uppercase">Hormat kami,</p>
+                                <p className="font-bold text-slate-800 text-sm">{kepalaNama}</p>
+                                <p className="text-[11px] text-blue-600 font-medium mt-0.5">Kepala Puskesmas</p>
+                            </div>
                         </div>
                     </div>
                 </div>

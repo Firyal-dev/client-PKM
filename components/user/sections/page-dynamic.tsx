@@ -1,5 +1,5 @@
 import Image from "next/image"
-import Breadcrumb from "@/components/user/partials/breadcrumb"
+import HeroHeader from "@/components/user/partials/hero-header"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
@@ -27,27 +27,18 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Hero Header */}
-            <div className="bg-gradient-to-br from-blue-700 to-blue-500 text-white">
-                <div className="max-w-5xl mx-auto px-4 py-12">
-                    <Breadcrumb items={breadcrumbItems} />
-                    <h1 className="text-3xl md:text-4xl font-bold mt-4 leading-tight">
-                        {isDetail ? page.title : menu.title}
-                    </h1>
-                    {isDetail && (
-                        <p className="mt-2 text-blue-100 text-sm">
-                            {new Date(page.createdAt).toLocaleDateString('id-ID', {
-                                day: 'numeric', month: 'long', year: 'numeric',
-                            })}
-                        </p>
-                    )}
-                </div>
-            </div>
+            <HeroHeader
+                items={breadcrumbItems}
+                title={isDetail ? page.title : menu.title}
+                description={isDetail ? new Date(page.createdAt).toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                }) : undefined}
+            />
 
             {/* Featured Image */}
             {imageUrl && (
-                <div className="max-w-5xl mx-auto px-4 -mt-6">
-                    <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
+                <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 pt-8">
+                    <div className="relative w-full h-56 md:h-72 rounded-xl overflow-hidden shadow-md">
                         <Image
                             src={imageUrl}
                             alt={page.title}
@@ -61,7 +52,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
             )}
 
             {/* Content */}
-            <div className="max-w-5xl mx-auto px-4 py-10">
+            <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 py-10">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 md:p-12">
                     {/* Judul artikel (hanya untuk halaman tunggal / non-detail agar tidak duplikat) */}
                     {!isDetail && (

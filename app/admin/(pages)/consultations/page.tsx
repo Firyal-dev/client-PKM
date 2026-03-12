@@ -21,22 +21,8 @@ export default async function ConsultationPage({ searchParams }: { searchParams:
                 description="Kelola tanya jawab dan konsultasi dari pengguna"
             />
 
-            {data.length > 0 && (
-                <div className="flex items-center gap-2 mt-5 mb-4">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 border border-border/60 rounded-full px-3 py-1.5">
-                        <MessageCircleQuestion className="h-3.5 w-3.5" />
-                        <span className="font-medium">{data.length} Konsultasi</span>
-                    </div>
-                    {unanswered > 0 && (
-                        <div className="flex items-center gap-1.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200/50 rounded-full px-3 py-1.5">
-                            {unanswered} belum dijawab
-                        </div>
-                    )}
-                </div>
-            )}
-
             <div className={cn(
-                "rounded-2xl bg-muted/30 border border-border/60 mt-2 p-5 min-h-[500px] flex flex-col",
+                "rounded-2xl bg-muted/30 border border-border/60 mt-6 p-5 min-h-[500px] flex flex-col",
                 data.length === 0 && "justify-center items-center mt-6"
             )}>
                 {data.length === 0 ? (
