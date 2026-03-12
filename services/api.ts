@@ -7,24 +7,71 @@ function getTenantIdFromCookie(): string | null {
     return match ? match[1] : null;
 }
 
+// Helper to get tenant slug from hostname (for public visitors)
+function getTenantSlugFromHostname(): string | null {
+    if (typeof window === 'undefined') return null;
+
+    const hostname = window.location.hostname;
+    const port = window.location.port ? `:${window.location.port}` : '';
+    const fullHost = port ? `${hostname}${port}` : hostname;
+
+    // Skip localhost without subdomain
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('127.0.0.1')) {
+        return null;
+    }
+
+    // Extract subdomain from patterns like: pkm-bogor-tengah.localhost
+    const parts = hostname.split('.');
+    if (parts.length >= 2 && (parts[parts.length - 1] === 'localhost' || parts[parts.length - 1] === 'local')) {
+        const subdomain = parts[0];
+        if (subdomain && !['www', 'api', 'admin'].includes(subdomain)) {
+            return subdomain;
+        }
+    }
+
+    // For production: subdomain.domain.com
+    if (parts.length > 2) {
+        const subdomain = parts[0];
+        if (subdomain && !['www', 'api', 'admin'].includes(subdomain)) {
+            return subdomain;
+        }
+    }
+
+    return null;
+}
+
 // Helper to get tenant headers
 function getTenantHeaders(): Record<string, string> {
-    if (typeof window === 'undefined') return {};
+    // Try server-side tenant header first (set by proxy middleware)
+    // Note: This only works for server-side requests, not client-side fetch
+
+    let tenantId: string | null = null;
+    let tenantSlug: string | null = null;
 
     // 1. First try to get from cookie (set after login/tenant switch)
-    let tenantId = getTenantIdFromCookie();
+    tenantId = getTenantIdFromCookie();
 
     // 2. If not in cookie, check if there's a global tenant context
-    if (!tenantId) {
+    if (!tenantId && typeof window !== 'undefined') {
         tenantId = (window as any).__TENANT_ID__;
     }
 
-    // 3. Inject tenant ID header for backend tenant resolution
+    // 3. For public visitors (not logged in), extract from hostname
+    if (!tenantId) {
+        tenantSlug = getTenantSlugFromHostname();
+    }
+
+    // 4. Inject tenant ID header for backend tenant resolution
     if (tenantId) {
         // Validate UUID format before sending
         if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tenantId)) {
             return { 'x-tenant-id': tenantId };
         }
+    }
+
+    // 5. Use slug for public visitors
+    if (tenantSlug) {
+        return { 'x-tenant-slug': tenantSlug };
     }
 
     return {};
@@ -46,6 +93,39 @@ async function handleApiError(response: Response): Promise<string> {
             // Try to parse as JSON
             try {
                 const json = JSON.parse(bodyText);
+
+                // Check for tenant status errors - check json.error (from ForbiddenException)
+                const errorCode = json?.error;
+                const errorMessage = json?.message;
+
+                if (errorCode === 'TENANT_SUSPENDED') {
+                    // Redirect to suspended page
+                    if (typeof window !== 'undefined') {
+                        const params = new URLSearchParams({
+                            tenant: json.tenantName || '',
+                            reason: json.reason || ''
+                        });
+                        window.location.href = `/suspended?${params.toString()}`;
+                    }
+                    return json.message || 'Puskesmas ditangguhkan';
+                }
+
+                if (errorCode === 'TENANT_INACTIVE') {
+                    msg = json.message || 'Puskesmas tidak aktif';
+                    if (typeof window !== 'undefined') {
+                        toast.error(msg); // Red toast for inactive
+                    }
+                    return msg;
+                }
+
+                if (errorCode === 'TENANT_MAINTENANCE') {
+                    msg = json.message || 'Website dalam perbaikan';
+                    if (typeof window !== 'undefined') {
+                        toast.info(msg); // Blue toast for maintenance - will be redirected anyway
+                    }
+                    return msg;
+                }
+
                 msg = json?.message || msg;
             } catch {
                 // If not valid JSON, use the text as message

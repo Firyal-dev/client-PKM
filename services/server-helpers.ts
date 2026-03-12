@@ -1,22 +1,57 @@
 // services/server-helpers.ts
 'use server'
 
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { getAuthToken, getTenantId } from '@/services/auth-token'
 
 export async function getTenantHeader(): Promise<Record<string, string>> {
     try {
+        // Get headers from Next.js (server-side)
         const headersList = await headers()
-        const tenantSlug = headersList.get('x-tenant-slug') || 'default'
+
+        // 1. First check x-tenant-slug header (set by proxy middleware)
+        let tenantSlug = headersList.get('x-tenant-slug') || 'default'
+
+        // DEBUG: Log what we get
+        console.log('[getTenantHeader] Initial tenantSlug:', tenantSlug)
+        console.log('[getTenantHeader] Host header:', headersList.get('host'))
+
+        // 2. If not from header, try to extract from host
+        if (!tenantSlug || tenantSlug === 'default') {
+            const host = headersList.get('host') || ''
+            const hostname = host.split(':')[0]
+
+            console.log('[getTenantHeader] Hostname:', hostname)
+
+            // Handle localhost with subdomain: pkm-bogor-tengah.localhost
+            if (hostname.includes('localhost') || hostname.endsWith('.local')) {
+                const parts = hostname.split('.')
+                console.log('[getTenantHeader] Parts:', parts)
+                // For patterns like: pkm-bogor-tengah.localhost
+                if (parts.length >= 2 && (parts[parts.length - 1] === 'localhost' || parts[parts.length - 1] === 'local')) {
+                    tenantSlug = parts[0]
+                }
+            }
+            // Handle production: subdomain.domain.com
+            else if (!hostname.startsWith('127.0.0.1')) {
+                const parts = hostname.split('.')
+                if (parts.length > 2) {
+                    tenantSlug = parts[0]
+                }
+            }
+        }
+
+        console.log('[getTenantHeader] Final tenantSlug:', tenantSlug)
 
         // Also check cookie for tenant ID (set by tenant switcher)
-        const cookieTenantId = await getTenantId();
+        const cookieStore = await cookies()
+        const cookieTenantId = cookieStore.get('tenant_id')?.value
 
         const result: Record<string, string> = {
             'Content-Type': 'application/json'
         };
 
-        // Priority: use tenant slug from headers if available, otherwise use tenant ID from cookie
+        // Priority: use tenant slug from headers/hostname if available, otherwise use tenant ID from cookie
         if (tenantSlug && tenantSlug !== 'default') {
             result['x-tenant-slug'] = String(tenantSlug);
         } else if (cookieTenantId) {
@@ -29,12 +64,17 @@ export async function getTenantHeader(): Promise<Record<string, string>> {
         return result;
     } catch (error) {
         // Try to get tenant ID from cookie as fallback
-        const cookieTenantId = await getTenantId();
-        if (cookieTenantId) {
-            return {
-                'x-tenant-id': cookieTenantId,
-                'Content-Type': 'application/json'
-            };
+        try {
+            const cookieStore = await cookies()
+            const cookieTenantId = cookieStore.get('tenant_id')?.value
+            if (cookieTenantId) {
+                return {
+                    'x-tenant-id': cookieTenantId,
+                    'Content-Type': 'application/json'
+                };
+            }
+        } catch (e) {
+            // Cookies not available
         }
         return {
             'x-tenant-slug': 'default',
@@ -89,9 +129,10 @@ export async function authHeaders() {
     const jwtTenantId = await getJwtTenantId()
 
     // Also check cookie for tenant ID (set by tenant switcher)
-    const cookieTenantId = await getTenantId()
+    const cookieStore = await cookies()
+    const cookieTenantId = cookieStore.get('tenant_id')?.value
 
-    // Get tenant from URL header (set by proxy)
+    // Get tenant from URL header (set by proxy) or extract from host
     const tenantHeaders = await getTenantHeader()
 
     // Use JWT tenant ID if available (Super Admin switched tenant), otherwise use cookie, otherwise use URL tenant slug
@@ -108,12 +149,12 @@ export async function authHeaders() {
         return headers
     }
 
-    // Priority: JWT tenant ID > Cookie tenant ID > URL header
+    // Priority: JWT tenant ID > Cookie tenant ID > URL header/hostname
     if (jwtTenantId) {
         headers['x-tenant-id'] = jwtTenantId
     } else if (cookieTenantId) {
         headers['x-tenant-id'] = cookieTenantId
-    } else {
+    } else if (tenantHeaders['x-tenant-slug'] && tenantHeaders['x-tenant-slug'] !== 'default') {
         headers['x-tenant-slug'] = tenantHeaders['x-tenant-slug']
     }
 

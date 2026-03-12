@@ -24,13 +24,25 @@ export interface Menu {
 // Publik: Ambil semua menu aktif
 export async function getPublicMenus(): Promise<Menu[]> {
   try {
-    const res = await fetch(`${getBaseUrl()}/v1/menus`, {
-      headers: await getTenantHeader(),
+    const url = `${getBaseUrl()}/v1/menus`
+    const headers = await getTenantHeader()
+
+    const res = await fetch(url, {
+      headers,
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.MENU] }
     })
-    if (!res.ok) throw new Error('Gagal ambil menu')
+
+    if (!res.ok) {
+      console.warn(`[MenuService] Failed to fetch public menus (Status ${res.status}). Returning empty array.`)
+      return []
+    }
+
     return await res.json() || []
-  } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
+  } catch (e) {
+    console.error(`[MenuService] Error in getPublicMenus:`, e)
+    // Return empty array instead of throwing to prevent layout crash
+    return []
+  }
 }
 
 // Publik: Ambil menu by slug

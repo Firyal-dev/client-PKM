@@ -11,9 +11,19 @@ export function proxy(request: NextRequest) {
 
     let tenantSlug = 'default';
 
-    if (hostWithoutPort !== 'localhost' && !hostWithoutPort.startsWith('127.0.0.1')) {
+    // FIX: Handle localhost with subdomain: pkm-bogor-tengah.localhost
+    if (hostWithoutPort.includes('localhost') || hostWithoutPort.endsWith('.local')) {
+        const parts = hostWithoutPort.split('.');
+        if (parts.length >= 2 && parts[0] !== 'localhost') {
+            tenantSlug = parts[0];
+        }
+    }
+    // Handle production: subdomain.domain.com
+    else if (!hostWithoutPort.startsWith('127.0.0.1')) {
         tenantSlug = hostWithoutPort.split('.')[0];
     }
+
+    console.log('[Proxy] Host:', hostWithoutPort, '-> Tenant:', tenantSlug);
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-tenant-slug', tenantSlug);
