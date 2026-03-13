@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, ArrowRight, MapPin, Search, X } from 'lucide-react'
+import { Building2, ArrowRight, Search, X, Globe } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { PaginationControl } from '@/components/pagination-control'
 import { getSubdomainUrl } from '@/lib/getSubdomain'
@@ -12,6 +12,7 @@ interface Puskesmas {
     id: string
     name: string
     slug: string
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'MAINTENANCE'
 }
 
 interface PuskesmasListClientProps {
@@ -28,11 +29,13 @@ export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [searchValue, setSearchValue] = useState(searchParams.get('q') || '')
-    const [isSearching, setIsSearching] = useState(false)
+
+    useEffect(() => {
+        setSearchValue(searchParams.get('q') || '')
+    }, [searchParams])
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
-        setIsSearching(true)
         const params = new URLSearchParams(searchParams.toString())
         if (searchValue) {
             params.set('q', searchValue)
@@ -40,8 +43,7 @@ export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
         } else {
             params.delete('q')
         }
-        router.push(`/puskesmas?${params.toString()}`)
-        setTimeout(() => setIsSearching(false), 500)
+        router.replace(`/puskesmas?${params.toString()}`)
     }
 
     const handleReset = () => {
@@ -60,92 +62,112 @@ export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
     const totalPages = initialData.totalPages || 1
 
     return (
-        <div className="max-w-5xl mx-auto px-6 py-12">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="mb-8">
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="w-full">
+            {/* Search Bar - Slim for Comfort */}
+            <div className="bg-white p-3 rounded-2xl shadow-xl shadow-blue-900/10 border border-slate-200 mb-8">
+                <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
-                            placeholder="Cari puskesmas..."
+                            placeholder="Cari puskesmas (contoh: Bogor Timur)..."
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
-                            className="pl-9 h-11 rounded-xl border-slate-200 bg-white text-sm"
+                            className="pl-10 h-11 rounded-xl border-none bg-slate-50 focus-visible:bg-white text-sm w-full transition-all"
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition-colors"
-                    >
-                        Cari
-                    </button>
-                    {hasSearch && (
+                    <div className="flex gap-2">
                         <button
-                            type="button"
-                            onClick={handleReset}
-                            className="h-11 px-4 text-slate-500 hover:text-slate-700 rounded-xl text-sm flex items-center gap-1.5"
+                            type="submit"
+                            className="h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[11px] transition-all shadow-md shadow-blue-500/20 uppercase tracking-wider"
                         >
-                            <X className="w-4 h-4" /> Reset
+                            Cari
                         </button>
-                    )}
-                </div>
-            </form>
+                        {hasSearch && (
+                            <button
+                                type="button"
+                                onClick={handleReset}
+                                className="h-11 px-4 text-slate-500 hover:text-red-600 hover:bg-red-50 bg-slate-50 rounded-xl transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </div>
 
-            {/* Results Info */}
-            {hasSearch && (
-                <p className="text-sm text-slate-500 mb-6">
-                    Menampilkan hasil pencarian "{searchParams.get('q')}" - {initialData.docs.length} puskesmas ditemukan
-                </p>
-            )}
-
-            {/* List */}
+            {/* List Grid */}
             {initialData.docs.length === 0 ? (
-                <div className="text-center py-20 text-slate-400">
-                    <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">
-                        {hasSearch ? 'Puskesmas tidak ditemukan.' : 'Belum ada puskesmas terdaftar.'}
-                    </p>
+                <div className="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Building2 className="w-8 h-8 text-slate-300" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800">Tidak Ditemukan</h3>
+                    <p className="text-sm text-slate-500">Puskesmas tidak terdaftar atau kata kunci salah.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {initialData.docs.map((puskesmas: Puskesmas) => (
                         <Link
                             key={puskesmas.id}
                             href={getSubdomainUrl(puskesmas.slug)}
-                            className="group block bg-white rounded-2xl border border-slate-100 p-5 hover:border-blue-200 hover:shadow-md transition-all duration-200"
+                            className="group flex flex-col bg-white rounded-[2rem] border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/5 hover:border-blue-400/40 hover:-translate-y-1.5"
                         >
-                            <div className="flex items-start justify-between gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:border-blue-600 transition-colors duration-200">
-                                    <Building2 className="w-4.5 h-4.5 text-blue-500 group-hover:text-white transition-colors duration-200" />
+                            <div className="p-7 flex-1 flex flex-col">
+                                {/* Header Card */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center transition-colors group-hover:bg-blue-600">
+                                        <Building2 className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
+                                    </div>
+                                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+                                        puskesmas.status === 'ACTIVE' 
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                                    }`}>
+                                        {puskesmas.status === 'ACTIVE' ? '● Aktif' : '● Maintenance'}
+                                    </div>
                                 </div>
-                                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all duration-200 mt-1 flex-shrink-0" />
+
+                                {/* Body Card */}
+                                <div className="mb-6 flex-1">
+                                    <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-blue-700 transition-colors leading-tight mb-2">
+                                        {puskesmas.name}
+                                    </h2>
+                                    <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2">
+                                        Layanan kesehatan masyarakat terpadu wilayah {puskesmas.name.replace('Puskesmas ', '')}, Kota Bogor.
+                                    </p>
+                                </div>
+
+                                {/* Link Badge */}
+                                <div className="mt-auto flex items-center gap-2 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
+                                    <Globe className="w-3.5 h-3.5 text-blue-500" />
+                                    <span className="text-[11px] font-bold text-slate-600 lowercase">
+                                        {puskesmas.slug}.bogorkota.go.id
+                                    </span>
+                                </div>
                             </div>
 
-                            <h2 className="text-sm font-bold text-slate-800 group-hover:text-blue-700 transition-colors leading-snug mb-1.5">
-                                {puskesmas.name}
-                            </h2>
-
-                            <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3 h-3 text-slate-300 flex-shrink-0" />
-                                <span className="text-[11px] text-slate-400 font-mono">
-                                    {puskesmas.slug}.localhost
+                            {/* Footer Action */}
+                            <div className="px-7 py-4 bg-slate-50/50 border-t border-slate-50 group-hover:bg-blue-600 transition-all flex items-center justify-between">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-white/90">
+                                    Buka Website
                                 </span>
+                                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-white transition-transform group-hover:translate-x-1" />
                             </div>
                         </Link>
                     ))}
                 </div>
             )}
 
-            {/* Pagination */}
+            {/* Pagination Section */}
             {initialData.docs.length > 0 && totalPages > 1 && (
-                <div className="mt-10">
+                <div className="mt-12 pt-8 border-t border-slate-200">
                     <PaginationControl
                         totalPages={totalPages}
                         currentPage={currentPage}
                         onPageChange={handlePageChange}
                     />
-                    <p className="text-center text-xs text-slate-400 mt-4">
-                        Menampilkan {initialData.docs.length} dari {initialData.totalDocs} puskesmas
+                    <p className="text-center text-[11px] text-slate-400 mt-4 font-bold uppercase tracking-widest">
+                        Menampilkan {initialData.docs.length} dari {initialData.totalDocs} Puskesmas
                     </p>
                 </div>
             )}
