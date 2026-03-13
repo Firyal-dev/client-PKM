@@ -82,17 +82,36 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                             </div>
                         </div>
 
-                        {/* PDF Embed — collapsible */}
+                        {/* PDF Embed — collapsible card */}
                         <div
-                            className="overflow-hidden transition-all duration-500 ease-in-out"
-                            style={{ maxHeight: previewOpen ? '85vh' : '0px' }}
+                            className={`overflow-hidden transition-all duration-500 ease-in-out ${previewOpen ? 'border-t border-slate-100' : ''}`}
+                            style={{ maxHeight: previewOpen ? '2000px' : '0px' }}
                         >
-                            <iframe
-                                src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                                className="w-full"
-                                style={{ height: '85vh', display: 'block' }}
-                                title={page.title}
-                            />
+                            <div className="p-6 bg-slate-50">
+                                <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-md">
+                                    <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-slate-50/50">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pratinjau Dokumen</span>
+                                        <a 
+                                            href={fileUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                            Tampilan Penuh
+                                        </a>
+                                    </div>
+                                    <div className="relative" style={{ height: '85vh', maxHeight: '800px' }}>
+                                        <iframe
+                                            src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                            className="w-full h-full border-none"
+                                            title={page.title}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>

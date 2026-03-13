@@ -146,7 +146,7 @@ export default function Hero({ data }: { data: Banner[] }) {
             {/* Scroll Indicator */}
             <div className="absolute bottom-20 md:bottom-28 right-6 md:right-16 lg:right-24 z-30 hidden md:flex flex-col items-center gap-3">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/40 vertical-text rotate-180" style={{ writingMode: 'vertical-rl' }}>
-                    Scroll Down
+                    Gulir Ke Bawah
                 </span>
                 <div className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line" />

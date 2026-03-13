@@ -161,16 +161,6 @@ export function ActivityLogList({ initialLogs, initialMeta }: ActivityLogListPro
             }
         },
         {
-            id: "route",
-            header: "Endpoint",
-            cell: ({ row }) => (
-                <div className="max-w-[200px] truncate">
-                    <span className="text-[10px] font-bold text-foreground mr-1">{row.original.method}</span>
-                    <span className="text-[10px] text-muted-foreground font-mono">{row.original.route || '-'}</span>
-                </div>
-            )
-        },
-        {
             id: "status",
             header: "Status",
             cell: ({ row }) => {

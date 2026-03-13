@@ -86,19 +86,35 @@ function DokumenCard({ page }: { page: Page }) {
                 </div>
             </div>
 
-            {/* PDF Preview — collapsible */}
+            {/* PDF Preview — collapsible card */}
             {fileUrl && (
                 <div
                     className="overflow-hidden transition-all duration-500 ease-in-out"
-                    style={{ maxHeight: previewOpen ? '75vh' : '0px' }}
+                    style={{ maxHeight: previewOpen ? '1000px' : '0px' }}
                 >
-                    <div className="border-t border-slate-100">
-                        <iframe
-                            src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                            className="w-full"
-                            style={{ height: '75vh', display: 'block' }}
-                            title={page.title}
-                        />
+                    <div className="mx-5 mb-5 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shadow-inner">
+                        <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pratinjau Dokumen</span>
+                            <a 
+                                href={fileUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                Tampilan Penuh
+                            </a>
+                        </div>
+                        <div className="relative" style={{ height: '75vh', maxHeight: '600px' }}>
+                            <iframe
+                                src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                className="w-full h-full border-none"
+                                title={page.title}
+                            />
+                            {/* Overlay protection for scroll consistency if needed, but iframe handles itself usually */}
+                        </div>
                     </div>
                 </div>
             )}

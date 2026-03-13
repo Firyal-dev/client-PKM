@@ -4,13 +4,11 @@ import type { NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
     const url = request.nextUrl;
     const pathname = url.pathname;
-
     const hostname = request.headers.get('host') || '';
-
     const hostWithoutPort = hostname.split(':')[0];
 
     let tenantSlug = 'default';
-
+   //
     // FIX: Handle localhost with subdomain: pkm-bogor-tengah.localhost
     if (hostWithoutPort.includes('localhost') || hostWithoutPort.endsWith('.local')) {
         const parts = hostWithoutPort.split('.');
@@ -38,6 +36,11 @@ export function proxy(request: NextRequest) {
 
     if (isLoginPage && token) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+
+    // Redirect root localhost to /puskesmas landing page
+    if (tenantSlug === 'default' && pathname === '/') {
+        return NextResponse.redirect(new URL('/puskesmas', request.url));
     }
 
     return NextResponse.next({

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { loginAction } from "@/services/auth/login-service"
 import Image from 'next/image'
 // Perubahan 1: Pastikan ChangeEvent diimport jika belum (biasanya otomatis di TS)
-import { useActionState, useState, ChangeEvent, useEffect } from 'react'
+import { useActionState, useState, ChangeEvent, useEffect, startTransition } from 'react'
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 import { clearAuthToken } from "@/services/auth-token"
 import { toast } from "sonner"
@@ -31,7 +31,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     if (token) {
       formData.set("recaptchaToken", token);
     }
-    action(formData);
+    startTransition(() => {
+      action(formData);
+    });
   };
 
   // Perubahan 3: Fungsi untuk menangani perubahan input username

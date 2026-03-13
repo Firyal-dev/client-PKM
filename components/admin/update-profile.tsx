@@ -39,15 +39,20 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
         }
     }, [profile?.name])
 
+    const wasPending = useRef(false)
+
     useEffect(() => {
-        if (state && !isPending && state.success && open) {
-            toast.success("Profil diperbarui!")
-            resetPreview()
-            setOpen(false)
-        } else if (state && !isPending && state.error && open) {
-            toast.error("Gagal: " + state.error)
+        if (!isPending && wasPending.current && state) {
+            if (state.success) {
+                toast.success("Profil diperbarui!")
+                resetPreview()
+                setOpen(false)
+            } else if (state.error) {
+                toast.error("Gagal: " + state.error)
+            }
         }
-    }, [state, isPending, open, resetPreview])
+        wasPending.current = isPending
+    }, [state, isPending, resetPreview])
 
     if (!profile) return null
 
@@ -60,7 +65,7 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">{profile.name}</span>
-                        <span className="truncate text-xs">Puskesmas</span>
+                        <span className="truncate text-xs">{profile.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Operator'}</span>
                     </div>
                 </SidebarMenuButton>
             </SheetTrigger>

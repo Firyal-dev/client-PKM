@@ -87,4 +87,5 @@ export const CACHE_TAGS = {
     CONSULTATION: 'consultation',
     WEB_INFO: 'web_info',
     PUSKESMAS: 'puskesmas',
+    PUSKESMAS_LIST: 'puskesmas_list',
 } as const
