@@ -9,15 +9,18 @@ export function proxy(request: NextRequest) {
 
     const hostWithoutPort = hostname.split(':')[0];
 
-    let tenantSlug = 'default';
+    let tenantSlug = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default';
 
     // FIX: Handle localhost with subdomain: pkm-bogor-tengah.localhost
     if (hostWithoutPort.includes('localhost') || hostWithoutPort.endsWith('.local')) {
         const parts = hostWithoutPort.split('.');
         if (parts.length >= 2 && parts[0] !== 'localhost') {
             tenantSlug = parts[0];
+        } else if (!process.env.NEXT_PUBLIC_DEFAULT_TENANT) {
+            console.warn('[Proxy] Warning: No subdomain detected and NEXT_PUBLIC_DEFAULT_TENANT is not set. Falling back to "default" tenant.');
         }
     }
+
     // Handle production: subdomain.domain.com
     else if (!hostWithoutPort.startsWith('127.0.0.1')) {
         tenantSlug = hostWithoutPort.split('.')[0];
