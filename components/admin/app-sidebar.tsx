@@ -21,7 +21,7 @@ import { TenantSwitcher } from "@/components/admin/tenant-switcher"
 import { Building2 } from "lucide-react"
 import Link from "next/link"
 
-export function AppSidebar({ profile, tenants = [], ...props }: { profile: AdminProfileProp, tenants?: any[] } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ profile, tenants = {}, ...props }: { profile: AdminProfileProp, tenants?: { docs?: any[] } } & React.ComponentProps<typeof Sidebar>) {
   const [state, logout, isPending] = useActionState(logoutAction, null)
   const [isTransitionPending, startTransition] = useTransition()
 
@@ -31,12 +31,8 @@ export function AppSidebar({ profile, tenants = [], ...props }: { profile: Admin
     })
   }
 
-  // Cek apakah user adalah SUPER_ADMIN dan sudah memilih puskesmas
   const isSuperAdmin = profile.role === 'SUPER_ADMIN'
   const hasSelectedPuskesmas = !!profile.active_tenant
-
-  // SUPER_ADMIN: hanya tampilkan menu terbatas jika belum memilih puskesmas
-  // Jika sudah memilih puskes, tampilkan semua menu
   const showLimitedMenu = isSuperAdmin && !hasSelectedPuskesmas
 
   //operator
@@ -50,36 +46,36 @@ export function AppSidebar({ profile, tenants = [], ...props }: { profile: Admin
             <UpdateProfile profile={profile} />
           </SidebarMenuItem>
           {isSuperAdmin && (
-            <TenantSwitcher tenants={tenants} activeTenantId={profile.active_tenant} />
+            <TenantSwitcher tenants={tenants?.docs ?? []} activeTenantId={profile.active_tenant} />
           )}
         </SidebarMenu>
       </SidebarHeader>
       <Separator />
- <SidebarContent>
-  {showLimitedMenu ? (
-    <>
-      <NavMain items={sidebarData.navMain.slice(0, 1)} />
+      <SidebarContent>
+        {showLimitedMenu ? (
+          <>
+            <NavMain items={sidebarData.navMain.slice(0, 1)} />
 
-      {/* Hanya SUPER_ADMIN */}
-      {isSuperAdmin && (
-        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-      )}
-    </>
-  ) : (
-    <>
-      <NavMain items={sidebarData.navMain} />
-      <NavMedia navMedia={sidebarData.navMedia} />
-      <NavActivities navActivities={sidebarData.navActivities} />
-      <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
-      <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
+            {/* Hanya SUPER_ADMIN */}
+            {isSuperAdmin && (
+              <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+            )}
+          </>
+        ) : (
+          <>
+            <NavMain items={sidebarData.navMain} />
+            <NavMedia navMedia={sidebarData.navMedia} />
+            <NavActivities navActivities={sidebarData.navActivities} />
+            <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
+            <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
 
-      {/* Hanya SUPER_ADMIN */}
-      {isSuperAdmin && (
-        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-      )}
-    </>
-  )}
-</SidebarContent>
+            {/* Hanya SUPER_ADMIN */}
+            {isSuperAdmin && (
+              <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+            )}
+          </>
+        )}
+      </SidebarContent>
       <SidebarFooter>
         <div className="flex gap-2">
           <ConfirmDialog trigger={<Button variant="destructive" className="flex-1 cursor-pointer">{isPending || isTransitionPending ? "Memuat..." : "Logout"}</Button>} title="Yakin keluar?" description="Sesi akan berakhir." onConfirm={handleLogout} confirmText="Keluar" />
