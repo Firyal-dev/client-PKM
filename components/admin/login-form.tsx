@@ -7,7 +7,6 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { loginAction } from "@/services/auth/login-service"
 import Image from 'next/image'
-// Perubahan 1: Pastikan ChangeEvent diimport jika belum (biasanya otomatis di TS)
 import { useActionState, useState, ChangeEvent, useEffect, startTransition } from 'react'
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 import { clearAuthToken } from "@/services/auth-token"
@@ -16,7 +15,8 @@ import { toast } from "sonner"
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [state, action, pending] = useActionState(loginAction, null);
   const [username, setUsername] = useState("");
-  const { executeRecaptcha } = useGoogleReCaptcha();
+  const recaptcha = useGoogleReCaptcha();
+  const executeRecaptcha = recaptcha?.executeRecaptcha;
 
   useEffect(() => {
     clearAuthToken();
@@ -36,13 +36,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     });
   };
 
-  // Perubahan 3: Fungsi untuk menangani perubahan input username
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
 
-    // Regex ini berarti: "Ganti semua karakter yang BUKAN (^) huruf kecil (a-z),
-    // huruf besar (A-Z), atau angka (0-9) dengan string kosong."
-    // Ini efektif menghapus spasi dan simbol aneh secara real-time.
     const cleanedValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
 
     setUsername(cleanedValue);
@@ -68,10 +64,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   type="text"
                   placeholder="username"
                   required
-                  value={username} // Nilai input dikunci ke state
-                  onChange={handleUsernameChange} // Panggil fungsi pembersih saat mengetik
+                  value={username}
+                  onChange={handleUsernameChange}
                 />
-                {/* Opsional: Tambahkan hint kecil */}
                 <p className="text-xs text-muted-foreground mt-1">Hanya huruf dan angka, tanpa spasi.</p>
               </Field>
               <Field>

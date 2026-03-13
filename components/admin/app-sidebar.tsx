@@ -39,6 +39,9 @@ export function AppSidebar({ profile, tenants = [], ...props }: { profile: Admin
   // Jika sudah memilih puskes, tampilkan semua menu
   const showLimitedMenu = isSuperAdmin && !hasSelectedPuskesmas
 
+  //operator
+  const isOperator = profile.role === 'OPERATOR'
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -52,27 +55,31 @@ export function AppSidebar({ profile, tenants = [], ...props }: { profile: Admin
         </SidebarMenu>
       </SidebarHeader>
       <Separator />
-      <SidebarContent>
-        {/* SUPER_ADMIN belum pilih puskes: hanya Dashboard, Data Admin, Log Aktivitas */}
-        {showLimitedMenu ? (
-          <>
-            {/* Dashboard saja */}
-            <NavMain items={sidebarData.navMain.slice(0, 1)} />
-            {/* Manajemen Admin: Data Admin dan Log Aktivitas */}
-            <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-          </>
-        ) : (
-          <>
-            {/* Semua menu untuk: non-SUPER_ADMIN ATAU SUPER_ADMIN yang sudah pilih puskes */}
-            <NavMain items={sidebarData.navMain} />
-            <NavMedia navMedia={sidebarData.navMedia} />
-            <NavActivities navActivities={sidebarData.navActivities} />
-            <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
-            <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
-            <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
-          </>
-        )}
-      </SidebarContent>
+ <SidebarContent>
+  {showLimitedMenu ? (
+    <>
+      <NavMain items={sidebarData.navMain.slice(0, 1)} />
+
+      {/* Hanya SUPER_ADMIN */}
+      {isSuperAdmin && (
+        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+      )}
+    </>
+  ) : (
+    <>
+      <NavMain items={sidebarData.navMain} />
+      <NavMedia navMedia={sidebarData.navMedia} />
+      <NavActivities navActivities={sidebarData.navActivities} />
+      <NavUserExperience navUserExperience={sidebarData.navUserExperience} />
+      <NavWebConfig navWebConfig={sidebarData.navWebConfig} />
+
+      {/* Hanya SUPER_ADMIN */}
+      {isSuperAdmin && (
+        <NavAdminManage navAdminManage={sidebarData.navAdminManage} />
+      )}
+    </>
+  )}
+</SidebarContent>
       <SidebarFooter>
         <div className="flex gap-2">
           <ConfirmDialog trigger={<Button variant="destructive" className="flex-1 cursor-pointer">{isPending || isTransitionPending ? "Memuat..." : "Logout"}</Button>} title="Yakin keluar?" description="Sesi akan berakhir." onConfirm={handleLogout} confirmText="Keluar" />
