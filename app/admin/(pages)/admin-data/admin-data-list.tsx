@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useTransition, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal } from "lucide-react"
+import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { format, parseISO } from "date-fns"
 import { id } from "date-fns/locale"
@@ -26,13 +26,11 @@ export default function AdminDataList({
     initialData,
     total,
     currentPage,
-    totalPages,
     currentAdmin
 }: {
     initialData: Admin[];
     total: number;
     currentPage: number;
-    totalPages: number;
     currentAdmin?: { id: string; name: string } | null | undefined;
 }) {
     const router = useRouter()
@@ -168,6 +166,7 @@ export default function AdminDataList({
         setGlobalFilter(value)
         const params = new URLSearchParams(searchParams.toString())
         value ? params.set("search", value) : params.delete("search")
+        params.delete("page") // Reset ke halaman 1 saat cari
         router.push(`/admin/admin-data?${params.toString()}`)
     }
 
@@ -175,6 +174,7 @@ export default function AdminDataList({
         setRoleFilter(value)
         const params = new URLSearchParams(searchParams.toString())
         value && value !== "all" ? params.set("role", value) : params.delete("role")
+        params.delete("page") // Reset ke halaman 1 saat ganti role
         router.push(`/admin/admin-data?${params.toString()}`)
     }
 
@@ -183,6 +183,7 @@ export default function AdminDataList({
         setRoleFilter("all")
         router.push("/admin/admin-data")
     }
+
 
     const handleDelete = async () => {
         if (!deleteAdminId) return
@@ -293,7 +294,7 @@ export default function AdminDataList({
             />
 
             {/* DataTable */}
-            <div className="rounded-xl border border-border/60 overflow-hidden">
+            <div className="rounded-xl border border-border/60 overflow-hidden bg-background">
                 <DataTable
                     columns={columns}
                     data={filteredAdmins}

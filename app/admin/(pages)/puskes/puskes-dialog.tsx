@@ -198,6 +198,46 @@ export function PuskesDialog({ initialData, action, open: controlledOpen, onOpen
 
                         </div>
 
+                        {/* Additional Fields based on status */}
+                        {status === 'SUSPENDED' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="suspended_reason">Alasan Ditangguhkan</Label>
+                                <Input
+                                    id="suspended_reason"
+                                    name="suspended_reason"
+                                    placeholder="Masukkan alasan penangguhan..."
+                                    defaultValue={initialData?.suspended_reason}
+                                    className="h-11"
+                                />
+                            </div>
+                        )}
+
+                        {status === 'MAINTENANCE' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="maintenance_message">Pesan Maintenance</Label>
+                                <Input
+                                    id="maintenance_message"
+                                    name="maintenance_message"
+                                    placeholder="Masukkan pesan maintenance..."
+                                    defaultValue={initialData?.maintenance_message}
+                                    className="h-11"
+                                />
+                            </div>
+                        )}
+
+                        {status === 'INACTIVE' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="deactivated_reason">Alasan Tidak Aktif</Label>
+                                <Input
+                                    id="deactivated_reason"
+                                    name="deactivated_reason"
+                                    placeholder="Masukkan alasan tidak aktif..."
+                                    defaultValue={initialData?.deactivated_reason}
+                                    className="h-11"
+                                />
+                            </div>
+                        )}
+
 
                         {state?.error && (
                             <p className="text-xs text-destructive">

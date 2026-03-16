@@ -60,8 +60,19 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
         <Sheet open={open} onOpenChange={handleOpenChange}>
             <SheetTrigger asChild>
                 <SidebarMenuButton size="lg" className="cursor-pointer" tooltip="Edit Profil">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                        <Image src={photoSrc} width={100} height={100} className="w-full h-full object-cover rounded-full" alt="Profil" unoptimized />
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                        <Image 
+                            src={photoSrc} 
+                            width={100} 
+                            height={100} 
+                            className="w-full h-full object-cover rounded-full" 
+                            alt="Profil" 
+                            unoptimized 
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/userPlaceholder.jpg";
+                            }}
+                        />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">{profile.name}</span>
@@ -78,7 +89,17 @@ export function UpdateProfile({ profile }: { profile: AdminProfileProp }) {
 
                 <div className="flex flex-col items-center justify-center gap-3 py-8">
                     <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-primary/10">
-                        <Image src={previewUrl || photoSrc} alt="Preview" fill className="object-cover" unoptimized />
+                        <Image 
+                            src={previewUrl || photoSrc} 
+                            alt="Preview" 
+                            fill 
+                            className="object-cover" 
+                            unoptimized 
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/userPlaceholder.jpg";
+                            }}
+                        />
                     </div>
                     <p className="text-xs text-muted-foreground uppercase">{previewUrl ? "Preview Baru" : "Foto Saat Ini"}</p>
                 </div>

@@ -6,12 +6,38 @@ import { FloatingConsultation } from "@/components/user/partials/floating-consul
 import { createReviewAction } from "@/services/review/review-service"
 import { createConsultationAction } from "@/services/consultation/consultation-service"
 import Script from "next/script"
+import { redirect } from "next/navigation";
+import { checkTenantStatus, getTenantPageType, TenantStatus } from "@/services/tenant-status-service";
+import { getTenantHeader } from "@/services/server-helpers";
 
 export default async function UserLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    // Get tenant slug from headers
+    const headers = await getTenantHeader();
+    const tenantSlug = headers['x-tenant-slug'] || 'default';
+
+    // Check tenant status early
+    const statusInfo = await checkTenantStatus(tenantSlug);
+    const pageType = getTenantPageType(statusInfo?.status as TenantStatus);
+
+    // Redirect to special pages for maintenance/suspended
+    const commonParams = `?name=${encodeURIComponent(statusInfo?.name || 'Puskesmas')}&message=${encodeURIComponent(statusInfo?.message || '')}`;
+
+    if (pageType === 'maintenance') {
+        redirect(`/maintenance${commonParams}`);
+    }
+
+    if (pageType === 'suspended') {
+        redirect(`/suspended${commonParams}`);
+    }
+
+    if (pageType === 'inactive') {
+        redirect(`/inactive${commonParams}`);
+    }
+
     return (
         <div className="flex min-h-screen flex-col bg-slate-50">
             {/* Header */}

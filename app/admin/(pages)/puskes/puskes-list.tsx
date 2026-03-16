@@ -50,8 +50,12 @@ export function PuskesmasList({
                 return <Badge className="bg-green-500">Aktif</Badge>
             case 'INACTIVE':
                 return <Badge variant="secondary">Tidak Aktif</Badge>
+            case 'SUSPENDED':
+                return <Badge variant="destructive">Ditangguhkan</Badge>
+            case 'MAINTENANCE':
+                return <Badge className="bg-orange-500 hover:bg-orange-600 border-none">Maintenance</Badge>
             default:
-                return <Badge>{status}</Badge>
+                return <Badge variant="outline">{status}</Badge>
         }
     }
 
@@ -88,6 +92,19 @@ export function PuskesmasList({
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => getStatusBadge(row.original.status),
+        },
+        {
+            id: "reason",
+            header: "Keterangan",
+            cell: ({ row }) => {
+                const p = row.original
+                let reason = ""
+                if (p.status === 'SUSPENDED') reason = p.suspended_reason || "-"
+                if (p.status === 'MAINTENANCE') reason = p.maintenance_message || "-"
+                if (p.status === 'INACTIVE') reason = p.deactivated_reason || "-"
+
+                return <span className="text-xs text-muted-foreground line-clamp-2 max-w-[200px]">{reason || "-"}</span>
+            },
         },
         {
             id: "actions",
@@ -205,6 +222,8 @@ export function PuskesmasList({
                             <SelectItem value="all">Semua Status</SelectItem>
                             <SelectItem value="ACTIVE">Aktif</SelectItem>
                             <SelectItem value="INACTIVE">Tidak Aktif</SelectItem>
+                            <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
+                            <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
                         </SelectContent>
                     </Select>
                     {hasFilter && (

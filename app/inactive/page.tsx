@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import StatusPage from "@/components/status-page";
 
 export const metadata: Metadata = {
-    title: "Maintenance - Puskesmas",
-    description: "Website sedang dalam perbaikan",
+    title: "Layanan Non-Aktif - Puskesmas",
+    description: "Status layanan sistem Puskesmas",
 };
 
-export default async function MaintenancePage({
+export default async function InactivePage({
     searchParams,
 }: {
     searchParams: Promise<{ message?: string; name?: string }>;
@@ -20,12 +20,12 @@ export default async function MaintenancePage({
     const statusInfo = await checkTenantStatus(tenantSlug);
     const currentPageType = getTenantPageType(statusInfo?.status);
 
-    if (currentPageType !== "maintenance") redirect("/");
+    if (currentPageType !== "inactive") redirect("/");
 
     const { message: searchMessage, name: searchName } = await searchParams;
 
-    const message = statusInfo?.message || searchMessage || "Rencana perawatan sistem sedang berlangsung.";
+    const message = statusInfo?.message || searchMessage || "Tidak ada keterangan tambahan dari administrator.";
     const pkmName = statusInfo?.name || searchName || "Puskesmas";
 
-    return <StatusPage type="maintenance" pkmName={pkmName} message={message} />
+    return <StatusPage type="inactive" pkmName={pkmName} message={message} />
 }

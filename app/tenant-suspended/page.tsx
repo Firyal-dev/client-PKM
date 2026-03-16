@@ -6,57 +6,64 @@ export default async function TenantSuspendedPage({
 }: {
     searchParams: Promise<{ tenant?: string; reason?: string }>;
 }) {
-    // Next.js 15 - searchParams is a Promise
     const params = await searchParams;
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 px-6">
+
+            <div className="max-w-xl w-full text-center">
+
                 {/* Icon */}
-                <div className="mb-6">
-                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                        <Building2 className="w-10 h-10 text-red-600" />
+                <div className="flex justify-center mb-6">
+                    <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-red-50 border border-red-100">
+                        <Building2 className="w-7 h-7 text-red-600" />
                     </div>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <h1 className="text-4xl font-semibold text-slate-900 mb-4">
                     Website Tidak Aktif
                 </h1>
 
                 {/* Description */}
-                <p className="text-gray-600 mb-4">
-                    Maaf, website puskesmas sedang tidak dapat diakses untuk saat ini.
-                </p>
-
-                {/* Reason - if provided */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">
-                    <p className="text-sm text-yellow-800">
-                        <span className="font-semibold">Alasan:</span>{" "}
-                        {params.reason || "Tidak ada informasi"}
-                    </p>
-                </div>
-
-                {/* Tenant Name */}
-                {params.tenant && (
-                    <p className="text-sm text-gray-500 mb-6">
-                        <span className="font-medium">Puskesmas:</span> {params.tenant}
-                    </p>
-                )}
-
-                {/* Contact Info */}
-                <p className="text-sm text-gray-500 mb-6">
+                <p className="text-slate-600 text-lg max-w-lg mx-auto mb-10 leading-relaxed">
+                    Website puskesmas ini saat ini tidak dapat diakses.
                     Silakan hubungi administrator untuk informasi lebih lanjut.
                 </p>
 
-                {/* Back to Home */}
+                {/* Tenant */}
+                {params.tenant && (
+                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-6">
+                        {params.tenant}
+                    </p>
+                )}
+
+                {/* Reason */}
+                <div className="border border-red-200 rounded-lg p-5 mb-10 text-left bg-white">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-red-500 mb-2">
+                        Alasan Penonaktifan
+                    </p>
+
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                        {params.reason || "Tidak ada informasi tambahan dari administrator."}
+                    </p>
+                </div>
+
+                {/* Action */}
                 <Link
                     href="/"
-                    className="inline-flex items-center justify-center w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
                 >
                     Kembali ke Beranda
                 </Link>
+
+                {/* Footer */}
+                <p className="mt-14 text-xs text-slate-400">
+                    Sistem Informasi Puskesmas
+                </p>
+
             </div>
+
         </div>
     );
 }

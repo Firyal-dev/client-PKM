@@ -108,8 +108,8 @@ async function handleApiError(response: Response): Promise<string> {
                     // Redirect to suspended page
                     if (typeof window !== 'undefined') {
                         const params = new URLSearchParams({
-                            tenant: json.tenantName || '',
-                            reason: json.reason || ''
+                            name: json.tenantName || '',
+                            message: json.reason || json.message || ''
                         });
                         window.location.href = `/suspended?${params.toString()}`;
                     }
@@ -119,7 +119,11 @@ async function handleApiError(response: Response): Promise<string> {
                 if (errorCode === 'TENANT_INACTIVE') {
                     msg = json.message || 'Puskesmas tidak aktif';
                     if (typeof window !== 'undefined') {
-                        toast.error(msg); // Red toast for inactive
+                        const params = new URLSearchParams({
+                            name: json.tenantName || '',
+                            message: json.reason || json.message || ''
+                        });
+                        window.location.href = `/inactive?${params.toString()}`;
                     }
                     return msg;
                 }
@@ -127,7 +131,11 @@ async function handleApiError(response: Response): Promise<string> {
                 if (errorCode === 'TENANT_MAINTENANCE') {
                     msg = json.message || 'Website dalam perbaikan';
                     if (typeof window !== 'undefined') {
-                        toast.info(msg); // Blue toast for maintenance - will be redirected anyway
+                        const params = new URLSearchParams({
+                            name: json.tenantName || '',
+                            message: json.message || ''
+                        });
+                        window.location.href = `/maintenance?${params.toString()}`;
                     }
                     return msg;
                 }

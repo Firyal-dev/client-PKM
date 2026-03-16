@@ -6,6 +6,7 @@ import { CreateAdminDialog } from "./create-admin-dialog"
 import { cn } from "@/lib/utils"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Users } from "lucide-react"
+import { PaginationControl } from "@/components/pagination-control"
 
 export default async function AdminDataPage({ searchParams }: { searchParams: Promise<{ search?: string; role?: string; page?: string }> }) {
     const params = await searchParams
@@ -46,9 +47,17 @@ export default async function AdminDataPage({ searchParams }: { searchParams: Pr
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <AdminDataList initialData={initialData} total={total} currentPage={page} totalPages={totalPages} currentAdmin={currentAdmin} />
+                    <>
+                        <AdminDataList initialData={initialData} total={total} currentPage={page} currentAdmin={currentAdmin} />
+                    </>
                 )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                    <PaginationControl totalPages={totalPages} currentPage={page} />
+                </div>
+            )}
         </div>
     )
-}
+}
