@@ -7,6 +7,7 @@ import Pelayanan from "@/components/user/sections/pelayanan";
 import Agenda from "@/components/user/sections/agenda";
 import Galeri from "@/components/user/sections/galeri";
 import Berita from "@/components/user/sections/berita";
+import Faq from "@/components/user/sections/faq";
 
 // services
 import { getPublicBanners } from "@/services/banner/banner-service";
@@ -14,6 +15,7 @@ import { getPublicAgenda } from "@/services/agenda/agenda-service";
 import { getPublicGallery } from "@/services/gallery/gallery-service";
 import { getPublicBerita } from "@/services/page/page-service";
 import { getPublicMenus, Menu } from "@/services/menu/menu-service";
+import { getPublicConsultationList } from "@/services/consultation/consultation-service";
 import { checkTenantStatus, getTenantPageType, TenantStatus } from "@/services/tenant-status-service";
 import { getTenantHeader } from "@/services/server-helpers";
 
@@ -57,13 +59,14 @@ export default async function Home() {
         redirect(`/suspended?message=${encodeURIComponent(statusInfo?.message || 'Website dinonaktifkan sementara')}`);
     }
 
-    // Ambil data banner, agenda, galeri, dan menu secara paralel
-    const [banners, agendas, galeri, berita, menus] = await Promise.all([
+    // Ambil data banner, agenda, galeri, menu, dan faq secara paralel
+    const [banners, agendas, galeri, berita, menus, faq] = await Promise.all([
         getPublicBanners(),
         getPublicAgenda(1, 3),
         getPublicGallery(1, 10),
         getPublicBerita(1, 6),
-        getPublicMenus()
+        getPublicMenus(),
+        getPublicConsultationList(1, 20) // Fetch up to 20 for scrolling demo if needed
     ]);
 
     // Get pelayanan submenus (max 6)
@@ -88,6 +91,9 @@ export default async function Home() {
 
             {/* Bagian Berita */}
             <Berita data={berita} />
+
+            {/* Bagian FAQ */}
+            <Faq data={faq.data} />
         </main>
     );
 }

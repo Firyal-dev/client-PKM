@@ -27,6 +27,23 @@ export async function createConsultationAction(data: Omit<Consultation, 'id' | '
     }, 'Gagal mengirim konsultasi')
 }
 
+// Publik: Ambil konsultasi (faq)
+export async function getPublicConsultationList(page = 1, limit = 10) {
+    try {
+        const tenantHeaders = await getTenantHeader()
+        const params = buildParams(page, limit)
+        const res = await api.get(`/v1/consultation?${params}`, { headers: tenantHeaders })
+        return { 
+            data: res.data.data as Consultation[], 
+            total: res.data.total,
+            totalPages: res.data.last_page || 1, 
+            currentPage: res.data.page || page 
+        }
+    } catch (e) {
+        return { data: [], total: 0, totalPages: 1, currentPage: 1 }
+    }
+}
+
 // Admin: Ambil konsultasi (paginated)
 export async function getAdminConsultationList(page = 1, limit = 10, search?: string) {
     try {

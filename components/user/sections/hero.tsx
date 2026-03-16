@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react"
 
 export default function Hero({ data }: { data: Banner[] }) {
     const [emblaRef, emblaApi] = useEmblaCarousel(
-        { loop: true, align: "start", duration: 30 }, 
+        { loop: true, align: "start", duration: 30 },
         [Autoplay({ delay: 6000, stopOnInteraction: false })]
     )
     const [selectedIndex, setSelectedIndex] = useState(0)
@@ -58,9 +58,8 @@ export default function Hero({ data }: { data: Banner[] }) {
                                     src={getMediaUrl(banner.image_path) || "/placeholder.jpg"}
                                     alt={banner.title || "Banner"}
                                     fill
-                                    className={`object-cover transition-transform duration-[10000ms] ease-linear ${
-                                        index === selectedIndex ? "scale-110" : "scale-100 placeholder:opacity-0"
-                                    }`}
+                                    className={`object-cover transition-transform duration-[10000ms] ease-linear ${index === selectedIndex ? "scale-110" : "scale-100 placeholder:opacity-0"
+                                        }`}
                                     priority={index === 0}
                                     unoptimized
                                 />
@@ -77,22 +76,20 @@ export default function Hero({ data }: { data: Banner[] }) {
                             {/* Content Container */}
                             <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 max-w-screen-2xl mx-auto">
                                 <div className="md:max-w-3xl lg:max-w-5xl">
-                                    <h1 
-                                        className={`text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${
-                                            index === selectedIndex 
-                                                ? "translate-y-0 opacity-100 delay-300" 
+                                    <h1
+                                        className={`text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
+                                                ? "translate-y-0 opacity-100 delay-300"
                                                 : "translate-y-20 opacity-0"
-                                        }`}
+                                            }`}
                                     >
                                         {banner.title}
                                     </h1>
                                     {banner.description && (
-                                        <p 
-                                            className={`text-lg md:text-xl lg:text-2xl text-slate-200/90 max-w-2xl line-clamp-4 md:line-clamp-3 drop-shadow-md leading-relaxed transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${
-                                                index === selectedIndex 
-                                                    ? "translate-y-0 opacity-100 delay-500" 
+                                        <p
+                                            className={`text-lg md:text-xl lg:text-2xl text-slate-200/90 max-w-2xl line-clamp-4 md:line-clamp-3 drop-shadow-md leading-relaxed transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
+                                                    ? "translate-y-0 opacity-100 delay-500"
                                                     : "translate-y-20 opacity-0"
-                                            }`}
+                                                }`}
                                         >
                                             {banner.description}
                                         </p>
@@ -108,32 +105,31 @@ export default function Hero({ data }: { data: Banner[] }) {
             {data.length > 1 && (
                 <div className="absolute bottom-24 md:bottom-32 left-6 md:left-16 lg:left-24 z-30 flex items-center gap-8">
                     <div className="flex items-center gap-3">
-                        <button 
-                            onClick={scrollPrev} 
+                        <button
+                            onClick={scrollPrev}
                             className="group p-2 text-white/40 hover:text-white transition-all duration-300 cursor-pointer bg-white/5 hover:bg-white/10 rounded-full border border-white/10"
                             aria-label="Previous slide"
                         >
                             <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                         </button>
-                        <button 
-                            onClick={scrollNext} 
+                        <button
+                            onClick={scrollNext}
                             className="group p-2 text-white/40 hover:text-white transition-all duration-300 cursor-pointer bg-white/5 hover:bg-white/10 rounded-full border border-white/10"
                             aria-label="Next slide"
                         >
                             <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                         </button>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         {data.map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => scrollTo(index)}
-                                className={`group relative h-1.5 transition-all duration-500 rounded-full cursor-pointer ${
-                                    index === selectedIndex 
-                                        ? "w-10 bg-white" 
+                                className={`group relative h-1.5 transition-all duration-500 rounded-full cursor-pointer ${index === selectedIndex
+                                        ? "w-10 bg-white"
                                         : "w-4 bg-white/20 hover:bg-white/40"
-                                }`}
+                                    }`}
                                 aria-label={`Go to slide ${index + 1}`}
                             >
                                 <span className="absolute -inset-2 block" />

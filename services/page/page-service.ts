@@ -115,6 +115,22 @@ export async function getPublicBerita(page?: number, limit?: number): Promise<Pa
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data berita')) }
 }
 
+// Publik: Search halaman (berita/pelayanan)
+export async function searchPublicPages(q: string): Promise<any[]> {
+  try {
+    if (!q || q.trim().length === 0) return []
+    const res = await fetch(`${getBaseUrl()}/v1/pages/search?q=${encodeURIComponent(q)}`, {
+      headers: await getTenantHeader(),
+      // No cache for search suggestions to keep it fresh
+      cache: 'no-store'
+    })
+    if (!res.ok) return []
+    return await res.json()
+  } catch {
+    return []
+  }
+}
+
 // Admin: Ambil semua halaman (paginated)
 export async function getAdminPages(page = 1, limit = 10) {
   try {

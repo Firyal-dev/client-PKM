@@ -46,9 +46,9 @@ const getTypeMeta = (type?: string) => {
 
 const getMenuMeta = (menuType?: string) => {
   switch (menuType) {
-    case "dynamic": return { icon: Layers,   color: "text-violet-400", bg: "bg-violet-500/10" }
-    case "grup":    return { icon: Folder,   color: "text-amber-400",  bg: "bg-amber-500/10"  }
-    default:        return { icon: FileText, color: "text-sky-400",    bg: "bg-sky-500/10"    }
+    case "dynamic": return { icon: Layers, color: "text-violet-400", bg: "bg-violet-500/10" }
+    case "grup": return { icon: Folder, color: "text-amber-400", bg: "bg-amber-500/10" }
+    default: return { icon: FileText, color: "text-sky-400", bg: "bg-sky-500/10" }
   }
 }
 
