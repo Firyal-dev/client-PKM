@@ -77,6 +77,12 @@ function getTenantHeaders(): Record<string, string> {
     return {};
 }
 
+// Clear authentication cookies before redirect to prevent loop
+function clearTokensClientSide() {
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'tenant_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+}
+
 // Error handler for API responses
 async function handleApiError(response: Response): Promise<string> {
     let msg = "Terjadi kesalahan";
@@ -140,6 +146,9 @@ async function handleApiError(response: Response): Promise<string> {
     if (typeof window !== 'undefined') {
         if (response.status === 401) {
             if (!window.sessionStorage.getItem('loggedOut')) {
+                // ✅ FIX: Clear tokens before redirect to prevent loop
+                clearTokensClientSide();
+
                 toast.error("Sesi berakhir karena akun ini login di tempat lain.")
                 window.sessionStorage.setItem('loggedOut', 'true')
                 window.location.href = '/admin/login'
