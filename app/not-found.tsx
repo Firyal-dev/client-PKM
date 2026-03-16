@@ -4,17 +4,21 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Home, ArrowLeft } from "lucide-react"
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function NotFound() {
   const router = useRouter()
 
+  useEffect(() => {
+    document.body.setAttribute('data-page', 'not-found')
+    return () => document.body.removeAttribute('data-page')
+  }, [])
+
   return (
     <div className="flex min-h-[calc(100vh-72px)] mt-[72px] flex-col items-center justify-center bg-background text-foreground relative overflow-hidden">
-      {/* Decorative Animated Blobs */}
       <div className="absolute top-[-10%] left-[-10%] -z-10 h-[50%] w-[50%] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] -z-10 h-[50%] w-[50%] rounded-full bg-primary/5 blur-[120px] animate-pulse delay-1000" />
 
-      {/* Grid Pattern Background */}
       <div
         className="absolute inset-0 -z-20 opacity-[0.03] select-none pointer-events-none"
         style={{
@@ -24,7 +28,6 @@ export default function NotFound() {
       />
 
       <div className="container relative z-10 flex flex-col items-center text-center px-4">
-        {/* Visual 404 Element */}
         <div className="relative mb-8 group">
           <h1 className="text-[12rem] md:text-[16rem] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-primary/40 via-primary/20 to-transparent select-none transition-all duration-700 group-hover:from-primary/60 group-hover:via-primary/30">
             404
@@ -50,13 +53,6 @@ export default function NotFound() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button
-              asChild
-              size="lg"
-              className="w-full sm    :w-auto rounded-full px-8 shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all duration-300"
-            >
-            </Button>
-
-            <Button
               variant="outline"
               size="lg"
               className="w-full sm:w-auto rounded-full px-8 backdrop-blur-sm hover:bg-muted/50 border-input/50 hover:border-input transition-all duration-300"
@@ -68,15 +64,6 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* Footer Support */}
-        <div className="mt-16 pt-8 border-t border-border/50 w-full max-w-xs">
-          <p className="text-sm text-muted-foreground">
-            Butuh bantuan?{' '}
-            <Link href="/kontak" className="text-primary hover:underline font-semibold decoration-2 underline-offset-4">
-              Hubungi Admin
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   )

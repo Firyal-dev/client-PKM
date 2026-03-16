@@ -11,7 +11,8 @@ import type { Gallery } from "@/types/gallery-prop"
 import type { Album } from "@/types/album-prop"
 import type { Video } from "@/services/video/video-service"
 import HeroHeader from "@/components/user/partials/hero-header"
-
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import '@vidstack/react/player/styles/base.css'
 import '@vidstack/react/player/styles/plyr/theme.css'
 import { MediaPlayer, MediaProvider } from '@vidstack/react'
@@ -98,7 +99,6 @@ export default function GalleryPageContent({ initialPhotos, initialAlbums, initi
 }
 
 /* ================= PHOTO TAB ================= */
-
 function PhotosTab({ data }: { data: Gallery[] }) {
     if (data.length === 0) {
         return (
@@ -112,34 +112,36 @@ function PhotosTab({ data }: { data: Gallery[] }) {
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {data.map((photo) => (
-                <div
-                    key={photo.id}
-                    className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-200 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                >
-                    <Image
-                        src={getMediaUrl(photo.image) || "/userPlaceholder.jpg"}
-                        alt={photo.image_title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        unoptimized
-                    />
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10">
-                        <h3 className="text-white font-bold text-sm line-clamp-1">{photo.image_title}</h3>
-                        {photo.description && (
-                            <p className="text-white/70 text-xs line-clamp-1 mt-0.5">{photo.description}</p>
-                        )}
+        <PhotoProvider>  {/* ← pindah ke sini, wrap semua foto */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {data.map((photo) => (
+                    <div
+                        key={photo.id}
+                        className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-200 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                    >
+                        <PhotoView src={getMediaUrl(photo.image) || "/userPlaceholder.jpg"}>
+                            <Image
+                                src={getMediaUrl(photo.image) || "/userPlaceholder.jpg"}
+                                alt={photo.image_title}
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-110 cursor-zoom-in"
+                                unoptimized
+                            />
+                        </PhotoView>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10 pointer-events-none">
+                            <h3 className="text-white font-bold text-sm line-clamp-1">{photo.image_title}</h3>
+                            {photo.description && (
+                                <p className="text-white/70 text-xs line-clamp-1 mt-0.5">{photo.description}</p>
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </PhotoProvider>
     )
 }
 
 /* ================= ALBUM TAB ================= */
-
 function AlbumsTab({ data }: { data: Album[] }) {
     if (data.length === 0) {
         return (

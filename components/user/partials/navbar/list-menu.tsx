@@ -133,16 +133,6 @@ function MenuItem({ menu, allMenus, level = 0, pathname, isWhite }: {
                 }
             </button>
 
-            {/* Arrow pointer for top-level */}
-            {level === 0 && isOpen && (
-                <div className={cn(
-                    'absolute top-full z-[51] w-3 h-3 bg-white border-l border-t border-slate-100 rotate-45',
-                    'transition-all duration-200',
-                    nearRight ? 'right-4' : 'left-1/2 -translate-x-1/2',
-                    'mt-[6px]'
-                )} />
-            )}
-
             <ul className={cn(dropBase, dropPos)}>
                 {children.map(child => (
                     <MenuItem key={child.id} menu={child} allMenus={allMenus} level={level + 1} pathname={pathname} isWhite={true} />

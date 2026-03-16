@@ -1,18 +1,18 @@
 import Link from "next/link"
 import { Menu } from "@/services/menu/menu-service"
-import { AlertCircle, ArrowRight, Stethoscope, ShieldCheck } from "lucide-react"
+import { AlertCircle, ArrowRight, Stethoscope } from "lucide-react"
 
 interface PelayananProps {
     data: Menu[]
 }
 
 const COLORS = [
-    { bg: "bg-blue-50", icon: "text-blue-500", border: "border-blue-100", active: "bg-blue-600" },
-    { bg: "bg-emerald-50", icon: "text-emerald-500", border: "border-emerald-100", active: "bg-emerald-600" },
-    { bg: "bg-violet-50", icon: "text-violet-500", border: "border-violet-100", active: "bg-violet-600" },
-    { bg: "bg-amber-50", icon: "text-amber-500", border: "border-amber-100", active: "bg-amber-600" },
-    { bg: "bg-rose-50", icon: "text-rose-500", border: "border-rose-100", active: "bg-rose-600" },
-    { bg: "bg-cyan-50", icon: "text-cyan-500", border: "border-cyan-100", active: "bg-cyan-600" },
+    { bg: "bg-blue-50", icon: "text-blue-500", border: "border-blue-100" },
+    { bg: "bg-emerald-50", icon: "text-emerald-500", border: "border-emerald-100" },
+    { bg: "bg-violet-50", icon: "text-violet-500", border: "border-violet-100" },
+    { bg: "bg-amber-50", icon: "text-amber-500", border: "border-amber-100" },
+    { bg: "bg-rose-50", icon: "text-rose-500", border: "border-rose-100" },
+    { bg: "bg-cyan-50", icon: "text-cyan-500", border: "border-cyan-100" },
 ]
 
 export default function Pelayanan({ data }: PelayananProps) {
@@ -26,8 +26,6 @@ export default function Pelayanan({ data }: PelayananProps) {
                     {/* Header */}
                     <div className="px-6 md:px-8 pt-6 pb-5 border-b border-slate-100">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-
-                            {/* Left — title + badges */}
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -42,7 +40,6 @@ export default function Pelayanan({ data }: PelayananProps) {
                                 </h2>
                             </div>
 
-                            {/* Right — link */}
                             {!isEmpty && (
                                 <Link
                                     href="/pelayanan"
@@ -78,17 +75,20 @@ export default function Pelayanan({ data }: PelayananProps) {
                                             className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-transparent hover:border-slate-100 hover:shadow-sm transition-all duration-200 text-center"
                                             aria-label={`Pelayanan ${item.title}`}
                                         >
-                                            {/* Icon wrap */}
-                                            <div className={`relative w-12 h-12 rounded-2xl border flex items-center justify-center transition-all duration-200 ${color.bg} ${color.border} group-hover:${color.active} group-hover:border-transparent group-hover:shadow-md`}>
+                                            <div className={`
+                                                relative w-12 h-12 rounded-2xl border flex items-center justify-center
+                                                transition-all duration-200
+                                                ${color.bg} ${color.border}
+                                                group-hover:bg-slate-800 group-hover:border-transparent group-hover:shadow-md
+                                            `}>
                                                 <Stethoscope
-                                                    className={`w-5 h-5 transition-colors duration-200 ${color.icon}`}
+                                                    className={`w-5 h-5 transition-colors duration-200 ${color.icon} group-hover:text-white`}
                                                     strokeWidth={1.8}
                                                 />
-                                                {/* Subtle shine on hover */}
                                                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity" />
                                             </div>
 
-                                            <p className="text-[11px] font-semibold text-slate-600 group-hover:text-blue-700 transition-colors leading-snug line-clamp-2">
+                                            <p className="text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 transition-colors leading-snug line-clamp-2">
                                                 {item.title}
                                             </p>
                                         </Link>

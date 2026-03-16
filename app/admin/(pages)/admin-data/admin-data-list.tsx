@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useTransition } from "react"
+import { useState, useMemo, useTransition, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Pencil, Trash2, Shield, ShieldCheck, Search, X, SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
@@ -38,13 +38,18 @@ export default function AdminDataList({
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [admins] = useState<Admin[]>(initialData)
+    const [admins, setAdmins] = useState<Admin[]>(initialData)
     const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
     const [roleFilter, setRoleFilter] = useState(searchParams.get("role") || "all")
     const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
     const [deleteAdminId, setDeleteAdminId] = useState<string | null>(null)
     const [selectedRows, setSelectedRows] = useState<Admin[]>([])
     const [isPending, startTransition] = useTransition()
+
+    // Sync admins state with initialData prop when it changes
+    useEffect(() => {
+        setAdmins(initialData)
+    }, [initialData])
 
     const currentUserInSelection = selectedRows.find(admin => admin.id === currentAdmin?.id)
 
@@ -186,6 +191,10 @@ export default function AdminDataList({
             if (result.success) {
                 toast.success("Admin berhasil dihapus")
                 setDeleteAdminId(null)
+                // Update local state immediately
+                setAdmins(prevAdmins => prevAdmins.filter(admin => admin.id !== deleteAdminId))
+                // Also update selectedRows if needed
+                setSelectedRows(prevSelected => prevSelected.filter(admin => admin.id !== deleteAdminId))
                 router.refresh()
             } else {
                 toast.error(result.error || "Gagal menghapus admin")
@@ -246,6 +255,8 @@ export default function AdminDataList({
                         try {
                             await Promise.all(selectedRows.map(admin => deleteAdmin(admin.id)))
                             toast.success(`${selectedRows.length} admin berhasil dihapus`)
+                            // Update local state immediately
+                            setAdmins(prevAdmins => prevAdmins.filter(admin => !selectedRows.some(selected => selected.id === admin.id)))
                             setSelectedRows([])
                             router.refresh()
                         } catch (error) {

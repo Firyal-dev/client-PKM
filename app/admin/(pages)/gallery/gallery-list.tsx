@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useTransition } from "react"
-import { Loader2, Trash2, CheckSquare, X } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { BulkActionBar } from "@/components/admin/bulk-action-bar"

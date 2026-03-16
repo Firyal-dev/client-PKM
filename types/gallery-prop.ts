@@ -3,7 +3,6 @@ export interface Gallery {
     image_title: string;
     description: string;
     image: string;
-    created_at: Date;
 }
 
 export interface GalleryCard {
