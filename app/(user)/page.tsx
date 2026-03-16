@@ -14,7 +14,6 @@ import { getPublicAgenda } from "@/services/agenda/agenda-service";
 import { getPublicGallery } from "@/services/gallery/gallery-service";
 import { getPublicBerita } from "@/services/page/page-service";
 import { getPublicMenus, Menu } from "@/services/menu/menu-service";
-import { checkTenantStatus, getTenantPageType, TenantStatus } from "@/services/tenant-status-service";
 import { getTenantHeader } from "@/services/server-helpers";
 
 export const metadata: Metadata = {
@@ -42,20 +41,6 @@ function getPelayananMenus(menus: Menu[]): Menu[] {
 export default async function Home() {
     // Get tenant slug from headers
     const headers = await getTenantHeader();
-    const tenantSlug = headers['x-tenant-slug'] || 'default';
-
-    // Check tenant status early
-    const statusInfo = await checkTenantStatus(tenantSlug);
-    const pageType = getTenantPageType(statusInfo?.status as TenantStatus);
-
-    // Redirect to special pages for maintenance/suspended
-    if (pageType === 'maintenance') {
-        redirect(`/maintenance?message=${encodeURIComponent(statusInfo?.message || 'Website sedang dalam perbaikan')}`);
-    }
-
-    if (pageType === 'suspended') {
-        redirect(`/suspended?message=${encodeURIComponent(statusInfo?.message || 'Website dinonaktifkan sementara')}`);
-    }
 
     // Ambil data banner, agenda, galeri, dan menu secara paralel
     const [banners, agendas, galeri, berita, menus] = await Promise.all([
