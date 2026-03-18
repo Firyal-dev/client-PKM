@@ -21,6 +21,7 @@ export default function UploadPhotoPage() {
     useEffect(() => {
         if (state?.success) {
             toast.success("Foto berhasil diunggah!")
+            resetPreview()
             router.push('/admin/gallery')
             router.refresh()
         } else if (state?.error) {
