@@ -39,16 +39,6 @@ export default function Pelayanan({ data }: PelayananProps) {
                                     Pelayanan Kesehatan Terbaik
                                 </h2>
                             </div>
-
-                            {!isEmpty && (
-                                <Link
-                                    href="/pelayanan"
-                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0 mt-1"
-                                >
-                                    Lihat Semua
-                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                                </Link>
-                            )}
                         </div>
                     </div>
 
