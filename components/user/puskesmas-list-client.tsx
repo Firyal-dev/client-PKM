@@ -25,6 +25,13 @@ interface PuskesmasListClientProps {
     }
 }
 
+const STATUS_CONFIG = {
+    ACTIVE: { label: 'Aktif', className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+    INACTIVE: { label: 'Nonaktif', className: 'bg-slate-50 text-slate-500 border-slate-200' },
+    SUSPENDED: { label: 'Ditangguhkan', className: 'bg-red-50 text-red-600 border-red-100' },
+    MAINTENANCE: { label: 'Maintenance', className: 'bg-amber-50 text-amber-600 border-amber-100' },
+} as const
+
 export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -63,7 +70,7 @@ export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
 
     return (
         <div className="w-full">
-            {/* Search Bar - Slim for Comfort */}
+            {/* Search Bar */}
             <div className="bg-white p-3 rounded-2xl shadow-xl shadow-blue-900/10 border border-slate-200 mb-8">
                 <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
                     <div className="relative flex-1">
@@ -106,59 +113,59 @@ export function PuskesmasListClient({ initialData }: PuskesmasListClientProps) {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {initialData.docs.map((puskesmas: Puskesmas) => (
-                        <Link
-                            key={puskesmas.id}
-                            href={getSubdomainUrl(puskesmas.slug)}
-                            className="group flex flex-col bg-white rounded-[2rem] border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/5 hover:border-blue-400/40 hover:-translate-y-1.5"
-                        >
-                            <div className="p-7 flex-1 flex flex-col">
-                                {/* Header Card */}
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center transition-colors group-hover:bg-blue-600">
-                                        <Building2 className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
+                    {initialData.docs.map((puskesmas) => {
+                        const statusConfig = STATUS_CONFIG[puskesmas.status] ?? STATUS_CONFIG.INACTIVE
+
+                        return (
+                            <Link
+                                key={puskesmas.id}
+                                href={getSubdomainUrl(puskesmas.slug)}
+                                className="group flex flex-col bg-white rounded-[2rem] border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/5 hover:border-blue-400/40 hover:-translate-y-1.5"
+                            >
+                                <div className="p-7 flex-1 flex flex-col">
+                                    {/* Header Card */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center transition-colors group-hover:bg-blue-600">
+                                            <Building2 className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
+                                        </div>
+                                        <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${statusConfig.className}`}>
+                                            ● {statusConfig.label}
+                                        </div>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
-                                        puskesmas.status === 'ACTIVE' 
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
-                                            : 'bg-slate-50 text-slate-500 border-slate-200'
-                                    }`}>
-                                        {puskesmas.status === 'ACTIVE' ? '● Aktif' : '● Maintenance'}
+
+                                    {/* Body Card */}
+                                    <div className="mb-6 flex-1">
+                                        <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-blue-700 transition-colors leading-tight mb-2">
+                                            {puskesmas.name}
+                                        </h2>
+                                        <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2">
+                                            Layanan kesehatan masyarakat terpadu wilayah {puskesmas.name.replace('Puskesmas ', '')}, Kota Bogor.
+                                        </p>
+                                    </div>
+
+                                    {/* Link Badge */}
+                                    <div className="mt-auto flex items-center gap-2 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
+                                        <Globe className="w-3.5 h-3.5 text-blue-500" />
+                                        <span className="text-[11px] font-bold text-slate-600 lowercase">
+                                            {puskesmas.slug}.bogorkota.go.id
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* Body Card */}
-                                <div className="mb-6 flex-1">
-                                    <h2 className="text-xl font-extrabold text-slate-900 group-hover:text-blue-700 transition-colors leading-tight mb-2">
-                                        {puskesmas.name}
-                                    </h2>
-                                    <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2">
-                                        Layanan kesehatan masyarakat terpadu wilayah {puskesmas.name.replace('Puskesmas ', '')}, Kota Bogor.
-                                    </p>
-                                </div>
-
-                                {/* Link Badge */}
-                                <div className="mt-auto flex items-center gap-2 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
-                                    <Globe className="w-3.5 h-3.5 text-blue-500" />
-                                    <span className="text-[11px] font-bold text-slate-600 lowercase">
-                                        {puskesmas.slug}.bogorkota.go.id
+                                {/* Footer Action */}
+                                <div className="px-7 py-4 bg-slate-50/50 border-t border-slate-50 group-hover:bg-blue-600 transition-all flex items-center justify-between">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-white/90">
+                                        Buka Website
                                     </span>
+                                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-white transition-transform group-hover:translate-x-1" />
                                 </div>
-                            </div>
-
-                            {/* Footer Action */}
-                            <div className="px-7 py-4 bg-slate-50/50 border-t border-slate-50 group-hover:bg-blue-600 transition-all flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-white/90">
-                                    Buka Website
-                                </span>
-                                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-white transition-transform group-hover:translate-x-1" />
-                            </div>
-                        </Link>
-                    ))}
+                            </Link>
+                        )
+                    })}
                 </div>
             )}
 
-            {/* Pagination Section */}
+            {/* Pagination */}
             {initialData.docs.length > 0 && totalPages > 1 && (
                 <div className="mt-12 pt-8 border-t border-slate-200">
                     <PaginationControl

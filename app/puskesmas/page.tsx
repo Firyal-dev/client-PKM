@@ -18,7 +18,7 @@ export default async function PuskesmasPage({
             {/* Hero Section - Diperkecil (py-20 jadi py-14) */}
             <div className="relative bg-[url('/breadcrumb_bg.jpeg')] bg-cover bg-center bg-no-repeat border-b border-slate-300 overflow-hidden">
                 <div className="absolute inset-0 bg-blue-950/80 mix-blend-multiply"></div>
-                
+
                 <div className="max-w-5xl mx-auto px-6 py-14 text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-4">
                         <MapPin className="w-3.5 h-3.5 text-blue-200" />
