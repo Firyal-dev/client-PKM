@@ -1,7 +1,7 @@
 'use server'
 
 import api from '@/services/api'
-import { authHeaders } from '@/services/helpers'
+import { authHeaders } from '@/services/server-helpers'
 
 export interface DashboardStats {
     visitors: {

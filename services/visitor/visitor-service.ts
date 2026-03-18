@@ -21,6 +21,11 @@ export interface VisitorStats {
     thisYear: number
 }
 
+export interface VisitorChartData {
+    date: string
+    visitors: number
+}
+
 // Admin: Ambil semua visitor
 export async function getAdminVisitors(): Promise<Visitor[]> {
     try {
@@ -72,4 +77,11 @@ export async function getPublicVisitorStats(): Promise<VisitorStats> {
         // Silent fail - visitor stats is non-critical
         return { total: 0, today: 0, thisMonth: 0, thisYear: 0 }
     }
+}
+// Admin: Ambil data chart pengunjung per hari
+export async function getVisitorChartData(days: number = 30): Promise<VisitorChartData[]> {
+    try {
+        const res = await api.get(`/v1/visitor/chart?days=${days}`, { headers: await authHeaders() })
+        return res.data
+    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data chart visitor')) }
 }

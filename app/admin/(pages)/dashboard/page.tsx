@@ -8,6 +8,7 @@ import {
     ArrowUpRight, Film, Menu, FileText, Book
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ChartVisitor } from '@/components/admin/chart-visitor'
 
 // ── Skeleton ──────────────────────────────────────────────────────────
 function Skeleton({ className }: { className?: string }) {
@@ -176,6 +177,9 @@ export default function DashboardPage() {
                     <StatCard key={i} {...card} />
                 ))}
             </div>
+
+            {/* Visitor Chart */}
+            <ChartVisitor />
 
             {/* Detail sections */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
