@@ -9,6 +9,7 @@ import Script from "next/script"
 import { redirect } from "next/navigation";
 import { checkTenantStatus, getTenantPageType, TenantStatus } from "@/services/tenant-status-service";
 import { getTenantHeader } from "@/services/server-helpers";
+import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service";
 
 export default async function UserLayout({
     children,
@@ -38,8 +39,25 @@ export default async function UserLayout({
         redirect(`/inactive${commonParams}`);
     }
 
+    const webInfo = await getPublicPuskesmasInfo();
+    const themeColor = webInfo?.theme_color;
+    const customStyle = themeColor ? { 
+        '--primary': themeColor,
+        '--color-blue-50': `color-mix(in srgb, ${themeColor} 10%, white)`,
+        '--color-blue-100': `color-mix(in srgb, ${themeColor} 20%, white)`,
+        '--color-blue-200': `color-mix(in srgb, ${themeColor} 40%, white)`,
+        '--color-blue-300': `color-mix(in srgb, ${themeColor} 60%, white)`,
+        '--color-blue-400': `color-mix(in srgb, ${themeColor} 80%, white)`,
+        '--color-blue-500': `color-mix(in srgb, ${themeColor} 90%, white)`,
+        '--color-blue-600': themeColor,
+        '--color-blue-700': `color-mix(in srgb, ${themeColor} 80%, black)`,
+        '--color-blue-800': `color-mix(in srgb, ${themeColor} 60%, black)`,
+        '--color-blue-900': `color-mix(in srgb, ${themeColor} 40%, black)`,
+        '--color-blue-950': `color-mix(in srgb, ${themeColor} 25%, black)`,
+    } as React.CSSProperties : {};
+
     return (
-        <div className="flex min-h-screen flex-col bg-slate-50">
+        <div className="flex min-h-screen flex-col bg-slate-50" style={customStyle}>
             {/* Header */}
             <Navbar />
 

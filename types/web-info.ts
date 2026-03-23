@@ -2,6 +2,7 @@ export interface PuskesmasInfo {
     id: number;
     web_title: string;
     logo?: string;
+    theme_color?: string;
     location?: string;
     social_links?: {
         facebook?: string;

@@ -184,6 +184,25 @@ export default function PuskesmasInfoForm({ initialData }: { initialData: Puskes
                                 </span>
                                 <p className="text-xs text-muted-foreground mt-2">Format: JPG, JPEG, PNG (Maks. 3MB)</p>
                             </label>
+
+                            <div className="space-y-2 pt-4 border-t">
+                                <Label htmlFor="theme_color">Warna Tema Website</Label>
+                                <div className="flex gap-4 items-center">
+                                    <div className="relative w-12 h-12 rounded-full overflow-hidden border shadow-sm">
+                                        <Input 
+                                            id="theme_color" 
+                                            name="theme_color" 
+                                            type="color" 
+                                            defaultValue={initialData.theme_color || '#3b82f6'} 
+                                            className="absolute -top-2 -left-2 w-16 h-16 p-0 cursor-pointer border-0" 
+                                        />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium">Pilih Warna Utama</span>
+                                        <span className="text-xs text-muted-foreground">Sesuaikan warna dasar tampilan website utama.</span>
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
