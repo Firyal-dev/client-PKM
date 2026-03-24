@@ -8,8 +8,10 @@ import {
 } from "@/components/ui/accordion"
 import { Consultation } from "@/services/consultation/consultation-service"
 import { HelpCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function Faq({ data = [] }: { data: Consultation[] }) {
+    const t = useTranslations('Faq')
     if (data.length === 0) return null;
 
     return (
@@ -19,12 +21,12 @@ export default function Faq({ data = [] }: { data: Consultation[] }) {
                 <div className="flex flex-col items-center text-center space-y-3 mb-12">
                     <div className="flex items-center gap-2">
                         <span className="block w-6 h-px bg-blue-400" />
-                        <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">Informasi & Konsultasi</span>
+                        <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">{t('label')}</span>
                         <span className="block w-6 h-px bg-blue-400" />
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Tanya Jawab (FAQ)</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
                     <p className="text-sm md:text-base text-slate-500 max-w-2xl px-4">
-                        Daftar pertanyaan dari masyarakat yang telah dijawab oleh admin dan dipublikasikan untuk membantu menjawab keraguan Anda.
+                        {t('desc')}
                     </p>
                 </div>
 
@@ -42,11 +44,11 @@ export default function Faq({ data = [] }: { data: Consultation[] }) {
                                     <AccordionContent className="pb-6">
                                         <div className="bg-slate-50 rounded-xl p-5 space-y-4 border border-slate-100">
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pertanyaan:</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('question')}</p>
                                                 <p className="text-sm text-slate-600 italic">"{item.message}"</p>
                                             </div>
                                             <div className="space-y-1">
-                                                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Jawaban Puskesmas:</p>
+                                                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">{t('answer')}</p>
                                                 <p className="text-sm text-slate-700 leading-relaxed font-medium">
                                                     {item.answer}
                                                 </p>
@@ -61,7 +63,7 @@ export default function Faq({ data = [] }: { data: Consultation[] }) {
                 
                 {data.length > 5 && (
                     <p className="text-center mt-6 text-xs text-slate-400">
-                        Gunakan scroll untuk melihat pertanyaan lainnya
+                        {t('scrollHint')}
                     </p>
                 )}
             </div>

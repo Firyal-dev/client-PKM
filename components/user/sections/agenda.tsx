@@ -7,11 +7,15 @@ import { PaginationControl } from "@/components/pagination-control"
 import { EmptyState } from "@/components/ui/empty-user"
 import { MapPin, CalendarDays, ArrowRight, Clock } from "lucide-react"
 import { format, isSameDay } from "date-fns"
-import { id } from "date-fns/locale"
+import { enUS, id } from "date-fns/locale"
 import type { Agenda } from "@/types/agenda-prop"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function Agenda({ data = [] }: { data: Agenda[] }) {
+    const t = useTranslations('Agenda')
+    const locale = useLocale()
+    const dLocale = locale === 'id' ? id : enUS
     const [date, setDate] = useState<Date | undefined>(new Date())
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 3
@@ -45,13 +49,13 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <span className="block w-6 h-px bg-blue-400" />
-                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">Agenda Kegiatan</span>
+                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">{t('label')}</span>
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Jadwal &amp; Agenda Puskesmas</h2>
-                        <p className="text-sm text-slate-500">Informasi jadwal pelayanan luar gedung dan kegiatan puskesmas.</p>
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
+                        <p className="text-sm text-slate-500">{t('desc')}</p>
                     </div>
-                    <Link href="/agenda" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0">
-                        Lihat Semua
+                    <Link href={`/agenda`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0">
+                        {t('viewAll')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                 </div>
@@ -63,6 +67,7 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                             onSelect={setDate}
                             count={filteredAgendas.length}
                             eventDates={eventDates}
+                            dLocale={dLocale}
                         />
                     </aside>
 
@@ -82,8 +87,8 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                             </>
                         ) : (
                             <EmptyState
-                                title="Tidak Ada Kegiatan"
-                                description="Tidak ada agenda kegiatan yang terjadwal pada tanggal ini."
+                                title={t('emptyTitle')}
+                                description={t('emptyDesc')}
                                 icon={CalendarDays}
                             />
                         )}
@@ -93,7 +98,7 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                                 href="/agenda"
                                 className="inline-flex items-center justify-center w-full py-3 px-6 border border-slate-200 text-slate-500 text-sm font-semibold rounded-xl hover:border-blue-300 hover:text-blue-600 transition-colors"
                             >
-                                Lihat Semua Jadwal
+                                {t('viewAllSchedule')}
                                 <ArrowRight className="w-3.5 h-3.5 ml-2" />
                             </Link>
                         </div>
@@ -110,9 +115,11 @@ interface CalendarCardProps {
     onSelect: (date: Date | undefined) => void
     count: number
     eventDates: Date[]
+    dLocale: any
 }
 
-function CalendarCard({ date, onSelect, count, eventDates }: CalendarCardProps) {
+function CalendarCard({ date, onSelect, count, eventDates, dLocale }: CalendarCardProps) {
+    const t = useTranslations('Agenda')
     return (
         <div className="sticky top-24 rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
             <div className="px-4 pt-4">
@@ -120,7 +127,7 @@ function CalendarCard({ date, onSelect, count, eventDates }: CalendarCardProps) 
                     mode="single"
                     selected={date}
                     onSelect={onSelect}
-                    locale={id}
+                    locale={dLocale}
                     className="w-full"
                     modifiers={{ hasEvent: eventDates }}
                 />
@@ -130,12 +137,12 @@ function CalendarCard({ date, onSelect, count, eventDates }: CalendarCardProps) 
             <div className="mx-4 mb-4 mt-2 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 flex items-center justify-between">
                 <div>
                     <p className="text-xs font-bold text-slate-800">
-                        {date ? format(date, "EEEE, d MMMM yyyy", { locale: id }) : "—"}
+                        {date ? format(date, "EEEE, d MMMM yyyy", { locale: dLocale }) : "—"}
                     </p>
                     <p className="text-xs text-slate-400 mt-0.5">
                         {count > 0
-                            ? <span className="text-blue-600 font-semibold">{count} kegiatan terjadwal</span>
-                            : "Tidak ada kegiatan"
+                            ? <span className="text-blue-600 font-semibold">{count} {t('scheduled')}</span>
+                            : t('noActivity')
                         }
                     </p>
                 </div>
@@ -185,6 +192,7 @@ function PaginationWrapper({ currentPage, totalPages, onPageChange }: {
     totalPages: number
     onPageChange: (page: number) => void
 }) {
+    const t = useTranslations('Agenda')
     return (
         <div className="pt-4 border-t border-slate-100 space-y-3">
             <PaginationControl
@@ -193,7 +201,7 @@ function PaginationWrapper({ currentPage, totalPages, onPageChange }: {
                 onPageChange={onPageChange}
             />
             <p className="text-center text-[10px] text-slate-400 tracking-widest uppercase">
-                Halaman {currentPage} dari {totalPages}
+                {t('page', { current: currentPage, total: totalPages })}
             </p>
         </div>
     )

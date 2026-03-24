@@ -15,7 +15,10 @@ const COLORS = [
     { bg: "bg-cyan-50", icon: "text-cyan-500", border: "border-cyan-100" },
 ]
 
+import { useTranslations } from "next-intl"
+
 export default function Pelayanan({ data }: PelayananProps) {
+    const t = useTranslations('Pelayanan')
     const isEmpty = !data || data.length === 0
 
     return (
@@ -32,11 +35,11 @@ export default function Pelayanan({ data }: PelayananProps) {
                                         <Stethoscope className="w-3.5 h-3.5 text-blue-600" strokeWidth={1.8} />
                                     </div>
                                     <p className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">
-                                        Layanan Kami
+                                        {t('label')}
                                     </p>
                                 </div>
                                 <h2 className="text-base font-bold text-slate-900 mb-3">
-                                    Pelayanan Kesehatan Terbaik
+                                    {t('title')}
                                 </h2>
                             </div>
                         </div>
@@ -49,9 +52,9 @@ export default function Pelayanan({ data }: PelayananProps) {
                                 <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
                                     <AlertCircle className="w-5 h-5 text-slate-400" />
                                 </div>
-                                <p className="text-slate-600 font-semibold text-sm mb-1">Belum ada layanan</p>
+                                <p className="text-slate-600 font-semibold text-sm mb-1">{t('empty')}</p>
                                 <p className="text-xs text-slate-400 max-w-xs">
-                                    Silakan kembali lagi nanti untuk informasi layanan.
+                                    {t('emptyDesc')}
                                 </p>
                             </div>
                         ) : (
@@ -92,7 +95,7 @@ export default function Pelayanan({ data }: PelayananProps) {
                     <div className="px-6 md:px-8 py-3 bg-slate-50 border-t border-slate-100 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
                         <p className="text-[10px] text-slate-400 font-medium">
-                            Seluruh layanan tersedia sesuai jam operasional puskesmas
+                            {t('footer')}
                         </p>
                     </div>
 

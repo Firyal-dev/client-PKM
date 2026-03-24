@@ -17,6 +17,7 @@ import '@vidstack/react/player/styles/base.css'
 import '@vidstack/react/player/styles/plyr/theme.css'
 import { MediaPlayer, MediaProvider } from '@vidstack/react'
 import { PlyrLayout, plyrLayoutIcons } from '@vidstack/react/player/layouts/plyr'
+import { useTranslations } from 'next-intl'
 
 interface GalleryPageContentProps {
     initialPhotos: Gallery[]
@@ -26,18 +27,18 @@ interface GalleryPageContentProps {
 
 type TabType = "foto" | "album" | "video"
 
-const TABS: { label: string; value: TabType; icon: React.ElementType; desc: string }[] = [
-    { label: "Foto", value: "foto", icon: Images, desc: "Dokumentasi kegiatan" },
-    { label: "Album", value: "album", icon: BookImage, desc: "Koleksi foto" },
-    { label: "Video", value: "video", icon: Film, desc: "Video & dokumentasi" },
-]
-
-
-
+// Tab configs passed without static translations, moving them inside component
 export default function GalleryPageContent({ initialPhotos, initialAlbums, initialVideos }: GalleryPageContentProps) {
+    const t = useTranslations('Galeri')
     const [activeTab, setActiveTab] = useState<TabType>("foto")
 
-    const breadcrumbItems = [{ label: "Galeri" }]
+    const TABS: { label: string; value: TabType; icon: React.ElementType; desc: string }[] = [
+        { label: t('tabFoto'), value: "foto", icon: Images, desc: t('tabFotoDesc') },
+        { label: t('tabAlbum'), value: "album", icon: BookImage, desc: t('tabAlbumDesc') },
+        { label: t('tabVideo'), value: "video", icon: Film, desc: t('tabVideoDesc') },
+    ]
+
+    const breadcrumbItems = [{ label: t('pageTitle') }]
 
     const counts: Record<TabType, number> = {
         foto: initialPhotos.length,
@@ -50,8 +51,8 @@ export default function GalleryPageContent({ initialPhotos, initialAlbums, initi
             {/* Page Header */}
             <HeroHeader
                 items={breadcrumbItems}
-                title="Galeri Puskesmas"
-                description="Kumpulan dokumentasi kegiatan, album foto, dan video terbaru dari Puskesmas."
+                title={t('pageHeading')}
+                description={t('pageDesc')}
             />
 
             {/* Tab Nav */}
@@ -100,11 +101,12 @@ export default function GalleryPageContent({ initialPhotos, initialAlbums, initi
 
 /* ================= PHOTO TAB ================= */
 function PhotosTab({ data }: { data: Gallery[] }) {
+    const t = useTranslations('Galeri')
     if (data.length === 0) {
         return (
             <EmptyState
-                title="Foto tidak ditemukan"
-                description="Belum ada foto kegiatan yang diunggah."
+                title={t('emptyFotoTitle')}
+                description={t('emptyFotoDesc')}
                 icon={ImageOff}
                 className="py-24"
             />
@@ -112,7 +114,7 @@ function PhotosTab({ data }: { data: Gallery[] }) {
     }
 
     return (
-        <PhotoProvider>  {/* ← pindah ke sini, wrap semua foto */}
+        <PhotoProvider>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {data.map((photo) => (
                     <div
@@ -143,11 +145,12 @@ function PhotosTab({ data }: { data: Gallery[] }) {
 
 /* ================= ALBUM TAB ================= */
 function AlbumsTab({ data }: { data: Album[] }) {
+    const t = useTranslations('Galeri')
     if (data.length === 0) {
         return (
             <EmptyState
-                title="Album tidak ditemukan"
-                description="Belum ada album foto yang dibuat."
+                title={t('emptyAlbumTitle')}
+                description={t('emptyAlbumDesc')}
                 icon={FolderArchive}
                 className="py-24"
             />
@@ -178,7 +181,7 @@ function AlbumsTab({ data }: { data: Album[] }) {
                                 {album.album_title}
                             </h3>
                             <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
-                                {album.description || "Koleksi foto kegiatan."}
+                                {album.description || t('albumPlaceholder')}
                             </p>
                         </CardContent>
                     </Card>
@@ -191,11 +194,12 @@ function AlbumsTab({ data }: { data: Album[] }) {
 /* ================= VIDEO TAB ================= */
 
 function VideosTab({ data }: { data: Video[] }) {
+    const t = useTranslations('Galeri')
     if (data.length === 0) {
         return (
             <EmptyState
-                title="Video tidak ditemukan"
-                description="Belum ada video edukasi atau dokumentasi."
+                title={t('emptyVideoTitle')}
+                description={t('emptyVideoDesc')}
                 icon={PlayCircle}
                 className="py-24"
             />
@@ -229,7 +233,7 @@ function VideosTab({ data }: { data: Video[] }) {
                         <div className="p-4 flex flex-col flex-1">
                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1.5">
                                 <PlayCircle className="w-3 h-3" />
-                                {video.is_embed ? "YouTube" : "Video"} Dokumentasi
+                                {video.is_embed ? "YouTube" : "Video"} {t('videoDoc')}
                             </div>
                             <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug flex-1">
                                 {video.video_title}

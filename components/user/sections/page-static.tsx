@@ -22,14 +22,6 @@ export function PageStatic({ page, menu }: PageStaticProps) {
             {/* Main Content Container */}
             <div className="max-w-4xl mx-auto px-6 py-10">
                 <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col overflow-hidden max-h-[85vh]">
-                    
-                    {/* Header inside Card */}
-                    <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Halaman Statis</span>
-                        </div>
-                    </div>
 
                     {/* Scrollable Content Area */}
                     <div className="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar">

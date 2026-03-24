@@ -5,11 +5,14 @@ import { Newspaper, CalendarDays, ArrowRight } from "lucide-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 
+import { useTranslations } from "next-intl"
+
 interface BeritaProps {
     data: Page[]
 }
 
 export default function Berita({ data }: BeritaProps) {
+    const t = useTranslations('Berita')
     if (!data || data.length === 0) return null
 
     return (
@@ -21,16 +24,16 @@ export default function Berita({ data }: BeritaProps) {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <span className="block w-6 h-px bg-blue-400" />
-                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">Berita</span>
+                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">{t('label')}</span>
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Berita & Informasi Terkini</h2>
-                        <p className="text-sm text-slate-500 max-w-md">Ikuti berita dan informasi terbaru seputar kegiatan dan layanan puskesmas.</p>
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
+                        <p className="text-sm text-slate-500 max-w-md">{t('desc')}</p>
                     </div>
                     <Link
                         href={`/${(data[0]?.menu as any)?.slug || 'berita'}`}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0"
                     >
-                        Lihat Semua
+                        {t('viewAll')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                 </div>
@@ -47,6 +50,7 @@ export default function Berita({ data }: BeritaProps) {
 }
 
 function BeritaCard({ item }: { item: Page }) {
+    const t = useTranslations('Berita')
     const menuSlug = (item.menu as any)?.slug || 'berita'
     const href = `/${menuSlug}/${item.id}`
     const rawText = item.dynamic_content?.replace(/<[^>]*>/g, '') || ''
@@ -92,7 +96,7 @@ function BeritaCard({ item }: { item: Page }) {
                         </p>
                     )}
                     <div className="mt-1 flex items-center gap-1 text-[11px] font-bold text-blue-500 group-hover:gap-2 transition-all">
-                        Baca Selengkapnya
+                        {t('readMore')}
                         <ArrowRight className="w-3 h-3" />
                     </div>
                 </div>

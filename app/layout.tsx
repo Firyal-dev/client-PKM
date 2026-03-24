@@ -1,5 +1,8 @@
 import '@/app/globals.css'
 import { Toaster } from "@/components/ui/sonner"
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages, getLocale } from 'next-intl/server'
+
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 
 import type { Metadata } from "next";
@@ -24,19 +27,24 @@ export const metadata: Metadata = {
 
 import { RecaptchaProvider } from '@/components/recaptcha-provider';
 
-export default function Layout({
+export default async function Layout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const messages = await getMessages();
+    const locale = await getLocale();
+
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang={locale} suppressHydrationWarning>
             <body className={`${jakarta.variable} ${inter.variable} font-sans antialiased`}>
-                <RecaptchaProvider>
-                    {children}
-                    <Toaster />
-                    <VisitorTracker />
-                </RecaptchaProvider>
+                <NextIntlClientProvider messages={messages} locale={locale}>
+                    <RecaptchaProvider>
+                        {children}
+                        <Toaster />
+                        <VisitorTracker />
+                    </RecaptchaProvider>
+                </NextIntlClientProvider>
             </body>
         </html>
     );

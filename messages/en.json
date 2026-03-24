@@ -1,0 +1,102 @@
+{
+  "Navbar": {
+    "language": "Language",
+    "search": "Search"
+  },
+  "Hero": {
+    "welcome": "Welcome to",
+    "more": "View More",
+    "scrollDown": "Scroll Down"
+  },
+  "Berita": {
+    "label": "News",
+    "title": "Latest News & Information",
+    "desc": "Follow the latest news and information regarding activities and services.",
+    "viewAll": "View All",
+    "readMore": "Read More"
+  },
+  "Pelayanan": {
+    "label": "Our Services",
+    "title": "Best Healthcare Services",
+    "empty": "No services available",
+    "emptyDesc": "Please check back later for service information.",
+    "footer": "All services are available according to operating hours"
+  },
+  "Agenda": {
+    "label": "Event Agenda",
+    "title": "Schedules & Events",
+    "desc": "Information regarding schedules and activities.",
+    "viewAll": "View All",
+    "emptyTitle": "No Events",
+    "emptyDesc": "There are no events scheduled for this date.",
+    "viewAllSchedule": "View All Schedules",
+    "scheduled": "events scheduled",
+    "noActivity": "No events",
+    "page": "Page {current} of {total}",
+    
+    "pageTitle": "Agenda",
+    "pageHeading": "Schedules & Events",
+    "pageDesc": "View all activities and services schedules throughout the year.",
+    "annualSchedule": "Annual Schedule",
+    "totalAgenda": "Total Events",
+    "calendar": "Calendar {year}",
+    "calendarHint": "Click marked dates to view events",
+    "swipeHint": "Swipe for other months",
+    "close": "Close",
+    "wib": "WIB"
+  },
+  "Galeri": {
+    "label": "Documentation",
+    "title": "Activity Gallery",
+    "desc": "Photos of our latest clinical activities and services.",
+    "viewAll": "View All",
+    
+    "pageTitle": "Gallery",
+    "pageHeading": "Clinic Gallery",
+    "pageDesc": "A collection of event documentations, photo albums, and videos.",
+    "tabFoto": "Photos",
+    "tabFotoDesc": "Event documentation",
+    "tabAlbum": "Albums",
+    "tabAlbumDesc": "Photo collections",
+    "tabVideo": "Videos",
+    "tabVideoDesc": "Videos & documentaries",
+    
+    "emptyFotoTitle": "No photos found",
+    "emptyFotoDesc": "No event photos have been uploaded yet.",
+    "emptyAlbumTitle": "No albums found",
+    "emptyAlbumDesc": "No photo albums have been created yet.",
+    "emptyVideoTitle": "No videos found",
+    "emptyVideoDesc": "No educational videos or documentaries yet.",
+    
+    "albumPlaceholder": "Event photo collections.",
+    "videoDoc": "Documentation"
+  },
+  "Footer": {
+    "desc": "Providing quality, equitable, and affordable health services for all.",
+    "contact": "Contact",
+    "openMap": "Open in Google Maps",
+    "stats": "Visitor Statistics",
+    "websiteVisitor": "Website Visitors",
+    "today": "Today",
+    "thisMonth": "This Month",
+    "thisYear": "This Year",
+    "total": "Total",
+    "copyright": "© {year} Bogor City Government",
+    "locationFallback": "Location not set"
+  },
+  "Faq": {
+    "label": "Information & Consultation",
+    "title": "Frequently Asked Questions",
+    "desc": "A list of inquiries from the community answered by the administration to help clear your doubts.",
+    "question": "Question:",
+    "answer": "Clinic's Answer:",
+    "scrollHint": "Scroll down to see more questions"
+  },
+  "Sambutan": {
+    "label": "Welcome Speech",
+    "head": "Head of Clinic",
+    "mainMessage": "Key Message",
+    "empty": "Speech is not available yet",
+    "signed": "Signed,"
+  }
+}

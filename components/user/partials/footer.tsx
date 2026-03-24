@@ -6,8 +6,10 @@ import { getPublicVisitorStats } from '@/services/visitor/visitor-service'
 import { getPublicPuskesmasInfo } from '@/services/puskesmas-info-service'
 import { getMediaUrl } from '@/lib/getMediaUrl'
 import { FooterMap } from './footer-map'
+import { getTranslations } from 'next-intl/server'
 
 export default async function Footer() {
+    const t = await getTranslations('Footer')
     const [stats, webInfo] = await Promise.all([
         getPublicVisitorStats(),
         getPublicPuskesmasInfo()
@@ -23,7 +25,7 @@ export default async function Footer() {
                 ) : (
                     <div className="w-full h-full bg-slate-900 flex items-center justify-center gap-3 text-slate-600">
                         <MapPin className="w-5 h-5" />
-                        <span className="text-sm">{webInfo?.location || 'Lokasi belum diatur'}</span>
+                        <span className="text-sm">{webInfo?.location || t('locationFallback')}</span>
                     </div>
                 )}
 
@@ -59,7 +61,7 @@ export default async function Footer() {
                         </Link>
 
                         <p className="text-sm text-slate-400 leading-relaxed max-w-[260px]">
-                            Memberikan pelayanan kesehatan yang bermutu, merata, dan terjangkau bagi seluruh masyarakat.
+                            {t('desc')}
                         </p>
 
                         <SocialIcon className="text-slate-500" socialLinks={webInfo?.social_links} />
@@ -68,7 +70,7 @@ export default async function Footer() {
                     {/* ── Col 2: Kontak ── */}
                     <div className="space-y-6">
                         <h4 className="text-[11px] font-bold tracking-[0.14em] text-slate-500 uppercase">
-                            Kontak
+                            {t('contact')}
                         </h4>
 
                         <div className="space-y-3.5">
@@ -100,7 +102,7 @@ export default async function Footer() {
                                 className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
                             >
                                 <ExternalLink size={11} />
-                                Buka di Google Maps
+                                {t('openMap')}
                             </Link>
                         )}
                     </div>
@@ -108,19 +110,14 @@ export default async function Footer() {
                     {/* ── Col 3: Visitor Stats ── */}
                     <div className="space-y-6">
                         <h4 className="text-[11px] font-bold tracking-[0.14em] text-slate-500 uppercase">
-                            Statistik Pengunjung
+                            {t('stats')}
                         </h4>
-
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <Users className="w-4 h-4" />
-                            <span className="text-sm font-medium">Pengunjung Website</span>
-                        </div>
 
                         <div className="rounded-xl border border-slate-800 overflow-hidden divide-y divide-slate-800">
                             {[
-                                { label: 'Hari Ini', value: stats.today },
-                                { label: 'Bulan Ini', value: stats.thisMonth },
-                                { label: 'Tahun Ini', value: stats.thisYear },
+                                { label: t('today'), value: stats.today },
+                                { label: t('thisMonth'), value: stats.thisMonth },
+                                { label: t('thisYear'), value: stats.thisYear },
                             ].map((stat, idx) => (
                                 <div
                                     key={idx}
@@ -133,7 +130,7 @@ export default async function Footer() {
                                 </div>
                             ))}
                             <div className="flex items-center justify-between px-4 py-3.5 bg-slate-800/60">
-                                <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">Total</span>
+                                <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">{t('total')}</span>
                                 <span className="text-base font-bold text-white tabular-nums">
                                     {stats.total.toLocaleString('id-ID')}
                                 </span>
@@ -144,7 +141,7 @@ export default async function Footer() {
 
                 {/* ── Bottom bar ── */}
                 <div className="py-5 flex flex-col md:flex-row justify-between items-center gap-2 text-[11px] text-slate-700 tracking-widest uppercase">
-                    <p>© {new Date().getFullYear()} Pemerintah Kota Bogor</p>
+                    <p>{t('copyright', { year: new Date().getFullYear() })}</p>
                 </div>
             </div>
         </footer>

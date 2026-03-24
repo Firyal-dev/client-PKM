@@ -7,8 +7,10 @@ import Autoplay from "embla-carousel-autoplay"
 import { Banner } from "@/types/banner-prop"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function Hero({ data }: { data: Banner[] }) {
+    const t = useTranslations('Hero')
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true, align: "start", duration: 30 },
         [Autoplay({ delay: 6000, stopOnInteraction: false })]
@@ -46,7 +48,7 @@ export default function Hero({ data }: { data: Banner[] }) {
     if (!data || data.length === 0) return null
 
     return (
-        <section className="relative w-full h-[100vh] overflow-hidden bg-slate-950">
+        <section className="relative w-full h-[75vh] min-h-[500px] md:h-[100vh] md:min-h-[700px] overflow-hidden bg-slate-950">
             {/* Carousel Container */}
             <div className="overflow-hidden h-full" ref={emblaRef}>
                 <div className="flex h-full">
@@ -77,18 +79,18 @@ export default function Hero({ data }: { data: Banner[] }) {
                             <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-16 lg:px-24 max-w-screen-2xl mx-auto">
                                 <div className="md:max-w-3xl lg:max-w-5xl">
                                     <h1
-                                        className={`text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight drop-shadow-2xl transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
+                                        className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white mb-4 md:mb-6 leading-[1.05] tracking-tight drop-shadow-2xl transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
                                                 ? "translate-y-0 opacity-100 delay-300"
-                                                : "translate-y-20 opacity-0"
+                                                : "translate-y-10 md:translate-y-20 opacity-0"
                                             }`}
                                     >
                                         {banner.title}
                                     </h1>
                                     {banner.description && (
                                         <p
-                                            className={`text-lg md:text-xl lg:text-2xl text-slate-200/90 max-w-2xl line-clamp-4 md:line-clamp-3 drop-shadow-md leading-relaxed transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
+                                            className={`text-sm sm:text-base md:text-xl lg:text-2xl text-slate-200/90 max-w-2xl line-clamp-4 md:line-clamp-3 drop-shadow-md leading-relaxed transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${index === selectedIndex
                                                     ? "translate-y-0 opacity-100 delay-500"
-                                                    : "translate-y-20 opacity-0"
+                                                    : "translate-y-10 md:translate-y-20 opacity-0"
                                                 }`}
                                         >
                                             {banner.description}
@@ -103,8 +105,8 @@ export default function Hero({ data }: { data: Banner[] }) {
 
             {/* Navigation Controls */}
             {data.length > 1 && (
-                <div className="absolute bottom-24 md:bottom-32 left-6 md:left-16 lg:left-24 z-30 flex items-center gap-8">
-                    <div className="flex items-center gap-3">
+                <div className="absolute bottom-16 md:bottom-28 lg:bottom-32 left-6 md:left-16 lg:left-24 z-30 flex items-center gap-6 md:gap-8">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button
                             onClick={scrollPrev}
                             className="group p-2 text-white/40 hover:text-white transition-all duration-300 cursor-pointer bg-white/5 hover:bg-white/10 rounded-full border border-white/10"
@@ -142,7 +144,7 @@ export default function Hero({ data }: { data: Banner[] }) {
             {/* Scroll Indicator */}
             <div className="absolute bottom-20 md:bottom-28 right-6 md:right-16 lg:right-24 z-30 hidden md:flex flex-col items-center gap-3">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/40 vertical-text rotate-180" style={{ writingMode: 'vertical-rl' }}>
-                    Gulir Ke Bawah
+                    {t('scrollDown')}
                 </span>
                 <div className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line" />

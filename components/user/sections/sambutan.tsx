@@ -4,11 +4,13 @@ import { Quote, ArrowRight } from "lucide-react"
 import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
+import { getTranslations } from "next-intl/server"
 
 export default async function Sambutan() {
+    const t = await getTranslations('Sambutan')
     const puskesmasInfo = await getPublicPuskesmasInfo()
 
-    const kepalaNama = puskesmasInfo?.kepala_puskesmas || 'Kepala Puskesmas'
+    const kepalaNama = puskesmasInfo?.kepala_puskesmas || t('head')
     const kepalaFoto = puskesmasInfo?.kepala_foto ? getMediaUrl(puskesmasInfo.kepala_foto) : null
     const SambutanKonten = puskesmasInfo?.Sambutan_konten || ''
     const sanitizedContent = DOMPurify.sanitize(SambutanKonten)
@@ -24,7 +26,7 @@ export default async function Sambutan() {
                 {/* Section Label */}
                 <div className="flex items-center gap-3 mb-12">
                     <span className="block w-8 h-px bg-blue-400" />
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-blue-500 uppercase">Kata Sambutan</span>
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-blue-500 uppercase">{t('label')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-12 lg:gap-20 items-start">
@@ -53,7 +55,7 @@ export default async function Sambutan() {
                         <div className="flex-1 lg:w-full">
                             <div className="bg-blue-700 rounded-xl px-5 py-4 shadow-md">
                                 <p className="text-[9px] font-bold tracking-[0.18em] text-blue-300 uppercase mb-1.5">
-                                    Kepala Puskesmas
+                                    {t('head')}
                                 </p>
                                 <p className="text-white font-bold text-sm leading-snug">
                                     {kepalaNama}
@@ -65,11 +67,10 @@ export default async function Sambutan() {
                     {/* Right — Content Card */}
                     <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col overflow-hidden max-h-[540px]">
                         
-                        {/* Header Badge inside Card */}
                         <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Quote className="w-4 h-4 text-blue-500 fill-blue-500/10" />
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pesan Utama</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('mainMessage')}</span>
                             </div>
                         </div>
 
@@ -88,7 +89,7 @@ export default async function Sambutan() {
                             ) : (
                                 <div className="text-center py-20 text-slate-300">
                                     <Quote className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                    <p className="font-bold uppercase tracking-widest text-[10px]">Sambutan belum tersedia</p>
+                                    <p className="font-bold uppercase tracking-widest text-[10px]">{t('empty')}</p>
                                 </div>
                             )}
 
@@ -98,9 +99,9 @@ export default async function Sambutan() {
                                     {kepalaNama.charAt(0)}
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-slate-400 mb-0.5 tracking-[0.1em] font-bold uppercase">Tertanda,</p>
+                                    <p className="text-[10px] text-slate-400 mb-0.5 tracking-[0.1em] font-bold uppercase">{t('signed')}</p>
                                     <p className="font-black text-slate-900 text-sm md:text-base">{kepalaNama}</p>
-                                    <p className="text-[11px] text-blue-600 font-bold mt-0.5">Kepala Puskesmas</p>
+                                    <p className="text-[11px] text-blue-600 font-bold mt-0.5">{t('head')}</p>
                                 </div>
                             </div>
                         </div>

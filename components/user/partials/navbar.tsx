@@ -7,6 +7,8 @@ import MobileNavbar from "./mobile-navbar"
 import SocialIcon from "./navbar/social-icon"
 import { Phone, Mail } from "lucide-react"
 import SearchToggle from "./search-toggle"
+import LanguageSwitcher from "./navbar/language-switcher"
+
 
 export default async function Navbar() {
     const [menus, webInfo] = await Promise.all([
@@ -59,6 +61,7 @@ export default async function Navbar() {
 
                 {/* Search + mobile trigger */}
                 <div className="flex items-center gap-1 flex-shrink-0">
+                    <LanguageSwitcher />
                     <SearchToggle />
 
                     {/* Mobile hamburger */}

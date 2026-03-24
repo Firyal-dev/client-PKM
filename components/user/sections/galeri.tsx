@@ -7,8 +7,10 @@ import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
 import { PhotoProvider, PhotoView } from 'react-photo-view'
 import 'react-photo-view/dist/react-photo-view.css'
+import { useTranslations } from 'next-intl'
 
 export default function GaleriSection({ data }: { data: Gallery[] }) {
+    const t = useTranslations('Galeri')
     const hasData = Array.isArray(data) && data.length > 0
 
     if (!hasData) return null
@@ -22,16 +24,16 @@ export default function GaleriSection({ data }: { data: Gallery[] }) {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <span className="block w-6 h-px bg-blue-400" />
-                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">Dokumentasi</span>
+                            <span className="text-[10px] font-bold tracking-[0.18em] text-blue-500 uppercase">{t('label')}</span>
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Galeri Kegiatan</h2>
-                        <p className="text-sm text-slate-500">Foto dokumentasi kegiatan dan pelayanan terbaru puskesmas.</p>
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
+                        <p className="text-sm text-slate-500">{t('desc')}</p>
                     </div>
                     <Link
                         href="/galeri"
                         className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0"
                     >
-                        Lihat Semua
+                        {t('viewAll')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                 </div>
@@ -73,8 +75,8 @@ export default function GaleriSection({ data }: { data: Gallery[] }) {
                                 <LayoutGrid className="w-6 h-6" />
                             </div>
                             <div className="text-center">
-                                <p className="text-xs font-black uppercase tracking-[0.2em]">Lihat Semua</p>
-                                <p className="text-[10px] text-white/60 font-medium mt-0.5">Dokumentasi</p>
+                                <p className="text-xs font-black uppercase tracking-[0.2em]">{t('viewAll')}</p>
+                                <p className="text-[10px] text-white/60 font-medium mt-0.5">{t('label')}</p>
                             </div>
                             <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300" />
                         </Link>

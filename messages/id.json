@@ -1,0 +1,102 @@
+{
+  "Navbar": {
+    "language": "Bahasa",
+    "search": "Cari"
+  },
+  "Hero": {
+    "welcome": "Selamat Datang di",
+    "more": "Lihat Selengkapnya",
+    "scrollDown": "Gulir Ke Bawah"
+  },
+  "Berita": {
+    "label": "Berita",
+    "title": "Berita & Informasi Terkini",
+    "desc": "Ikuti berita dan informasi terbaru seputar kegiatan dan layanan puskesmas.",
+    "viewAll": "Lihat Semua",
+    "readMore": "Baca Selengkapnya"
+  },
+  "Pelayanan": {
+    "label": "Layanan Kami",
+    "title": "Pelayanan Kesehatan Terbaik",
+    "empty": "Belum ada layanan",
+    "emptyDesc": "Silakan kembali lagi nanti untuk informasi layanan.",
+    "footer": "Seluruh layanan tersedia sesuai jam operasional puskesmas"
+  },
+  "Agenda": {
+    "label": "Agenda Kegiatan",
+    "title": "Jadwal & Agenda Puskesmas",
+    "desc": "Informasi jadwal pelayanan luar gedung dan kegiatan puskesmas.",
+    "viewAll": "Lihat Semua",
+    "emptyTitle": "Tidak Ada Kegiatan",
+    "emptyDesc": "Tidak ada agenda kegiatan yang terjadwal pada tanggal ini.",
+    "viewAllSchedule": "Lihat Semua Jadwal",
+    "scheduled": "kegiatan terjadwal",
+    "noActivity": "Tidak ada kegiatan",
+    "page": "Halaman {current} dari {total}",
+    
+    "pageTitle": "Agenda",
+    "pageHeading": "Agenda & Jadwal",
+    "pageDesc": "Lihat seluruh jadwal kegiatan dan pelayanan Puskesmas sepanjang tahun.",
+    "annualSchedule": "Jadwal Tahunan",
+    "totalAgenda": "Total Agenda",
+    "calendar": "Kalender {year}",
+    "calendarHint": "Klik tanggal bertanda untuk melihat agenda",
+    "swipeHint": "Geser untuk bulan lain",
+    "close": "Tutup",
+    "wib": "WIB"
+  },
+  "Galeri": {
+    "label": "Dokumentasi",
+    "title": "Galeri Kegiatan",
+    "desc": "Foto dokumentasi kegiatan dan pelayanan terbaru puskesmas.",
+    "viewAll": "Lihat Semua",
+    
+    "pageTitle": "Galeri",
+    "pageHeading": "Galeri Puskesmas",
+    "pageDesc": "Kumpulan dokumentasi kegiatan, album foto, dan video terbaru dari Puskesmas.",
+    "tabFoto": "Foto",
+    "tabFotoDesc": "Dokumentasi kegiatan",
+    "tabAlbum": "Album",
+    "tabAlbumDesc": "Koleksi foto",
+    "tabVideo": "Video",
+    "tabVideoDesc": "Video & dokumentasi",
+    
+    "emptyFotoTitle": "Foto tidak ditemukan",
+    "emptyFotoDesc": "Belum ada foto kegiatan yang diunggah.",
+    "emptyAlbumTitle": "Album tidak ditemukan",
+    "emptyAlbumDesc": "Belum ada album foto yang dibuat.",
+    "emptyVideoTitle": "Video tidak ditemukan",
+    "emptyVideoDesc": "Belum ada video edukasi atau dokumentasi.",
+    
+    "albumPlaceholder": "Koleksi foto kegiatan.",
+    "videoDoc": "Dokumentasi"
+  },
+  "Footer": {
+    "desc": "Memberikan pelayanan kesehatan yang bermutu, merata, dan terjangkau bagi seluruh masyarakat.",
+    "contact": "Kontak",
+    "openMap": "Buka di Google Maps",
+    "stats": "Statistik Pengunjung",
+    "websiteVisitor": "Pengunjung Website",
+    "today": "Hari Ini",
+    "thisMonth": "Bulan Ini",
+    "thisYear": "Tahun Ini",
+    "total": "Total",
+    "copyright": "© {year} Pemerintah Kota Bogor",
+    "locationFallback": "Lokasi belum diatur"
+  },
+  "Faq": {
+    "label": "Informasi & Konsultasi",
+    "title": "Tanya Jawab (FAQ)",
+    "desc": "Daftar pertanyaan dari masyarakat yang telah dijawab oleh admin dan dipublikasikan untuk membantu menjawab keraguan Anda.",
+    "question": "Pertanyaan:",
+    "answer": "Jawaban Puskesmas:",
+    "scrollHint": "Gunakan scroll untuk melihat pertanyaan lainnya"
+  },
+  "Sambutan": {
+    "label": "Kata Sambutan",
+    "head": "Kepala Puskesmas",
+    "mainMessage": "Pesan Utama",
+    "empty": "Sambutan belum tersedia",
+    "signed": "Tertanda,"
+  }
+}

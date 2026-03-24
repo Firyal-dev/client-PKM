@@ -51,7 +51,7 @@ export default async function Home() {
         getPublicGallery(1, 10),
         getPublicBerita(1, 6),
         getPublicMenus(),
-        getPublicConsultationList(1, 20) // Fetch up to 20 for scrolling demo if needed
+        getPublicConsultationList(1, 20)
     ]);
 
     // Get pelayanan submenus (max 6)
