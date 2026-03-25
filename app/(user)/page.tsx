@@ -17,6 +17,7 @@ import { getPublicBerita } from "@/services/page/page-service";
 import { getPublicMenus, Menu } from "@/services/menu/menu-service";
 import { getPublicConsultationList } from "@/services/consultation/consultation-service";
 import { getTenantHeader } from "@/services/server-helpers";
+import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service";
 
 export const metadata: Metadata = {
     title: "Puskesmas Kecamatan Sehat",
@@ -45,13 +46,14 @@ export default async function Home() {
     const headers = await getTenantHeader();
 
     // Ambil data banner, agenda, galeri, menu, dan faq secara paralel
-    const [banners, agendas, galeri, berita, menus, faq] = await Promise.all([
+    const [banners, agendas, galeri, berita, menus, faq, puskesmasInfo] = await Promise.all([
         getPublicBanners(),
         getPublicAgenda(1, 3),
         getPublicGallery(1, 10),
         getPublicBerita(1, 6),
         getPublicMenus(),
-        getPublicConsultationList(1, 20)
+        getPublicConsultationList(1, 20),
+        getPublicPuskesmasInfo()
     ]);
 
     // Get pelayanan submenus (max 6)
@@ -66,7 +68,7 @@ export default async function Home() {
             <Pelayanan data={pelayanan} />
 
             {/* Bagian Sambutan Kepala Puskesmas */}
-            <Sambutan />
+            <Sambutan data={puskesmasInfo} />
 
             {/* Bagian Agenda Kegiatan */}
             <Agenda data={agendas.data} />

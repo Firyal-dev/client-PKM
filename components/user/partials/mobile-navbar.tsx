@@ -69,7 +69,7 @@ export default function MobileNavbar({ menus = [], webInfo }: MobileNavbarProps)
 
             <SheetContent
                 side="left"
-                className="w-[280px] sm:w-[320px] z-[999] p-0 border-l border-slate-100 flex flex-col bg-white"
+                className="w-[280px] sm:w-[320px] p-0 border-l border-slate-100 flex flex-col bg-white"
             >
                 {/* ── Header ── */}
                 <SheetHeader className="relative shrink-0 px-5 py-4 border-b border-slate-100">

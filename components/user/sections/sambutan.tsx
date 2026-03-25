@@ -1,14 +1,16 @@
 import Image from "next/image"
-import Link from "next/link"
-import { Quote, ArrowRight } from "lucide-react"
-import { getPublicPuskesmasInfo } from "@/services/puskesmas-info-service"
+import { Quote } from "lucide-react"
+import { PuskesmasInfo } from "@/types/web-info"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
 import { getTranslations } from "next-intl/server"
 
-export default async function Sambutan() {
+interface SambutanProps {
+    data: PuskesmasInfo | null;
+}
+
+export default async function Sambutan({ data: puskesmasInfo }: SambutanProps) {
     const t = await getTranslations('Sambutan')
-    const puskesmasInfo = await getPublicPuskesmasInfo()
 
     const kepalaNama = puskesmasInfo?.kepala_puskesmas || t('head')
     const kepalaFoto = puskesmasInfo?.kepala_foto ? getMediaUrl(puskesmasInfo.kepala_foto) : null

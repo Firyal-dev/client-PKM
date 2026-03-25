@@ -48,7 +48,7 @@ export default function NavbarWrapper({ children }: { children: React.ReactNode 
         <header
             data-scroll={state}
             className={cn(
-                'fixed top-0 left-0 right-0 z-[100]',
+                'fixed top-0 left-0 right-0 z-40',
                 'transition-all duration-[450ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
                 state === 'top' && 'bg-transparent border-transparent',
                 state === 'hidden' && '-translate-y-full opacity-0 pointer-events-none border-transparent',

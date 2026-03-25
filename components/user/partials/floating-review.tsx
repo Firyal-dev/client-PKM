@@ -117,7 +117,7 @@ export function FloatingReview({ onSubmit }: FloatingReviewProps) {
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Kritik & Saran</DialogTitle>
                         <DialogDescription>
