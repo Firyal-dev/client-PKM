@@ -31,17 +31,17 @@ function extractTotal(data: any): number {
 // Helper untuk count total menus termasuk children
 function countTotalMenus(data: any): number {
     if (!data?.data && !Array.isArray(data)) return 0
-    
+
     const menus = Array.isArray(data) ? data : (data.data || [])
     let total = menus.length
-    
+
     // Count child menus
     menus.forEach((menu: any) => {
         if (menu.children && Array.isArray(menu.children)) {
             total += menu.children.length
         }
     })
-    
+
     return total
 }
 
@@ -51,10 +51,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
         // Fetch visitor stats
         const visitorPromises = Promise.all([
-            api.get<number>('/v1/visitor/count', { headers }),
-            api.get<number>('/v1/visitor/count-day', { headers }),
-            api.get<number>('/v1/visitor/count-month', { headers }),
-            api.get<number>('/v1/visitor/count-year', { headers }),
+            api.get<number>('/v1/v-stats/count', { headers }),
+            api.get<number>('/v1/v-stats/count-day', { headers }),
+            api.get<number>('/v1/v-stats/count-month', { headers }),
+            api.get<number>('/v1/v-stats/count-year', { headers }),
         ])
 
         // Fetch consultation counts

@@ -40,8 +40,8 @@ export default function VisitorTracker() {
             if (hasVisited) return;
 
             try {
-                // Include tenant slug in request header for subdomain-based tracking
-                await api.post('/v1/visitor/log', null, {
+                // Rename to 'v-stats/v-session' to evade ad-blockers
+                await api.post('/v1/v-stats/v-session', {}, {
                     headers: {
                         'x-tenant-slug': slug
                     }

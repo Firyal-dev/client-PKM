@@ -15,9 +15,13 @@ export async function getPublicAgenda(page = 1, limit = 10) {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
         if (!res.ok) throw new Error('Gagal ambil agenda')
-        const data = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
-    } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil agenda')) }
+    } catch (e) {
+        console.error("Gagal fetch agenda:", e)
+        throw new Error(handleServiceError(e, 'Gagal ambil agenda'))
+    }
 }
 
 // Publik: Ambil agenda by slug
@@ -27,7 +31,9 @@ export async function getPublicAgendaBySlug(slug: string): Promise<Agenda | null
             headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.AGENDA] }
         })
-        return res.ok ? await res.json() : null
+        if (!res.ok) return null
+        const result = await res.json()
+        return result.data || result
     } catch { return null }
 }
 

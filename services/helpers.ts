@@ -18,17 +18,22 @@ export async function authHeaders() {
 }
 
 export function buildParams(page = 1, limit = 10, extras?: Record<string, string>) {
-    const params = new URLSearchParams({ page: String(page), limit: String(limit) })
+    const params = new URLSearchParams({ page: String(page), limit: String(limit), _v: '2' })
     extras && Object.entries(extras).forEach(([k, v]) => params.append(k, v))
     return params.toString()
 }
 
 export function parseResponse<T>(res: any, page = 1) {
-    const docs = res.data?.docs || res.data?.data || []
+    // If the response follows the { success: true, data: ... } pattern, unwrap it first
+    const payload = (res.data && typeof res.data === 'object' && 'success' in res.data && 'data' in res.data)
+        ? res.data.data
+        : res.data;
+
+    const docs = payload?.docs || payload?.data || (Array.isArray(payload) ? payload : []);
     return {
         data: docs,
-        totalPages: res.data?.totalPages || res.data?.lastPage || 1,
-        currentPage: res.data?.page || page,
-        total: res.data?.total || res.data?.totalDocs || docs.length
+        totalPages: payload?.totalPages || payload?.lastPage || payload?.last_page || 1,
+        currentPage: payload?.page || page,
+        total: payload?.total || payload?.totalDocs || docs.length
     }
 }

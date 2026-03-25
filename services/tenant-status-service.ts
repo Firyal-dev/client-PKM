@@ -21,7 +21,8 @@ export async function checkTenantStatus(tenantSlug: string): Promise<TenantStatu
 
         if (!res.ok) return null
 
-        return await res.json()
+        const result = await res.json()
+        return result.data || result
     } catch (e) {
         console.error('[checkTenantStatus] Error:', e)
         return null

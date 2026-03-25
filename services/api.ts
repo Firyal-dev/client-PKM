@@ -172,7 +172,7 @@ async function handleApiError(response: Response): Promise<string> {
 // API client using fetch
 const api = {
     async get<T = any>(url: string, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
-        const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
+        const baseURL = process.env.NEXT_PUBLIC_API_URL
 
         // Merge tenant headers with custom headers
         const tenantHeaders = getTenantHeaders()
@@ -200,12 +200,17 @@ const api = {
             return { data: null as unknown as T }
         }
 
-        const data = JSON.parse(text) as T
-        return { data }
+        const json = JSON.parse(text)
+        // If the response follows the { success: true, data: ... } pattern, unwrap it
+        const result = (json && typeof json === 'object' && 'success' in json && 'data' in json)
+            ? json.data
+            : json
+
+        return { data: result as T }
     },
 
     async post<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
-        const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
+        const baseURL = process.env.NEXT_PUBLIC_API_URL
         const isFormData = data instanceof FormData
 
         // Merge tenant headers with custom headers
@@ -227,20 +232,33 @@ const api = {
             })
         }
 
-        // Handle null/undefined data - don't send as JSON string "null", send empty body instead
+        // Handle null/undefined data - prefer sending empty object for POST to avoid content-type issues
         let body: string | FormData | undefined;
-        if (data !== null && data !== undefined) {
-            body = isFormData ? data as FormData : JSON.stringify(data);
+        if (isFormData) {
+            body = data as FormData;
+        } else {
+            // Send empty object if data is null/undefined to satisfy JSON body requirements
+            body = JSON.stringify(data ?? {});
         }
-        // If data is null or undefined, don't set body (will be sent as empty)
 
-        const response = await fetch(`${baseURL}${url}`, {
-            method: 'POST',
-            credentials: 'include',
-            headers,
-            body,
-            next: options?.next,
-        })
+        if (!baseURL) {
+            console.error('API Error: NEXT_PUBLIC_API_URL is not defined');
+            throw new Error('API URL tidak terdefinisi');
+        }
+
+        let response: Response;
+        try {
+            response = await fetch(`${baseURL}${url}`, {
+                method: 'POST',
+                credentials: 'include',
+                headers,
+                body,
+                next: options?.next,
+            })
+        } catch (error: any) {
+            console.error(`Network Error fetching ${baseURL}${url}:`, error);
+            throw new Error('Gagal terhubung ke server. Silakan periksa koneksi internet Anda atau hubungi admin.');
+        }
 
         if (!response.ok) {
             const errorMsg = await handleApiError(response)
@@ -249,18 +267,21 @@ const api = {
 
         // Handle empty or null response
         const text = await response.text()
-
-        // More robust null/empty check
         if (!text || text === 'null' || text.trim() === 'null' || text === '') {
             return { data: null as unknown as T }
         }
 
-        const result = JSON.parse(text) as T
-        return { data: result }
+        const json = JSON.parse(text)
+        // If the response follows the { success: true, data: ... } pattern, unwrap it
+        const result = (json && typeof json === 'object' && 'success' in json && 'data' in json)
+            ? json.data
+            : json
+
+        return { data: result as T }
     },
 
     async patch<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
-        const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
+        const baseURL = process.env.NEXT_PUBLIC_API_URL
         const isFormData = data instanceof FormData
 
         // Merge tenant headers with custom headers
@@ -301,8 +322,13 @@ const api = {
             return { data: null as unknown as T }
         }
 
-        const result = JSON.parse(patchText) as T
-        return { data: result }
+        const json = JSON.parse(patchText)
+        // If the response follows the { success: true, data: ... } pattern, unwrap it
+        const result = (json && typeof json === 'object' && 'success' in json && 'data' in json)
+            ? json.data
+            : json
+
+        return { data: result as T }
     },
 
     async put<T = any>(url: string, data?: unknown, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
@@ -311,7 +337,7 @@ const api = {
     },
 
     async delete<T = any>(url: string, options?: { headers?: Record<string, string>, next?: NextFetchRequestConfig }): Promise<{ data: T }> {
-        const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api"
+        const baseURL = process.env.NEXT_PUBLIC_API_URL
 
         // Merge tenant headers with custom headers
         const tenantHeaders = getTenantHeaders()
@@ -339,8 +365,13 @@ const api = {
             return { data: null as unknown as T }
         }
 
-        const result = JSON.parse(deleteText) as T
-        return { data: result }
+        const json = JSON.parse(deleteText)
+        // If the response follows the { success: true, data: ... } pattern, unwrap it
+        const result = (json && typeof json === 'object' && 'success' in json && 'data' in json)
+            ? json.data
+            : json
+
+        return { data: result as T }
     },
 }
 

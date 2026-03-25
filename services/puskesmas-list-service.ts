@@ -13,13 +13,15 @@ export async function getPuskesmasList(page: number, limit: number, search?: str
             },
         })
         if (!res.ok) throw new Error('Failed to fetch puskesmas list')
-        const data = await res.json()
+        const json = await res.json()
+        const payload = json.success && json.data ? json.data : json
+
         return {
-            docs: data.docs || [],
-            totalDocs: data.totalDocs || 0,
-            limit: data.limit || limit,
-            page: data.page || page,
-            totalPages: data.totalPages || 1
+            docs: payload.docs || [],
+            totalDocs: payload.totalDocs || 0,
+            limit: payload.limit || limit,
+            page: payload.page || page,
+            totalPages: payload.totalPages || 1
         }
     } catch (e) {
         throw new Error(handleServiceError(e, 'Failed to fetch puskesmas list'))

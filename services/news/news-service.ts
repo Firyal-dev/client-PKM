@@ -15,7 +15,8 @@ export async function getPublicNews(page = 1, limit = 12) {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.NEWS] }
         })
         if (!res.ok) throw new Error('Gagal ambil berita')
-        const data = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil berita')) }
 }
@@ -28,7 +29,8 @@ export async function getPublicNewsById(id: string): Promise<Berita> {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.NEWS] }
         })
         if (!res.ok) throw new Error('Gagal ambil berita')
-        return await res.json()
+        const result = await res.json()
+        return result.data || result
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil berita')) }
 }
 

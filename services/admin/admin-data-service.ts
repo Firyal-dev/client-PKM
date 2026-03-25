@@ -5,6 +5,7 @@ import { authHeaders } from '@/services/server-helpers'
 import { tryAction } from '@/services/utils'
 import { Admin, AdminFormData } from '@/types/admin'
 import { revalidateTag } from 'next/cache'
+import { parseResponse } from '@/services/helpers'
 
 const CACHE_TAG = 'admin-data'
 
@@ -20,7 +21,12 @@ export async function getAdmins(search?: string, role?: string, limit: number = 
         const res = await api.get(`/v1/admin/admins?${params.toString()}`, {
             headers: await authHeaders()
         })
-        return res.data || { data: [], total: 0 }
+
+        const parsed = parseResponse<Admin>(res, Math.floor(offset / limit) + 1)
+        return {
+            data: parsed.data as Admin[],
+            total: parsed.total
+        }
     } catch (e) {
         console.error('Error fetching admins:', e)
         return { data: [], total: 0 }

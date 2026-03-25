@@ -67,25 +67,25 @@ export async function tryActionWithAuth<T>(action: () => Promise<T>, fallback: s
     }
 }
 
-// Revalidation time (1 jam)
-export const SSG_REVALIDATE_TIME = 3600
+// Revalidation time (default 1 jam)
+export const SSG_REVALIDATE_TIME = parseInt(process.env.NEXT_PUBLIC_SSG_REVALIDATE || '3600')
 
 // Cache tags
 export const CACHE_TAGS = {
-    AGENDA: 'agenda',
-    ALBUM: 'album',
-    BANNER: 'banners',
-    GALLERY: 'gallery',
-    REVIEW: 'reviews',
-    PROFILE: 'profile',
-    NEWS: 'news',
-    MENU: 'menu',
-    PAGE: 'page',
-    STATIC_PAGE: 'static_pages',
-    VIDEO: 'videos',
-    SERVICES: 'services',
-    CONSULTATION: 'consultation',
-    WEB_INFO: 'web_info',
-    PUSKESMAS: 'puskesmas',
-    PUSKESMAS_LIST: 'puskesmas_list',
+    AGENDA: 'agenda_v2',
+    ALBUM: 'album_v2',
+    BANNER: 'banners_v2',
+    GALLERY: 'gallery_v2',
+    REVIEW: 'reviews_v2',
+    PROFILE: 'profile_v2',
+    NEWS: 'news_v2',
+    MENU: 'menu_v2',
+    PAGE: 'page_v2',
+    STATIC_PAGE: 'static_pages_v2',
+    VIDEO: 'videos_v2',
+    SERVICES: 'services_v2',
+    CONSULTATION: 'consultation_v2',
+    WEB_INFO: 'web_info_v2',
+    PUSKESMAS: 'puskesmas_v2',
+    PUSKESMAS_LIST: 'puskesmas_list_v2',
 } as const

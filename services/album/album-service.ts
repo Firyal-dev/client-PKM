@@ -15,7 +15,8 @@ export async function getPublicAlbums(page = 1, limit = 10) {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.ALBUM] }
         })
         if (!res.ok) throw new Error('Gagal ambil album')
-        const data = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil album')) }
 }
@@ -27,7 +28,8 @@ export async function getPublicAlbumById(id: string): Promise<Album | null> {
             headers: await getTenantHeader(),
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.ALBUM] }
         })
-        return res.ok ? await res.json() : null
+        const result = await res.json()
+        return res.ok ? (result.data || result) : null
     } catch { return null }
 }
 

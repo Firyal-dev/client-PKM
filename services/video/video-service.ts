@@ -25,7 +25,8 @@ export async function getPublicVideos(page = 1, limit = 10) {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.VIDEO] }
         })
         if (!res.ok) throw new Error('Gagal ambil video')
-        const data = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil video')) }
 }

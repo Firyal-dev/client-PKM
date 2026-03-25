@@ -3,7 +3,7 @@ import Link from "next/link"
 import HeroHeader from "@/components/user/partials/hero-header"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
-import { getBaseUrl } from "@/services/helpers"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import { PaginationControl } from "@/components/pagination-control"
 
 interface PageHalamanListProps {
@@ -19,11 +19,7 @@ function stripHtml(html: string): string {
 }
 
 function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
-    const imageUrl = page.image
-        ? page.image.startsWith('http')
-            ? page.image
-            : `${getBaseUrl().replace('/api', '')}${page.image}`
-        : null
+    const imageUrl = page.image ? getMediaUrl(page.image) : null
 
     const excerpt = page.dynamic_content
         ? stripHtml(page.dynamic_content).substring(0, 160)

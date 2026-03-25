@@ -16,13 +16,14 @@ export async function getPublicBanners(): Promise<Banner[]> {
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.BANNER] }
         })
         if (!res.ok) throw new Error('Gagal ambil banner')
-        const data: { docs: Banner[] } = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return data.docs || []
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil banner')) }
 }
 
 // Admin: Ambil banner (paginated)
-export async function getAdminBannerList(page = 1, limit = 10) {
+export async function getAdminBannerList(page = 1, limit = parseInt(process.env.NEXT_PUBLIC_DEFAULT_LIMIT || '10')) {
     try {
         const res = await api.get(`/v1/admin/banner?${buildParams(page, limit)}`, { headers: await authHeaders() })
         return parseResponse<Banner>(res, page)

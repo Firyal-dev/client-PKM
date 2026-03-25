@@ -31,7 +31,8 @@ export async function getPublicPages(): Promise<Page[]> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
-    return await res.json() || []
+    const result = await res.json()
+    return result.data || result || []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
@@ -43,7 +44,8 @@ export async function getPublishedPages(): Promise<Page[]> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
-    const data = await res.json()
+    const result = await res.json()
+    const data = result.data || result
     return data.docs || data.data || []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
@@ -56,7 +58,8 @@ export async function getPublicPageByMenuId(menuId: string): Promise<Page> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
@@ -68,7 +71,8 @@ export async function getPublicPagesByMenuId(menuId: string, page = 1, limit = 1
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
@@ -80,7 +84,8 @@ export async function getPublicPageById(id: string): Promise<Page> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman')) }
 }
 
@@ -92,9 +97,10 @@ export async function getPublicPelayanan(limit = 6): Promise<Page[]> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data pelayanan: ${res.status}`)
-    const data = await res.json()
-    const items = Array.isArray(data) ? data : []
-    return items.slice(0, limit)
+    const result = await res.json()
+    const data = result.data || result
+    const items = Array.isArray(data) ? data : (data.docs || [])
+    return Array.isArray(items) ? items.slice(0, limit) : []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data pelayanan')) }
 }
 
@@ -110,8 +116,10 @@ export async function getPublicBerita(page?: number, limit?: number): Promise<Pa
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.PAGE] }
     })
     if (!res.ok) throw new Error(`Gagal ambil data berita: ${res.status}`)
-    const data = await res.json()
-    return Array.isArray(data) ? data : []
+    const result = await res.json()
+    const data = result.data || result
+    const items = Array.isArray(data) ? data : (data.docs || [])
+    return Array.isArray(items) ? items : []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data berita')) }
 }
 
@@ -125,7 +133,8 @@ export async function searchPublicPages(q: string): Promise<any[]> {
       cache: 'no-store'
     })
     if (!res.ok) return []
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch {
     return []
   }

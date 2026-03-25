@@ -8,7 +8,7 @@ import { Gallery } from '@/types/gallery-prop'
 import { revalidateTag } from 'next/cache'
 
 // Publik: Ambil gallery (paginated)
-export async function getPublicGallery(page = 1, limit = 20, options?: { albumId?: string; noAlbum?: boolean }) {
+export async function getPublicGallery(page = 1, limit = parseInt(process.env.NEXT_PUBLIC_GALLERY_LIMIT || '20'), options?: { albumId?: string; noAlbum?: boolean }) {
     try {
         const params = new URLSearchParams({ page: String(page), limit: String(limit) })
         options?.albumId && params.append('album_id', options.albumId)
@@ -19,13 +19,14 @@ export async function getPublicGallery(page = 1, limit = 20, options?: { albumId
             next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.GALLERY] }
         })
         if (!res.ok) throw new Error('Gagal ambil gallery')
-        const data = await res.json()
+        const result = await res.json()
+        const data = result.data || result
         return { data: data.docs || [], totalPages: data.totalPages || 1, currentPage: data.page || page }
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil gallery')) }
 }
 
 // Admin: Ambil gallery (paginated)
-export async function getAdminGallery(page = 1, limit = 20, options?: { albumId?: string; noAlbum?: boolean }) {
+export async function getAdminGallery(page = 1, limit = parseInt(process.env.NEXT_PUBLIC_GALLERY_LIMIT || '20'), options?: { albumId?: string; noAlbum?: boolean }) {
     try {
         const params = new URLSearchParams({ page: String(page), limit: String(limit) })
         options?.albumId && params.append('album_id', options.albumId)

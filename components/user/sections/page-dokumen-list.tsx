@@ -4,7 +4,7 @@ import { useState } from "react"
 import HeroHeader from "@/components/user/partials/hero-header"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
-import { getBaseUrl } from "@/services/helpers"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import { PaginationControl } from "@/components/pagination-control"
 
 interface PageDokumenListProps {
@@ -18,11 +18,7 @@ interface PageDokumenListProps {
 function DokumenCard({ page }: { page: Page }) {
     const [previewOpen, setPreviewOpen] = useState(false)
 
-    const fileUrl = page.file
-        ? page.file.startsWith('http')
-            ? page.file
-            : `${getBaseUrl().replace('/api', '')}${page.file}`
-        : null
+    const fileUrl = page.file ? getMediaUrl(page.file) : null
 
     const uploadedAt = new Date(page.createdAt).toLocaleDateString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
@@ -95,9 +91,9 @@ function DokumenCard({ page }: { page: Page }) {
                     <div className="mx-5 mb-5 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shadow-inner">
                         <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pratinjau Dokumen</span>
-                            <a 
-                                href={fileUrl} 
-                                target="_blank" 
+                            <a
+                                href={fileUrl}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
                             >

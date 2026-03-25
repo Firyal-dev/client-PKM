@@ -342,7 +342,7 @@ export function EditAdminDialog({
 
   const [formName, setFormName] = useState(admin?.name || "")
   const [formRole, setFormRole] = useState<"OPERATOR" | "SUPER_ADMIN">(admin?.role as any)
-  const [formPuskesmasId, setFormPuskesmasId] = useState<string | undefined>(admin?.puskesmas_id)
+  const [formPuskesmasId, setFormPuskesmasId] = useState<string | undefined>(admin?.puskesmas_id || undefined)
 
   const [formPassword, setFormPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -367,7 +367,7 @@ export function EditAdminDialog({
 
     setFormName(admin.name)
     setFormRole(admin.role as any)
-    setFormPuskesmasId(admin.puskesmas_id)
+    setFormPuskesmasId(admin.puskesmas_id || undefined)
 
   }, [admin])
 
@@ -403,17 +403,17 @@ export function EditAdminDialog({
     }
 
 
-   if (formRole === "OPERATOR") {
+    if (formRole === "OPERATOR") {
 
-  const puskesId = formPuskesmasId || admin.puskesmas_id
+      const puskesId = formPuskesmasId || admin.puskesmas_id
 
-  if (!puskesId) {
-    toast.error("Puskesmas tidak valid")
-    return
-  }
+      if (!puskesId) {
+        toast.error("Puskesmas tidak valid")
+        return
+      }
 
-  data.puskesmas_id = puskesId
-}
+      data.puskesmas_id = puskesId
+    }
     console.log(data)
     setIsSubmitting(true)
 

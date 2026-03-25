@@ -2,7 +2,7 @@
 
 import api from "@/services/api"
 import { getBaseUrl, buildParams } from "@/services/helpers"
-import {authHeaders, getTenantHeader} from "@/services/server-helpers"
+import { authHeaders, getTenantHeader } from "@/services/server-helpers"
 import { tryAction, handleServiceError, SSG_REVALIDATE_TIME, CACHE_TAGS } from "@/services/utils"
 import { revalidateTag } from "next/cache"
 
@@ -25,7 +25,8 @@ export async function getPublicStaticPages(): Promise<StaticPage[]> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')
-    return await res.json() || []
+    const result = await res.json()
+    return result.data || result || []
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman statis')) }
 }
 
@@ -37,7 +38,8 @@ export async function getPublicStaticPageById(id: string): Promise<StaticPage> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman statis')) }
 }
 
@@ -49,7 +51,8 @@ export async function getPublicStaticPageByMenuId(menuId: string): Promise<Stati
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.STATIC_PAGE] }
     })
     if (!res.ok) throw new Error('Gagal ambil halaman statis')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil halaman statis')) }
 }
 

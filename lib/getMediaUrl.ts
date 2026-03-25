@@ -4,16 +4,23 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/api";
  * Mendapatkan domain dasar dari API URL (tanpa /api atau /v1)
  */
 export function getBaseUrl() {
-    // Menghapus /api, /api/v1, /v1 di akhir URL
-    return API_URL
-        .replace(/\/api\/v1\/?$/, '')
-        .replace(/\/api\/?$/, '')
-        .replace(/\/v1\/?$/, '')
-        .replace(/\/$/, '');
+    let url = API_URL.replace(/\/$/, '');
+
+    // Pastikan base URL sudah pakai versi API (v1) tempat controller Files terdaftar
+    if (!url.endsWith('/v1')) {
+        url += '/v1';
+    }
+
+    return url;
 }
 
 /**
  * Mengubah path media menjadi URL lengkap
+ * 
+ * BARU: Format path sekarang adalah /{slug}/{module}/{filename}
+ * (file disimpan di public/{slug}/{module}/ dan diakses langsung via static file serving)
+ * 
+ * Masih support backward compatibility untuk path lama /files/{tenant}/{module}/{filename}
  */
 export function getMediaUrl(path: string | null | undefined, defaultFolder: string = '') {
     if (!path) return null;
@@ -26,21 +33,32 @@ export function getMediaUrl(path: string | null | undefined, defaultFolder: stri
     }
 
     const BASE_URL = getBaseUrl();
+
+    // Clean base URL - hapus /v1 karena sekarang static files dilayani langsung
+    // Dari http://localhost:3002/api/v1 -> http://localhost:3002/api
+    let baseUrlClean = BASE_URL.replace(/\/v1$/, '').replace(/\/$/, '');
+
+    // Jika path adalah format baru /{slug}/{module}/{filename}, langsung gabungkan
+    // Jika path adalah format lama /files/{tenant}/{module}/{filename}, convert ke baru
     let finalPath = path;
 
-    // Jika path tidak diawali / dan ada defaultFolder, gabungkan
+    if (path.startsWith('/files/')) {
+        // Convert dari /files/{tenant}/{module}/{filename} ke /{tenant}/{module}/{filename}
+        finalPath = path.replace('/files/', '/');
+    } else if (!path.startsWith('/')) {
+        finalPath = `/${path}`;
+    }
+
+    // Jika path tidak dimulai dengan / dan ada defaultFolder, gabungkan
     if (!path.startsWith('/') && defaultFolder) {
         const folder = defaultFolder.startsWith('/') ? defaultFolder : `/${defaultFolder}`;
         finalPath = `${folder}/${path}`;
-    } else if (!path.startsWith('/')) {
-        finalPath = `/${path}`;
     }
 
     // Bersihkan multiple slashes
     finalPath = finalPath.replace(/\/+/g, '/');
 
-    // Gabungkan BASE_URL dan finalPath, pastikan join-nya benar
-    const baseUrlClean = BASE_URL.replace(/\/$/, '');
+    // Gabungkan baseUrlClean dan finalPath
     const pathClean = finalPath.startsWith('/') ? finalPath : `/${finalPath}`;
 
     return `${baseUrlClean}${pathClean}`;

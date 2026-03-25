@@ -37,7 +37,8 @@ export async function getPublicMenus(): Promise<Menu[]> {
       return []
     }
 
-    return await res.json() || []
+    const result = await res.json()
+    return result.data || result || []
   } catch (e) {
     console.error(`[MenuService] Error in getPublicMenus:`, e)
     // Return empty array instead of throwing to prevent layout crash
@@ -53,7 +54,8 @@ export async function getPublicMenuBySlug(slug: string): Promise<Menu> {
       next: { revalidate: SSG_REVALIDATE_TIME, tags: [CACHE_TAGS.MENU] }
     })
     if (!res.ok) throw new Error('Gagal ambil menu')
-    return await res.json()
+    const result = await res.json()
+    return result.data || result
   } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil menu')) }
 }
 

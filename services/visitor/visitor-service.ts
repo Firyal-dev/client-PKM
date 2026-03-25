@@ -1,7 +1,7 @@
 "use server"
 
 import api from "@/services/api"
-import { getBaseUrl, parseResponse} from "@/services/helpers"
+import { getBaseUrl, parseResponse } from "@/services/helpers"
 import { authHeaders, getTenantHeader } from "@/services/server-helpers"
 import { handleServiceError } from "@/services/utils"
 
@@ -29,7 +29,7 @@ export interface VisitorChartData {
 // Admin: Ambil semua visitor
 export async function getAdminVisitors(): Promise<Visitor[]> {
     try {
-        const res = await api.get('/v1/visitor', { headers: await authHeaders() })
+        const res = await api.get('/v1/v-stats', { headers: await authHeaders() })
         return res.data
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil visitor')) }
 }
@@ -38,10 +38,10 @@ export async function getAdminVisitors(): Promise<Visitor[]> {
 export async function getVisitorStats(): Promise<VisitorStats> {
     try {
         const [total, today, thisMonth, thisYear] = await Promise.all([
-            api.get('/v1/visitor/count', { headers: await authHeaders() }),
-            api.get('/v1/visitor/count-day', { headers: await authHeaders() }),
-            api.get('/v1/visitor/count-month', { headers: await authHeaders() }),
-            api.get('/v1/visitor/count-year', { headers: await authHeaders() }),
+            api.get('/v1/v-stats/count', { headers: await authHeaders() }),
+            api.get('/v1/v-stats/count-day', { headers: await authHeaders() }),
+            api.get('/v1/v-stats/count-month', { headers: await authHeaders() }),
+            api.get('/v1/v-stats/count-year', { headers: await authHeaders() }),
         ])
 
         return {
@@ -61,10 +61,10 @@ export async function getPublicVisitorStats(): Promise<VisitorStats> {
         const headers = await getTenantHeader()
 
         const [total, today, thisMonth, thisYear] = await Promise.all([
-            fetch(`${url}/v1/visitor/count`, { headers, next: { revalidate: 300 } }).then(r => r.json()),
-            fetch(`${url}/v1/visitor/count-day`, { headers, next: { revalidate: 300 } }).then(r => r.json()),
-            fetch(`${url}/v1/visitor/count-month`, { headers, next: { revalidate: 300 } }).then(r => r.json()),
-            fetch(`${url}/v1/visitor/count-year`, { headers, next: { revalidate: 300 } }).then(r => r.json()),
+            fetch(`${url}/v1/v-stats/count`, { headers, next: { revalidate: 300 } }).then(r => r.json()).then(j => j.data ?? 0),
+            fetch(`${url}/v1/v-stats/count-day`, { headers, next: { revalidate: 300 } }).then(r => r.json()).then(j => j.data ?? 0),
+            fetch(`${url}/v1/v-stats/count-month`, { headers, next: { revalidate: 300 } }).then(r => r.json()).then(j => j.data ?? 0),
+            fetch(`${url}/v1/v-stats/count-year`, { headers, next: { revalidate: 300 } }).then(r => r.json()).then(j => j.data ?? 0),
         ])
 
         return {
@@ -81,7 +81,7 @@ export async function getPublicVisitorStats(): Promise<VisitorStats> {
 // Admin: Ambil data chart pengunjung per hari
 export async function getVisitorChartData(days: number = 30): Promise<VisitorChartData[]> {
     try {
-        const res = await api.get(`/v1/visitor/chart?days=${days}`, { headers: await authHeaders() })
+        const res = await api.get(`/v1/v-stats/chart?days=${days}`, { headers: await authHeaders() })
         return res.data
     } catch (e) { throw new Error(handleServiceError(e, 'Gagal ambil data chart visitor')) }
 }

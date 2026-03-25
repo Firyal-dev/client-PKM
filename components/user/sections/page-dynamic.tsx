@@ -4,6 +4,7 @@ import HeroHeader from "@/components/user/partials/hero-header"
 import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
+import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
 
 interface PageDynamicProps {
@@ -18,11 +19,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
         ? [{ label: menu.title, href: `/${menu.slug}` }, { label: page.title }]
         : [{ label: menu.title }]
 
-    const imageUrl = page.image
-        ? page.image.startsWith('http')
-            ? page.image
-            : `${getBaseUrl().replace('/api', '')}${page.image}`
-        : null
+    const imageUrl = getMediaUrl(page.image)
 
     const sanitizedContent = page.dynamic_content ? DOMPurify.sanitize(page.dynamic_content) : ""
 
@@ -38,7 +35,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
 
             {/* Main Article Container */}
             <div className="max-w-4xl mx-auto px-6 py-10">
-                
+
                 {/* Featured Image */}
                 {imageUrl && (
                     <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-xl mb-8 border-4 border-white">
@@ -59,7 +56,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                     {/* Sticky Header inside Card (Optional) */}
                     <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center justify-between">
                         {isDetail && (
-                            <button 
+                            <button
                                 onClick={() => window.history.back()}
                                 className="text-[10px] font-black uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
                             >
@@ -109,9 +106,9 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <a 
-                                            href={page.file.startsWith('http') ? page.file : `${getBaseUrl().replace('/api', '')}${page.file}`} 
-                                            target="_blank" 
+                                        <a
+                                            href={(page.file && page.file.startsWith('http')) ? page.file : (getMediaUrl(page.file) || '#')}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-xs px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
                                         >
@@ -120,8 +117,8 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                             </svg>
                                             Tampilan Penuh
                                         </a>
-                                        <a 
-                                            href={page.file.startsWith('http') ? page.file : `${getBaseUrl().replace('/api', '')}${page.file}`} 
+                                        <a
+                                            href={(page.file && page.file.startsWith('http')) ? page.file : (getMediaUrl(page.file) || '#')}
                                             download
                                             className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shadow-blue-200"
                                         >
@@ -134,7 +131,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                 </div>
                                 <div className="relative" style={{ height: '75vh', maxHeight: '700px' }}>
                                     <iframe
-                                        src={`${page.file.startsWith('http') ? page.file : `${getBaseUrl().replace('/api', '')}${page.file}`}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        src={`${(page.file && page.file.startsWith('http')) ? page.file : (getMediaUrl(page.file) || '')}#toolbar=0&navpanes=0&scrollbar=0`}
                                         className="w-full h-full border-none bg-slate-100"
                                         title={page.title}
                                     />
