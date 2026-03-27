@@ -71,10 +71,10 @@ export default async function UserLayout({
             <Footer />
 
             <FloatingMenu>
-                <FloatingSienna />
                 <FloatingConsultation onSubmit={createConsultationAction} />
                 <FloatingReview onSubmit={createReviewAction} />
             </FloatingMenu>
+            <FloatingSienna />
             <Script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js" defer></Script>
             <style dangerouslySetInnerHTML={{ __html: `
                 .asw-menu-btn { display: none !important; }
