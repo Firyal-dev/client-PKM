@@ -6,6 +6,7 @@ import { PuskesmasList } from "./puskes-list"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Building2 } from "lucide-react"
 import { CreatePuskesDialog } from "./puskes-dialog"
+import { PaginationControl } from "@/components/pagination-control"
 
 export default async function PuskesmasPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const profile = await getAdminProfile()
@@ -44,9 +45,15 @@ export default async function PuskesmasPage({ searchParams }: { searchParams: Pr
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <PuskesmasList puskesmas={data} total={data.length} />
+                    <PuskesmasList puskesmas={data} total={data.length} totalPages={totalPages} currentPage={currentPage} />
                 )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="py-4 mt-4 flex justify-center">
+                    <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+                </div>
+            )}
         </div>
     )
 }

@@ -17,15 +17,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export function PuskesmasList({
     puskesmas,
-    total
+    total,
+    totalPages,
+    currentPage
 }: {
     puskesmas: Puskesmas[]
     total: number
+    totalPages: number
+    currentPage: number
 }) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [data] = useState<Puskesmas[]>(puskesmas)
     const [globalFilter, setGlobalFilter] = useState(searchParams.get("search") || "")
     const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
     const [selectedRows, setSelectedRows] = useState<Puskesmas[]>([])
@@ -33,7 +36,7 @@ export function PuskesmasList({
     const [editPuskes, setEditPuskes] = useState<Puskesmas | null>(null)
 
     const filteredData = useMemo(() => {
-        let result = [...data]
+        let result = [...puskesmas]
         if (globalFilter) {
             const search = globalFilter.toLowerCase()
             result = result.filter(p => p.name.toLowerCase().includes(search) || p.slug.toLowerCase().includes(search))
@@ -42,7 +45,7 @@ export function PuskesmasList({
             result = result.filter(p => p.status === statusFilter)
         }
         return result
-    }, [data, globalFilter, statusFilter])
+    }, [puskesmas, globalFilter, statusFilter])
 
     const getStatusBadge = (status: string) => {
         switch (status) {
