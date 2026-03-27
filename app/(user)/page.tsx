@@ -84,3 +84,8 @@ export default async function Home() {
         </main>
     );
 }
+
+
+
+
+// FIRYAL GANTENG
