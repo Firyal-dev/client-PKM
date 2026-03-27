@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { TenantLink } from '@/components/user/partials/tenant-link'
 import { usePathname } from 'next/navigation'
 import { Menu } from '@/services/menu/menu-service'
 import { ChevronDown, ChevronRight } from 'lucide-react'
@@ -37,7 +38,7 @@ function NavLink({ href, children, active, isWhite }: {
     href: string; children: React.ReactNode; active?: boolean; isWhite?: boolean
 }) {
     return (
-        <Link
+        <TenantLink
             href={href}
             className={cn(
                 'relative px-3.5 py-2 rounded-xl text-[13.5px] font-semibold tracking-[-0.01em] transition-all duration-200 block',
@@ -57,7 +58,7 @@ function NavLink({ href, children, active, isWhite }: {
                     isWhite ? 'bg-blue-600' : 'bg-white'
                 )} />
             )}
-        </Link>
+        </TenantLink>
     )
 }
 
@@ -68,7 +69,11 @@ function MenuItem({ menu, allMenus, level = 0, pathname, isWhite }: {
     const children = getChildren(menu, allMenus)
     const hasChildren = children.length > 0
     const menuHref = `/${menu.slug}`
-    const isActive = pathname === menuHref || pathname.startsWith(`${menuHref}/`)
+    
+    // Check if isActive considerando o tenant-prefix
+    // Pathname di Client-Side (Next.js 15 App dir) akan berisi [tenantSlug]
+    // Kita perlu berhati-hati dengan perbandingannya.
+    const isActive = pathname.endsWith(menuHref) || pathname.includes(`${menuHref}/`)
     const [isOpen, setIsOpen] = useState(false)
     const [nearRight, setNearRight] = useState(false)
     const liRef = useRef<HTMLLIElement>(null)
@@ -89,10 +94,10 @@ function MenuItem({ menu, allMenus, level = 0, pathname, isWhite }: {
         if (level === 0) return <li><NavLink href={menuHref} active={isActive} isWhite={isWhite}>{menu.title}</NavLink></li>
         return (
             <li>
-                <Link href={menuHref} className={cn(
+                <TenantLink href={menuHref} className={cn(
                     'block px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150',
                     isActive ? 'text-blue-700 bg-blue-50 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                )}>{menu.title}</Link>
+                )}>{menu.title}</TenantLink>
             </li>
         )
     }

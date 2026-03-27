@@ -11,44 +11,17 @@ export async function getTenantHeader(): Promise<Record<string, string>> {
 
         // 1. First check x-tenant-slug header (set by proxy middleware)
         let tenantSlug = headersList.get('x-tenant-slug') || 'default'
+        let urlPathname = headersList.get('x-url-pathname') || ''
 
-        // DEBUG: Log what we get
-        console.log('[getTenantHeader] Initial tenantSlug:', tenantSlug)
-        console.log('[getTenantHeader] Host header:', headersList.get('host'))
-
-        // 2. If not from header, try to extract from host
-        if (!tenantSlug || tenantSlug === 'default') {
-            const host = headersList.get('host') || ''
-            const hostname = host.split(':')[0]
-
-            console.log('[getTenantHeader] Hostname:', hostname)
-
-            // Handle localhost with subdomain: pkm-bogor-tengah.localhost
-            if (hostname.includes('localhost') || hostname.endsWith('.local')) {
-                const parts = hostname.split('.')
-                console.log('[getTenantHeader] Parts:', parts)
-                // For patterns like: pkm-bogor-tengah.localhost
-                if (parts.length >= 2 && (parts[parts.length - 1] === 'localhost' || parts[parts.length - 1] === 'local')) {
-                    tenantSlug = parts[0]
-                }
-            }
-            // Handle production: subdomain.domain.com
-            else if (!hostname.startsWith('127.0.0.1')) {
-                const parts = hostname.split('.')
-                if (parts.length > 2) {
-                    tenantSlug = parts[0]
-                }
-            }
-        }
-
-        console.log('[getTenantHeader] Final tenantSlug:', tenantSlug)
+        console.log('[getTenantHeader] Final tenantSlug:', tenantSlug, 'Path:', urlPathname)
 
         // Also check cookie for tenant ID (set by tenant switcher)
         const cookieStore = await cookies()
         const cookieTenantId = cookieStore.get('tenant_id')?.value
 
         const result: Record<string, string> = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-url-pathname': urlPathname
         };
 
         // Priority: use tenant slug from headers/hostname if available, otherwise use tenant ID from cookie

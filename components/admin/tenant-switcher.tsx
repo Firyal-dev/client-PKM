@@ -20,6 +20,7 @@ import {
 import { switchTenant } from "@/services/admin/tenant-service"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 
 export function TenantSwitcher({
     tenants,
@@ -54,19 +55,21 @@ export function TenantSwitcher({
             if (tenantId === 'all') {
                 const res = await switchTenant(null); // Pass null to reset
                 if (res.success) {
-                    window.location.reload();
+                    toast.success("Berhasil berpindah ke tampilan global");
+                    // Wait a bit for the toast to be seen before reload
+                    setTimeout(() => window.location.reload(), 800);
                 } else {
-                    alert(res.message);
+                    toast.error(res.message || "Gagal berpindah akses");
                 }
                 return;
             }
 
             const res = await switchTenant(tenantId);
             if (res.success) {
-                // Use hard reload to ensure all Server and Client components are fresh
-                window.location.reload();
+                toast.success(`Berhasil berpindah akses`);
+                setTimeout(() => window.location.reload(), 800);
             } else {
-                alert(res.message);
+                toast.error(res.message || "Gagal berpindah akses");
             }
         });
     }
@@ -75,9 +78,10 @@ export function TenantSwitcher({
         startTransition(async () => {
             const res = await switchTenant(null);
             if (res.success) {
-                window.location.reload();
+                toast.success("Akses puskesmas direset");
+                setTimeout(() => window.location.reload(), 800);
             } else {
-                alert(res.message);
+                toast.error(res.message || "Gagal meriset akses");
             }
         });
     }

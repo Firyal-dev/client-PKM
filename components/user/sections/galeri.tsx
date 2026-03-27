@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
+import { TenantLink } from "../partials/tenant-link"
 import { LayoutGrid, ArrowRight } from "lucide-react"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import type { Gallery } from "@/types/gallery-prop"
@@ -29,13 +29,13 @@ export default function GaleriSection({ data }: { data: Gallery[] }) {
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
                         <p className="text-sm text-slate-500">{t('desc')}</p>
                     </div>
-                    <Link
+                    <TenantLink
                         href="/galeri"
                         className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0"
                     >
                         {t('viewAll')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
+                    </TenantLink>
                 </div>
 
                 {/* Grid */}
@@ -66,7 +66,7 @@ export default function GaleriSection({ data }: { data: Gallery[] }) {
                         ))}
 
                         {/* Lihat semua tile */}
-                        <Link
+                        <TenantLink
                             href="/galeri"
                             className="group relative aspect-square overflow-hidden rounded-2xl bg-blue-600 hover:bg-slate-900 border border-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center gap-3 text-white"
                         >
@@ -79,7 +79,7 @@ export default function GaleriSection({ data }: { data: Gallery[] }) {
                                 <p className="text-[10px] text-white/60 font-medium mt-0.5">{t('label')}</p>
                             </div>
                             <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300" />
-                        </Link>
+                        </TenantLink>
                     </div>
                 </PhotoProvider>
 

@@ -8,8 +8,13 @@ import { getMediaUrl } from '@/lib/getMediaUrl'
 import { FooterMap } from './footer-map'
 import { getTranslations } from 'next-intl/server'
 
+import { getTenantHeader } from '@/services/server-helpers'
+
 export default async function Footer() {
     const t = await getTranslations('Footer')
+    const headers = await getTenantHeader()
+    const tenantSlug = headers['x-tenant-slug'] || 'default'
+
     const [stats, webInfo] = await Promise.all([
         getPublicVisitorStats(),
         getPublicPuskesmasInfo()
@@ -39,7 +44,7 @@ export default async function Footer() {
 
                     {/* ── Col 1: Brand ── */}
                     <div className="space-y-6">
-                        <Link href="/" className="flex items-center gap-3 group w-fit">
+                        <Link href={`/${tenantSlug}`} className="flex items-center gap-3 group w-fit">
                             <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-800 ring-1 ring-slate-700 flex items-center justify-center flex-shrink-0">
                                 <Image
                                     src={getMediaUrl(webInfo?.logo) || "/puskesmasLogo.png"}

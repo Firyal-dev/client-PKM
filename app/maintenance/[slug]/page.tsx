@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { checkTenantStatus, getTenantPageType } from "@/services/tenant-status-service";
-import { getTenantHeader } from "@/services/server-helpers";
 import { redirect } from "next/navigation";
 import StatusPage from "@/components/status-page";
 
@@ -10,20 +9,19 @@ export const metadata: Metadata = {
 };
 
 export default async function MaintenancePage({
+    params,
     searchParams,
 }: {
+    params: Promise<{ slug: string }>;
     searchParams: Promise<{ message?: string; name?: string }>;
 }) {
-    const headers = await getTenantHeader();
-    const tenantSlug = headers["x-tenant-slug"] || "default";
-
-    const statusInfo = await checkTenantStatus(tenantSlug);
+    const { slug } = await params;
+    const statusInfo = await checkTenantStatus(slug);
     const currentPageType = getTenantPageType(statusInfo?.status);
 
     if (currentPageType !== "maintenance") redirect("/");
 
     const { message: searchMessage, name: searchName } = await searchParams;
-
     const message = statusInfo?.message || searchMessage || "Rencana perawatan sistem sedang berlangsung.";
     const pkmName = statusInfo?.name || searchName || "Puskesmas";
 

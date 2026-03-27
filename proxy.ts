@@ -7,26 +7,25 @@ export function proxy(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
     const hostWithoutPort = hostname.split(':')[0];
 
+    // Extract tenant slug from the first path segment
+    const pathParts = pathname.split('/').filter(Boolean);
+    const firstSegment = pathParts[0] || '';
+
+    // Define route prefixes that are NOT tenant slugs
+    const nonTenantSegments = ['admin', 'puskesmas', 'api', 'maintenance', 'suspended', 'inactive', '_next'];
+    
     let tenantSlug = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default';
-    // FIX: Handle localhost with subdomain: pkm-bogor-tengah.localhost
-    if (hostWithoutPort.includes('localhost') || hostWithoutPort.endsWith('.local')) {
-        const parts = hostWithoutPort.split('.');
-        if (parts.length >= 2 && parts[0] !== 'localhost') {
-            tenantSlug = parts[0];
-        } else if (!process.env.NEXT_PUBLIC_DEFAULT_TENANT) {
-            console.warn('[Proxy] Warning: No subdomain detected and NEXT_PUBLIC_DEFAULT_TENANT is not set. Falling back to "default" tenant.');
-        }
+
+    if (firstSegment && !nonTenantSegments.includes(firstSegment)) {
+        tenantSlug = firstSegment;
     }
 
-    // Handle production: subdomain.domain.com
-    else if (!hostWithoutPort.startsWith('127.0.0.1')) {
-        tenantSlug = hostWithoutPort.split('.')[0];
-    }
-
-    console.log('[Proxy] Host:', hostWithoutPort, '-> Tenant:', tenantSlug);
-
+    // Set headers so server components can see the tenant and current path
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-tenant-slug', tenantSlug);
+    requestHeaders.set('x-url-pathname', pathname);
+
+    console.log('[Proxy] Path:', pathname, '-> Tenant:', tenantSlug);
 
     const token = request.cookies.get('token')?.value;
     const isAdminPage = pathname.startsWith('/admin');
@@ -38,11 +37,6 @@ export function proxy(request: NextRequest) {
 
     if (isLoginPage && token) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-
-    // Redirect root localhost to /puskesmas landing page
-    if (tenantSlug === 'default' && pathname === '/') {
-        return NextResponse.redirect(new URL('/puskesmas', request.url));
     }
 
     return NextResponse.next({

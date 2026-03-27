@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { TenantLink } from "../partials/tenant-link"
 import { Menu } from "@/services/menu/menu-service"
 import { AlertCircle, ArrowRight, Stethoscope } from "lucide-react"
 
@@ -62,7 +62,7 @@ export default function Pelayanan({ data }: PelayananProps) {
                                 {data.map((item, i) => {
                                     const color = COLORS[i % COLORS.length]
                                     return (
-                                        <Link
+                                        <TenantLink
                                             key={item.id}
                                             href={`/${item.slug}`}
                                             className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-transparent hover:border-slate-100 hover:shadow-sm transition-all duration-200 text-center"
@@ -84,7 +84,7 @@ export default function Pelayanan({ data }: PelayananProps) {
                                             <p className="text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 transition-colors leading-snug line-clamp-2">
                                                 {item.title}
                                             </p>
-                                        </Link>
+                                        </TenantLink>
                                     )
                                 })}
                             </div>
@@ -103,4 +103,4 @@ export default function Pelayanan({ data }: PelayananProps) {
             </div>
         </section>
     )
-}
+}

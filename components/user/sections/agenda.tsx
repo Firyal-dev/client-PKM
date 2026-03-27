@@ -9,7 +9,7 @@ import { MapPin, CalendarDays, ArrowRight, Clock } from "lucide-react"
 import { format, isSameDay } from "date-fns"
 import { enUS, id } from "date-fns/locale"
 import type { Agenda } from "@/types/agenda-prop"
-import Link from "next/link"
+import { TenantLink } from "../partials/tenant-link"
 import { useTranslations, useLocale } from "next-intl"
 
 export default function Agenda({ data = [] }: { data: Agenda[] }) {
@@ -54,10 +54,10 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h2>
                         <p className="text-sm text-slate-500">{t('desc')}</p>
                     </div>
-                    <Link href={`/agenda`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0">
+                    <TenantLink href={`/agenda`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors group shrink-0">
                         {t('viewAll')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
+                    </TenantLink>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -94,13 +94,13 @@ export default function Agenda({ data = [] }: { data: Agenda[] }) {
                         )}
 
                         <div className="mt-2">
-                            <Link
+                            <TenantLink
                                 href="/agenda"
                                 className="inline-flex items-center justify-center w-full py-3 px-6 border border-slate-200 text-slate-500 text-sm font-semibold rounded-xl hover:border-blue-300 hover:text-blue-600 transition-colors"
                             >
                                 {t('viewAllSchedule')}
                                 <ArrowRight className="w-3.5 h-3.5 ml-2" />
-                            </Link>
+                            </TenantLink>
                         </div>
                     </div>
                 </div>
@@ -156,34 +156,26 @@ function CalendarCard({ date, onSelect, count, eventDates, dLocale }: CalendarCa
 
 function AgendaItem({ item }: { item: Agenda }) {
     return (
-        <Link href={`/agenda/${item.id}`} className="group block">
-            <div className="flex items-stretch gap-0 rounded-xl border border-slate-100 bg-white hover:border-blue-200 hover:shadow-sm transition-all duration-200 overflow-hidden">
+        <div className="flex items-stretch gap-0 rounded-xl border border-slate-100 bg-white overflow-hidden shadow-sm/0 transition-all duration-200">
+            {/* Time sidebar */}
+            <div className="flex flex-col items-center justify-center px-4 py-4 bg-slate-50 border-r border-slate-100 min-w-[72px] text-center">
+                <Clock className="w-3.5 h-3.5 text-slate-400 mb-1" />
+                <span className="text-xs font-bold text-slate-700 tabular-nums leading-tight">
+                    {item.time}
+                </span>
+            </div>
 
-                {/* Time sidebar */}
-                <div className="flex flex-col items-center justify-center px-4 py-4 bg-slate-50 border-r border-slate-100 min-w-[72px] text-center">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 mb-1" />
-                    <span className="text-xs font-bold text-slate-700 tabular-nums leading-tight">
-                        {item.time}
-                    </span>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 px-4 py-4 min-w-0">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1 mb-1">
-                        {item.activity_name}
-                    </h4>
-                    <div className="flex items-center gap-1 text-slate-400">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        <span className="text-xs truncate">{item.location}</span>
-                    </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="flex items-center pr-4">
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all duration-200" />
+            {/* Content */}
+            <div className="flex-1 px-4 py-4 min-w-0">
+                <h4 className="text-sm font-semibold text-slate-800 line-clamp-1 mb-1">
+                    {item.activity_name}
+                </h4>
+                <div className="flex items-center gap-1 text-slate-400">
+                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-xs truncate">{item.location}</span>
                 </div>
             </div>
-        </Link>
+        </div>
     )
 }
 

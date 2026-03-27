@@ -26,18 +26,13 @@ export default async function UserLayout({
     const pageType = getTenantPageType(statusInfo?.status as TenantStatus);
 
     // Redirect to special pages for maintenance/suspended
-    const commonParams = `?name=${encodeURIComponent(statusInfo?.name || 'Puskesmas')}&message=${encodeURIComponent(statusInfo?.message || '')}`;
-
-    if (pageType === 'maintenance') {
-        redirect(`/maintenance${commonParams}`);
-    }
-
-    if (pageType === 'suspended') {
-        redirect(`/suspended${commonParams}`);
-    }
-
-    if (pageType === 'inactive') {
-        redirect(`/inactive${commonParams}`);
+    const pathname = headers['x-url-pathname'] || '';
+    const isStatusPage = pathname.includes('/maintenance') || pathname.includes('/suspended') || pathname.includes('/inactive');
+    
+    // If it's a special status (maintenance, suspended, inactive)
+    if (pageType && pageType !== 'normal' && !isStatusPage) {
+        const commonParams = `?name=${encodeURIComponent(statusInfo?.name || 'Puskesmas')}&message=${encodeURIComponent(statusInfo?.message || '')}`;
+        redirect(`/${pageType}/${tenantSlug}${commonParams}`);
     }
 
     const webInfo = await getPublicPuskesmasInfo();

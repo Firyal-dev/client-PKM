@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
+import { TenantLink } from '@/components/user/partials/tenant-link'
 import { getMediaUrl } from '@/lib/getMediaUrl'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -37,7 +37,7 @@ export default function Logo({ className = '', webTitle, logoUrl }: LogoProps) {
     const rest = titleParts.slice(1).join(' ') || 'Kecamatan Sehat'
 
     return (
-        <Link href="/" className={cn('flex items-center gap-3 group flex-shrink-0', className)}>
+        <TenantLink href="/" className={cn('flex items-center gap-3 group flex-shrink-0', className)}>
             {/* Logo kota */}
             <div className={cn(
                 'w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border transition-all duration-[450ms] shrink-0',
@@ -77,6 +77,6 @@ export default function Logo({ className = '', webTitle, logoUrl }: LogoProps) {
                     {rest}
                 </p>
             </div>
-        </Link>
+        </TenantLink>
     )
 }
