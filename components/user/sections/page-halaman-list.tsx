@@ -5,6 +5,7 @@ import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { PaginationControl } from "@/components/pagination-control"
+import { useTranslations, useLocale } from "next-intl"
 
 interface PageHalamanListProps {
     pages: Page[]
@@ -19,13 +20,16 @@ function stripHtml(html: string): string {
 }
 
 function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
+    const t = useTranslations("Pages")
+    const locale = useLocale()
+    
     const imageUrl = page.image ? getMediaUrl(page.image) : null
 
     const excerpt = page.dynamic_content
         ? stripHtml(page.dynamic_content).substring(0, 160)
         : ''
 
-    const publishedAt = new Date(page.createdAt).toLocaleDateString('id-ID', {
+    const publishedAt = new Date(page.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
     })
 
@@ -66,7 +70,7 @@ function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
                     </p>
                 )}
                 <div className="mt-3 flex items-center text-blue-600 text-xs font-medium">
-                    Selengkapnya
+                    {t('readMore')}
                     <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -77,6 +81,7 @@ function PageCard({ page, menuSlug }: { page: Page; menuSlug: string }) {
 }
 
 export function PageHalamanList({ pages, menu, totalPages, currentPage, total }: PageHalamanListProps) {
+    const t = useTranslations("Pages")
     const breadcrumbItems = [{ label: menu.title }]
 
     return (
@@ -84,7 +89,7 @@ export function PageHalamanList({ pages, menu, totalPages, currentPage, total }:
             <HeroHeader
                 items={breadcrumbItems}
                 title={menu.title}
-                description={`${total} artikel tersedia`}
+                description={t('articlesAvailable', { total })}
             />
 
             <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 py-10">
@@ -113,8 +118,8 @@ export function PageHalamanList({ pages, menu, totalPages, currentPage, total }:
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="font-semibold text-slate-700 mb-1">Belum Ada Artikel</h3>
-                        <p className="text-sm text-slate-400">Konten untuk halaman ini belum tersedia.</p>
+                        <h3 className="font-semibold text-slate-700 mb-1">{t('noArticles')}</h3>
+                        <p className="text-sm text-slate-400">{t('noArticlesDesc')}</p>
                     </div>
                 )}
             </div>

@@ -6,6 +6,7 @@ import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
+import { useTranslations } from "next-intl"
 
 interface PageDokumenProps {
     page: Page
@@ -13,6 +14,7 @@ interface PageDokumenProps {
 }
 
 export function PageDokumen({ page, menu }: PageDokumenProps) {
+    const t = useTranslations("Pages")
     const breadcrumbItems = [{ label: menu.title }]
     const [previewOpen, setPreviewOpen] = useState(false)
 
@@ -42,7 +44,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-slate-800 text-sm">{page.title}</p>
-                                    <p className="text-xs text-slate-400">Dokumen PDF</p>
+                                    <p className="text-xs text-slate-400">{t('pdfDoc')}</p>
                                 </div>
                             </div>
 
@@ -59,7 +61,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                                     >
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
-                                    {previewOpen ? 'Sembunyikan Preview' : 'Tampilkan Preview'}
+                                    {previewOpen ? t('hidePreview') : t('showPreview')}
                                 </button>
 
                                 {/* Download Button */}
@@ -73,7 +75,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
-                                    Unduh
+                                    {t('download')}
                                 </a>
                             </div>
                         </div>
@@ -86,7 +88,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                             <div className="p-6 bg-slate-50">
                                 <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-md">
                                     <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-slate-50/50">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pratinjau Dokumen</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('documentPreview')}</span>
                                         <a
                                             href={fileUrl}
                                             target="_blank"
@@ -96,7 +98,7 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
-                                            Tampilan Penuh
+                                            {t('fullView')}
                                         </a>
                                     </div>
                                     <div className="relative" style={{ height: '85vh', maxHeight: '800px' }}>
@@ -119,15 +121,15 @@ export function PageDokumen({ page, menu }: PageDokumenProps) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 className="font-semibold text-slate-700 mb-1">Dokumen Belum Tersedia</h3>
-                        <p className="text-sm text-slate-400">Dokumen untuk halaman ini belum diunggah.</p>
+                        <h3 className="font-semibold text-slate-700 mb-1">{t('noDocument')}</h3>
+                        <p className="text-sm text-slate-400">{t('noDocumentDesc')}</p>
                     </div>
                 )}
 
                 {/* Deskripsi tambahan jika ada dynamic_content */}
                 {page.dynamic_content && page.dynamic_content !== '-' && (
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
-                        <h2 className="text-lg font-semibold text-slate-800 mb-4">Keterangan</h2>
+                        <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('description')}</h2>
                         <div
                             className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: sanitizedContent }}

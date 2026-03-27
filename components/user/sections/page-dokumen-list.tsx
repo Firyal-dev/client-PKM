@@ -6,6 +6,7 @@ import { Page } from "@/services/page/page-service"
 import { Menu } from "@/services/menu/menu-service"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import { PaginationControl } from "@/components/pagination-control"
+import { useTranslations, useLocale } from "next-intl"
 
 interface PageDokumenListProps {
     pages: Page[]
@@ -16,11 +17,14 @@ interface PageDokumenListProps {
 }
 
 function DokumenCard({ page }: { page: Page }) {
+    const t = useTranslations("Pages")
+    const locale = useLocale()
+    
     const [previewOpen, setPreviewOpen] = useState(false)
 
     const fileUrl = page.file ? getMediaUrl(page.file) : null
 
-    const uploadedAt = new Date(page.createdAt).toLocaleDateString('id-ID', {
+    const uploadedAt = new Date(page.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
     })
 
@@ -37,7 +41,7 @@ function DokumenCard({ page }: { page: Page }) {
                     </div>
                     <div className="min-w-0">
                         <p className="font-semibold text-slate-800 text-sm truncate">{page.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">Diunggah {uploadedAt}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{t('uploadedAt', { date: uploadedAt })}</p>
                     </div>
                 </div>
 
@@ -56,7 +60,7 @@ function DokumenCard({ page }: { page: Page }) {
                                 >
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
-                                {previewOpen ? 'Tutup' : 'Preview'}
+                                {previewOpen ? t('close') : t('preview')}
                             </button>
 
                             {/* Download */}
@@ -71,13 +75,13 @@ function DokumenCard({ page }: { page: Page }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                Unduh
+                                {t('download')}
                             </a>
                         </>
                     )}
 
                     {!fileUrl && (
-                        <span className="text-xs text-slate-400 italic px-3 py-2">File belum tersedia</span>
+                        <span className="text-xs text-slate-400 italic px-3 py-2">{t('fileNotAvailable')}</span>
                     )}
                 </div>
             </div>
@@ -90,7 +94,7 @@ function DokumenCard({ page }: { page: Page }) {
                 >
                     <div className="mx-5 mb-5 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shadow-inner">
                         <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pratinjau Dokumen</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('documentPreview')}</span>
                             <a
                                 href={fileUrl}
                                 target="_blank"
@@ -100,7 +104,7 @@ function DokumenCard({ page }: { page: Page }) {
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
-                                Tampilan Penuh
+                                {t('fullView')}
                             </a>
                         </div>
                         <div className="relative" style={{ height: '75vh', maxHeight: '600px' }}>
@@ -128,6 +132,7 @@ function DokumenCard({ page }: { page: Page }) {
 }
 
 export function PageDokumenList({ pages, menu, totalPages, currentPage, total }: PageDokumenListProps) {
+    const t = useTranslations("Pages")
     const breadcrumbItems = [{ label: menu.title }]
 
     return (
@@ -135,7 +140,7 @@ export function PageDokumenList({ pages, menu, totalPages, currentPage, total }:
             <HeroHeader
                 items={breadcrumbItems}
                 title={menu.title}
-                description={`${total} dokumen publik tersedia`}
+                description={t('documentsAvailable', { total })}
             />
 
             <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-16 py-10">
@@ -164,8 +169,8 @@ export function PageDokumenList({ pages, menu, totalPages, currentPage, total }:
                                     d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 className="font-semibold text-slate-700 mb-1">Belum Ada Dokumen</h3>
-                        <p className="text-sm text-slate-400">Dokumen untuk halaman ini belum tersedia.</p>
+                        <h3 className="font-semibold text-slate-700 mb-1">{t('noDocuments')}</h3>
+                        <p className="text-sm text-slate-400">{t('noDocumentsDesc')}</p>
                     </div>
                 )}
             </div>

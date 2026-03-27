@@ -52,7 +52,7 @@ export default async function Home() {
         getPublicGallery(1, 10),
         getPublicBerita(1, 6),
         getPublicMenus(),
-        getPublicConsultationList(1, 20),
+        getPublicConsultationList(1, 10),
         getPublicPuskesmasInfo()
     ]);
 

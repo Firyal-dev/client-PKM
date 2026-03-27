@@ -98,5 +98,31 @@
     "mainMessage": "Key Message",
     "empty": "Speech is not available yet",
     "signed": "Signed,"
+  },
+  "Pages": {
+    "back": "← Back",
+    "contentNotAvailable": "Content not available",
+    "attachmentDoc": "Attachment Document",
+    "pdfPreview": "PDF Preview",
+    "fullView": "Full View",
+    "download": "Download",
+    "readMore": "Read More",
+    "articlesAvailable": "{total} articles available",
+    "noArticles": "No Articles Yet",
+    "noArticlesDesc": "Content for this page is not available yet.",
+    "pdfDoc": "PDF Document",
+    "hidePreview": "Hide Preview",
+    "showPreview": "Show Preview",
+    "documentPreview": "Document Preview",
+    "noDocument": "Document Not Available",
+    "noDocumentDesc": "The document for this page has not been uploaded yet.",
+    "description": "Description",
+    "uploadedAt": "Uploaded {date}",
+    "close": "Close",
+    "preview": "Preview",
+    "fileNotAvailable": "File not available",
+    "documentsAvailable": "{total} public documents available",
+    "noDocuments": "No Documents Yet",
+    "noDocumentsDesc": "Documents for this page are not available yet."
   }
 }

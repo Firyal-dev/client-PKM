@@ -34,9 +34,9 @@ export function getMediaUrl(path: string | null | undefined, defaultFolder: stri
 
     const BASE_URL = getBaseUrl();
 
-    // Clean base URL - hapus /v1 karena sekarang static files dilayani langsung
-    // Dari http://localhost:3002/api/v1 -> http://localhost:3002/api
-    let baseUrlClean = BASE_URL.replace(/\/v1$/, '').replace(/\/$/, '');
+    // Clean base URL - hapus /api/v1 karena sekarang static files dilayani langsung dari root /
+    // Dari http://localhost:3002/api/v1 -> http://localhost:3002
+    let baseUrlClean = BASE_URL.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '').replace(/\/v1\/?$/, '').replace(/\/$/, '');
 
     // Jika path adalah format baru /{slug}/{module}/{filename}, langsung gabungkan
     // Jika path adalah format lama /files/{tenant}/{module}/{filename}, convert ke baru

@@ -98,5 +98,31 @@
     "mainMessage": "Pesan Utama",
     "empty": "Sambutan belum tersedia",
     "signed": "Tertanda,"
+  },
+  "Pages": {
+    "back": "← Kembali",
+    "contentNotAvailable": "Konten belum tersedia",
+    "attachmentDoc": "Dokumen Lampiran",
+    "pdfPreview": "Pratinjau PDF",
+    "fullView": "Tampilan Penuh",
+    "download": "Unduh",
+    "readMore": "Selengkapnya",
+    "articlesAvailable": "{total} artikel tersedia",
+    "noArticles": "Belum Ada Artikel",
+    "noArticlesDesc": "Konten untuk halaman ini belum tersedia.",
+    "pdfDoc": "Dokumen PDF",
+    "hidePreview": "Sembunyikan Preview",
+    "showPreview": "Tampilkan Preview",
+    "documentPreview": "Pratinjau Dokumen",
+    "noDocument": "Dokumen Belum Tersedia",
+    "noDocumentDesc": "Dokumen untuk halaman ini belum diunggah.",
+    "description": "Keterangan",
+    "uploadedAt": "Diunggah {date}",
+    "close": "Tutup",
+    "preview": "Preview",
+    "fileNotAvailable": "File belum tersedia",
+    "documentsAvailable": "{total} dokumen publik tersedia",
+    "noDocuments": "Belum Ada Dokumen",
+    "noDocumentsDesc": "Dokumen untuk halaman ini belum tersedia."
   }
 }

@@ -30,8 +30,8 @@ export default function Faq({ data = [] }: { data: Consultation[] }) {
                     </p>
                 </div>
 
-                <div className={`max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden`}>
-                    <div className={`p-2 md:p-4 ${data.length > 5 ? 'max-h-[600px] overflow-y-auto custom-scrollbar' : ''}`}>
+                <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="p-2 md:p-4 max-h-[300px] overflow-y-auto custom-scrollbar">
                         <Accordion type="single" collapsible className="w-full">
                             {data.map((item, index) => (
                                 <AccordionItem key={item.id} value={`item-${index}`} className="border-slate-100 last:border-0 px-4">
@@ -61,11 +61,9 @@ export default function Faq({ data = [] }: { data: Consultation[] }) {
                     </div>
                 </div>
                 
-                {data.length > 5 && (
-                    <p className="text-center mt-6 text-xs text-slate-400">
-                        {t('scrollHint')}
-                    </p>
-                )}
+                <p className="text-center mt-6 text-xs text-slate-400">
+                    {t('scrollHint')}
+                </p>
             </div>
 
             <style jsx global>{`

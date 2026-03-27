@@ -6,6 +6,7 @@ import { Menu } from "@/services/menu/menu-service"
 import { getBaseUrl } from "@/services/helpers"
 import { getMediaUrl } from "@/lib/getMediaUrl"
 import DOMPurify from "isomorphic-dompurify"
+import { useTranslations, useLocale } from "next-intl"
 
 interface PageDynamicProps {
     page: Page
@@ -15,6 +16,9 @@ interface PageDynamicProps {
 }
 
 export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) {
+    const t = useTranslations("Pages")
+    const locale = useLocale()
+    
     const breadcrumbItems = isDetail
         ? [{ label: menu.title, href: `/${menu.slug}` }, { label: page.title }]
         : [{ label: menu.title }]
@@ -28,7 +32,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
             <HeroHeader
                 items={breadcrumbItems}
                 title={isDetail ? page.title : menu.title}
-                description={isDetail ? new Date(page.createdAt).toLocaleDateString('id-ID', {
+                description={isDetail ? new Date(page.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'id-ID', {
                     day: 'numeric', month: 'long', year: 'numeric',
                 }) : undefined}
             />
@@ -60,7 +64,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                 onClick={() => window.history.back()}
                                 className="text-[10px] font-black uppercase tracking-wider text-blue-600 hover:text-blue-800 transition-colors"
                             >
-                                ← Kembali
+                                {t('back')}
                             </button>
                         )}
                     </div>
@@ -85,7 +89,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                     <svg className="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <p className="font-bold uppercase tracking-widest text-[10px]">Konten belum tersedia</p>
+                                    <p className="font-bold uppercase tracking-widest text-[10px]">{t('contentNotAvailable')}</p>
                                 </div>
                             )
                         )}
@@ -101,8 +105,8 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                             </svg>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-xs font-bold text-slate-800 uppercase tracking-tight">Dokumen Lampiran</span>
-                                            <span className="text-[10px] text-slate-400">Pratinjau PDF</span>
+                                            <span className="text-xs font-bold text-slate-800 uppercase tracking-tight">{t('attachmentDoc')}</span>
+                                            <span className="text-[10px] text-slate-400">{t('pdfPreview')}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -115,7 +119,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
-                                            Tampilan Penuh
+                                            {t('fullView')}
                                         </a>
                                         <a
                                             href={(page.file && page.file.startsWith('http')) ? page.file : (getMediaUrl(page.file) || '#')}
@@ -125,7 +129,7 @@ export function PageDynamic({ page, menu, isDetail = false }: PageDynamicProps) 
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                             </svg>
-                                            Unduh
+                                            {t('download')}
                                         </a>
                                     </div>
                                 </div>
